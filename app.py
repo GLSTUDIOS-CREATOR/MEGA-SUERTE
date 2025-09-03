@@ -60,6 +60,82 @@ DATA_DIR = os.path.join(BASE_DIR, "DATA")
 REINTEGROS_DIR = os.path.join(DATA_DIR, "REINTEGROS")
 os.makedirs(DATA_DIR, exist_ok=True)
 os.makedirs(REINTEGROS_DIR, exist_ok=True)
+# ==== PERSISTENCIA (Render / Local) ====
+import os, shutil
+
+# 1) Usar DATA_DIR de entorno si existe; si no, ./DATA local
+DATA_DIR = os.environ.get("DATA_DIR", os.path.join(BASE_DIR, "DATA"))
+os.makedirs(DATA_DIR, exist_ok=True)
+
+# Helpers
+def _persist(*rel):
+    """Ruta dentro de DATA_DIR (crea la carpeta si no existe)."""
+    path = os.path.join(DATA_DIR, *rel)
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    return path
+
+def _seed(src_rel, dst_abs):
+    """
+    Copia archivo inicial del repo → persistente, solo si NO existe.
+    Ej.: _seed('static/db/caja.xml', CAJA_XML)
+    """
+    src_abs = os.path.join(BASE_DIR, src_rel)
+    if not os.path.exists(dst_abs) and os.path.exists(src_abs):
+        shutil.copy2(src_abs, dst_abs)
+
+# 2) Reasignar rutas de XML “vivos” a DATA_DIR (persistente)
+#    Usamos los mismos nombres de variables que usa tu app.
+USUARIOS_XML            = _persist('usuarios', 'usuarios.xml')
+
+CAJA_XML                = _persist('static', 'db', 'caja.xml')
+ASIGNACIONES_XML        = _persist('static', 'db', 'asignaciones.xml')
+PAGOS_PREMIOS_XML       = _persist('static', 'db', 'pagos_premios.xml')
+RESULTADOS_SORTEO_XML   = _persist('static', 'db', 'resultados_sorteo.xml')
+SORTEOS_XML             = _persist('static', 'db', 'sorteos.xml')
+SPINNERS_XML            = _persist('static', 'db', 'spinners.xml')
+VMIX_REINTEGRO_XML      = _persist('static', 'db', 'vmix_reintegro.xml')
+VMIX_SPINNERS_XML       = _persist('static', 'db', 'vmix_spinners.xml')
+VMIX_VENDEDORES_XML     = _persist('static', 'db', 'vmix_vendedores.xml')
+VMIX_VENTAS_XML         = _persist('static', 'db', 'vmix_ventas.xml')
+
+LOGS_CAJA_XML           = _persist('static', 'LOGS', 'caja.xml')
+LOGS_IMPRESIONES_XML    = _persist('static', 'LOGS', 'impresiones.xml')
+
+CONTAB_BANCOS_XML       = _persist('static', 'CONTABILIDAD', 'bancos.xml')
+CONTAB_GASTOS_XML       = _persist('static', 'CONTABILIDAD', 'gastos.xml')
+CONTAB_SUELDOS_XML      = _persist('static', 'CONTABILIDAD', 'sueldos.xml')
+CONTAB_VENTAS_XML       = _persist('static', 'CONTABILIDAD', 'ventas.xml')
+
+# 3) Sembrar contenido inicial (solo primera vez)
+for src, dst in [
+    ('usuarios/usuarios.xml',               USUARIOS_XML),
+    ('static/db/caja.xml',                  CAJA_XML),
+    ('static/db/asignaciones.xml',          ASIGNACIONES_XML),
+    ('static/db/pagos_premios.xml',         PAGOS_PREMIOS_XML),
+    ('static/db/resultados_sorteo.xml',     RESULTADOS_SORTEO_XML),
+    ('static/db/sorteos.xml',               SORTEOS_XML),
+    ('static/db/spinners.xml',              SPINNERS_XML),
+    ('static/db/vmix_reintegro.xml',        VMIX_REINTEGRO_XML),
+    ('static/db/vmix_spinners.xml',         VMIX_SPINNERS_XML),
+    ('static/db/vmix_vendedores.xml',       VMIX_VENDEDORES_XML),
+    ('static/db/vmix_ventas.xml',           VMIX_VENTAS_XML),
+    ('static/LOGS/caja.xml',                LOGS_CAJA_XML),
+    ('static/LOGS/impresiones.xml',         LOGS_IMPRESIONES_XML),
+    ('static/CONTABILIDAD/bancos.xml',      CONTAB_BANCOS_XML),
+    ('static/CONTABILIDAD/gastos.xml',      CONTAB_GASTOS_XML),
+    ('static/CONTABILIDAD/sueldos.xml',     CONTAB_SUELDOS_XML),
+    ('static/CONTABILIDAD/ventas.xml',      CONTAB_VENTAS_XML),
+]:
+    _seed(src, dst)
+
+# (Opcional) Escritura atómica (más seguro ante cortes)
+def write_text_atomic(path, text):
+    tmp = f"{path}.tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
+        f.write(text)
+    os.replace(tmp, path)
+# ==== FIN PERSISTENCIA ====
+
 
 ROLES = [
     ('superadmin', 'Super Administrador'),
