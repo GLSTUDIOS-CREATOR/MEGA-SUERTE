@@ -1,0 +1,12 @@
+<vendedores>
+  <vendedor>
+    <nombre>Juan</nombre>
+    <apellido>P&#233;rez</apellido>
+    <seudonimo>Corre Caminos</seudonimo>
+  </vendedor>
+  <vendedor>
+    <nombre>Mar&#237;a</nombre>
+    <apellido>Garc&#237;a</apellido>
+    <seudonimo>MaryG</seudonimo>
+  </vendedor>
+<vendedor><nombre>GIOVANNY</nombre><apellido>LARA</apellido><seudonimo>MR.GIO</seudonimo></vendedor><vendedor><nombre>DIEGO</nombre><apellido>MANQUILLO</apellido><seudonimo>PEPE</seudonimo></vendedor><vendedor><nombre>HHHH</nombre><apellido>HHHH</apellido><seudonimo>HHH</seudonimo></vendedor><vendedor><nombre>JULIO</nombre><apellido>URRESTO</apellido><seudonimo>TILIN</seudonimo></vendedor><vendedor><nombre>LUIS</nombre><apellido>VEAS</apellido><seudonimo>VECINO DE LA SUERTE</seudonimo></vendedor></vendedores>

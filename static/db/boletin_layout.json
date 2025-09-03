@@ -1,0 +1,30 @@
+{
+  "logo_path": "static/golpe_suerte_logo.png",
+  "logo_x": 14.17325,
+  "logo_y": 775.2755905511813,
+  "logo_w": 192.75590551181102,
+  "grid_cell": 13.0,
+  "grid_cols": 6,
+  "grid_top_y": 697.3228346456694,
+  "2025-08-12": {
+    "figs": {},
+    "logo": {
+      "h": 70,
+      "w": 170,
+      "x": 18,
+      "y": 18
+    },
+    "title": {
+      "align": "center",
+      "size": 20,
+      "x": 297.6377952755906,
+      "y": 30
+    },
+    "total": {
+      "align": "right",
+      "size": 32,
+      "x": 583.2755905511812,
+      "y": 22
+    }
+  }
+}

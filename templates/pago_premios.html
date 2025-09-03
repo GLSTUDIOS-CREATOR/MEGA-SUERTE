@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Pagar premios | GL Bingo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <style>
+    :root{
+      --bg:#0b1423; --panel:#0f1829; --soft:#0e1727; --stroke:#1f2c49;
+      --text:#eaf1ff; --muted:#a6b2c8; --blue:#3b82f6; --blue-2:#1e40af;
+      --green:#10b981; --orange:#f59e0b; --red:#ef4444; --purple:#8b5cf6;
+      --chip:#15243d; --radius:14px; --shadow:0 10px 30px rgba(0,0,0,.35);
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial}
+    a{color:#bed3ff;text-decoration:none}
+
+    .wrap{display:flex;min-height:100vh}
+
+    /* Sidebar */
+    .sidebar{width:240px;background:#121f36;border-right:1px solid var(--stroke);padding:18px;position:sticky;top:0;height:100vh}
+    .s-logo{display:flex;flex-direction:column;align-items:center;gap:8px;margin-bottom:12px}
+    .s-logo img{width:56px;height:56px;border-radius:12px;box-shadow:var(--shadow)}
+    .s-logo .brand{font-weight:700;letter-spacing:.3px}
+    .s-menu{margin-top:10px}
+    .s-menu a{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;color:var(--text);border:1px solid transparent}
+    .s-menu a:hover{background:#0d1a32;border-color:#223559}
+    .s-menu a.active{background:#0d1a32;border-color:#2b4674}
+    .s-menu .icon{width:18px;text-align:center;opacity:.9}
+
+    /* Main */
+    .main{flex:1;padding:18px}
+    .panel{background:linear-gradient(180deg,#0f192a,#0d1626);border:1px solid var(--stroke);border-radius:16px;box-shadow:var(--shadow);padding:16px}
+    .head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+    .head h1{margin:0;font-size:22px}
+    .chip{background:var(--chip);border:1px solid #233960;border-radius:999px;padding:6px 10px;font-size:12px;color:#cfe2ff}
+    .actions a{margin-left:10px;font-size:13px}
+
+    .filters{display:flex;gap:10px;align-items:flex-end;margin-bottom:12px}
+    label.muted{font-size:12px;color:var(--muted)}
+    input,button,select{background:#0f1b2f;border:1px solid var(--stroke);color:var(--text);border-radius:12px;padding:9px 12px;outline:none}
+    input::placeholder{color:#93a0ba}
+    .btn{cursor:pointer}
+    .btn.primary{background:var(--blue);border-color:var(--blue-2)}
+    .btn.success{background:var(--green);border-color:#0b7457;color:#02281e}
+    .btn.ghost{background:#0e1a2d}
+
+    .grid{display:grid;grid-template-columns:1.6fr .9fr;gap:16px}
+    @media(max-width:1100px){.grid{grid-template-columns:1fr}}
+
+    /* KPI bar */
+    .kpis{display:grid;grid-template-columns:repeat(4,minmax(160px,1fr));gap:10px;margin:8px 0 14px}
+    .kpi{display:flex;align-items:center;gap:10px;padding:12px;border:1px solid var(--stroke);border-radius:14px;background:linear-gradient(180deg,#0e1930,#0c1628)}
+    .kpi .num{font-weight:900;font-size:22px}
+    .kpi .lbl{font-size:12px;color:var(--muted)}
+    .kpi .dot{width:10px;height:10px;border-radius:999px}
+    .kpi.green  .dot{background:var(--green)}
+    .kpi.blue   .dot{background:var(--blue)}
+    .kpi.orange .dot{background:var(--orange)}
+    .kpi.red    .dot{background:var(--red)}
+    .kpi.active{outline:2px solid #2c4d89}
+
+    /* Lista con stripe por figura */
+    .list .row{
+      display:grid;grid-template-columns:1.2fr .9fr .8fr .6fr 1.1fr 160px;
+      gap:10px;align-items:center;padding:12px 14px;border-bottom:1px solid #162646;
+      border-radius:12px;position:relative;background:linear-gradient(90deg, rgba(255,255,255,0.03), rgba(255,255,255,0));
+      box-shadow:inset 8px 0 0 var(--accent, #2a3f6d);
+    }
+    .list .row:hover{background:linear-gradient(90deg, rgba(255,255,255,0.05), rgba(255,255,255,0))}
+    .list .head{font-weight:700;box-shadow:none;border-bottom:1px solid transparent}
+    .muted{color:var(--muted)}
+
+    /* Figura etiqueta */
+    .figtag{
+      display:inline-block;padding:6px 10px;border-radius:12px;font-weight:700;
+      background:var(--ac,#2a3f6d); color:#fff; border:1px solid rgba(255,255,255,.18);
+    }
+
+    /* Estado: tags y semáforo de caducidad */
+    .state{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+    .tag{border-radius:999px;padding:5px 10px;font-size:12px;border:1px solid transparent;line-height:1}
+    .tag.ghost{background:#0b192f;border-color:#22365b;color:#cdd9f1}
+    .tag.outline{background:transparent;border-color:#2a4060;color:#cfe2ff}
+    .tag.green{background:#0f3a2b;border-color:#156047;color:#bfffe8;font-weight:700}
+    .tag.yellow{background:#3a2b05;border-color:#6a4c0b;color:#ffe6a8;font-weight:700}
+    .tag.orange{background:#3e2504;border-color:#8a5307;color:#ffd8a8;font-weight:700}
+    .tag.red{background:#3a0d14;border-color:#6a1220;color:#ffd3d9;font-weight:800;letter-spacing:.2px}
+    .tag.blue{background:#123060;border-color:#23509f;color:#cfe3ff}
+
+    /* Acciones */
+    .pay-actions{display:flex;gap:8px;justify-content:flex-end}
+    .btn.pill{border-radius:999px;padding:8px 12px}
+
+    /* Right box & form */
+    .rightbox{min-height:240px;border:1px dashed #263b64;border-radius:14px;padding:16px;display:flex;align-items:center;justify-content:center;color:#aab7d0}
+    .formgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .formgrid .col{display:flex;flex-direction:column;gap:6px}
+    .foot{margin-top:12px;display:flex;gap:8px;align-items:center;justify-content:flex-end}
+
+    /* Modal */
+    .modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;padding:16px;z-index:40}
+    .modal .box{background:var(--panel);border:1px solid var(--stroke);border-radius:16px;box-shadow:var(--shadow);padding:16px;max-width:640px;width:100%}
+    .modal .help{color:#9fb0cc;font-size:13px}
+    .rowline{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    @media(max-width:700px){.rowline,.formgrid,.list .row{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="s-logo">
+      <img src="{{ url_for('static', filename='img/logo.png') }}" alt="logo">
+      <div class="brand">GL Bingo</div>
+    </div>
+    <nav class="s-menu">
+      <a href="/dashboard"><span class="icon">🏠</span> Dashboard</a>
+      <a href="/usuarios"><span class="icon">🧑‍💼</span> Usuarios</a>
+      <a href="/juego"><span class="icon">🎲</span> Juego</a>
+      <a href="/contabilidad"><span class="icon">📊</span> Contabilidad</a>
+      <a href="/vendedores"><span class="icon">🧾</span> Vendedores</a>
+      <a href="/asignar-planillas"><span class="icon">📑</span> Asignar Planillas</a>
+      <a href="/impresion"><span class="icon">🖨️</span> Impresión de Boletos</a>
+      <a href="/cobro"><span class="icon">💵</span> Cobro de Caja</a>
+      <a href="/pago-premios" class="active"><span class="icon">🏅</span> Pago de Premios</a>
+      <a href="/sorteo"><span class="icon">🎟️</span> Sorteo</a>
+      <a href="/crear-figuras"><span class="icon">🟩</span> Crear Figuras</a>
+      <a href="/escoger-figuras"><span class="icon">🟦</span> Escoger Figuras</a>
+      <a href="/boletin"><span class="icon">📋</span> Boletín</a>
+    </nav>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+    <div class="panel">
+      <div class="head">
+        <div>
+          <h1>Pago de premios</h1>
+          <span class="chip">Gestión de pagos y recibos</span>
+        </div>
+        <div class="actions">
+          <a class="link" id="btnCfg">⚙️ Configurar acta</a>
+        </div>
+      </div>
+
+      <!-- KPI SUMMARY (clickable filters) -->
+      <div class="kpis" id="kpis">
+        <div class="kpi green"  data-filter="paid"    title="Mostrar solo pagados">
+          <div class="dot"></div>
+          <div>
+            <div class="num" id="kpiPaid">0</div>
+            <div class="lbl">Premios pagados</div>
+          </div>
+        </div>
+        <div class="kpi blue"   data-filter="pending" title="Mostrar solo por pagar">
+          <div class="dot"></div>
+          <div>
+            <div class="num" id="kpiPending">0</div>
+            <div class="lbl">Premios por pagar</div>
+          </div>
+        </div>
+        <div class="kpi orange" data-filter="soon"    title="Mostrar por caducar (≤7 días)">
+          <div class="dot"></div>
+          <div>
+            <div class="num" id="kpiSoon">0</div>
+            <div class="lbl">Por caducar (≤7d)</div>
+          </div>
+        </div>
+        <div class="kpi red"    data-filter="expired" title="Mostrar caducados">
+          <div class="dot"></div>
+          <div>
+            <div class="num" id="kpiExpired">0</div>
+            <div class="lbl">Premios caducados</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="filters">
+        <div>
+          <label class="muted">Fecha sorteo</label><br>
+          <input id="fecha" type="date" value="{{ fecha_inicial }}">
+        </div>
+        <div style="flex:1">
+          <label class="muted">Buscar</label><br>
+          <input id="busca" placeholder="Buscar por figura, boleto o nombre…">
+        </div>
+        <button class="btn primary" id="btnCargar">Cargar</button>
+        <button class="btn ghost" id="btnCSV">Exportar CSV</button>
+      </div>
+
+      <div class="grid">
+        <!-- Lista -->
+        <section class="panel" style="margin:0">
+          <h3 style="margin:0 0 10px">Resultados del sorteo</h3>
+          <div class="list" id="lista"></div>
+        </section>
+
+        <!-- Formulario pago -->
+        <aside class="panel" style="margin:0">
+          <h3 style="margin:0 0 10px">Registrar pago</h3>
+          <div id="rightEmpty" class="rightbox">Selecciona un premio pendiente para iniciar el pago.</div>
+
+          <div id="formBox" style="display:none">
+            <p class="muted" style="margin-top:0">Complete los datos del cobrador y confirme el pago. Se generará el <b>Acta PDF</b>.</p>
+            <div class="formgrid">
+              <div class="col">
+                <label class="muted">Figura</label>
+                <input id="f_figura" disabled>
+              </div>
+              <div class="col">
+                <label class="muted">Boleto</label>
+                <input id="f_boleto" disabled>
+              </div>
+              <div class="col">
+                <label class="muted">Texto de planilla</label>
+                <input id="f_ganador" disabled>
+              </div>
+              <div class="col">
+                <label class="muted">Premio</label>
+                <input id="f_premio" disabled>
+              </div>
+
+              <div class="col">
+                <label class="muted">Ciudad (para acta)</label>
+                <input id="f_ciudad">
+              </div>
+              <div class="col">
+                <label class="muted">Empresa (para acta)</label>
+                <input id="f_empresa">
+              </div>
+
+              <div class="col">
+                <label class="muted">CI del cobrador</label>
+                <input id="f_ci" placeholder="Ej: 1207…">
+              </div>
+              <div class="col">
+                <label class="muted">Nombre del cobrador</label>
+                <input id="f_cobrador" placeholder="Apellidos Nombres">
+              </div>
+              <div class="col">
+                <label class="muted">Teléfono</label>
+                <input id="f_tel" placeholder="099…">
+              </div>
+              <div class="col">
+                <label class="muted">Caduca</label>
+                <input id="f_caduca" disabled>
+              </div>
+            </div>
+
+            <div class="foot">
+              <button class="btn ghost" id="btnCancelar">Cancelar</button>
+              <button class="btn success" id="btnPagar">Pagar y generar Acta</button>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+
+    <footer style="text-align:center;color:#9fb0cc;margin:14px 0 6px;font-size:13px">
+      © 2025 GL Studios Corporation. Todos los derechos reservados.
+    </footer>
+  </main>
+</div>
+
+<!-- Modal de configuración -->
+<div class="modal" id="modalCfg">
+  <div class="box">
+    <h3 style="margin:0 0 8px">Configurar acta</h3>
+    <p class="help" style="margin-top:0">Estos valores se usarán por defecto al generar cada acta.  
+      La <b>hoja membreteada</b> debe existir en <code>static/img/</code> (por ejemplo: <code>HOJA-MEMBRETADA.png</code>).
+    </p>
+    <div class="rowline" style="margin:10px 0">
+      <div>
+        <label class="muted">Empresa</label>
+        <input id="cfgEmpresa">
+      </div>
+      <div>
+        <label class="muted">Ciudad por defecto</label>
+        <input id="cfgCiudad">
+      </div>
+    </div>
+    <div>
+      <label class="muted">Archivo de hoja membreteada (en <code>static/img/</code>)</label>
+      <input id="cfgMembrete" placeholder="HOJA-MEMBRETADA.png">
+      <p class="help">Se usará: <code>static/img/<span id="cfgPathExample"></span></code></p>
+    </div>
+
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
+      <button class="btn ghost" id="cfgCancelar">Cerrar</button>
+      <button class="btn primary" id="cfgGuardar">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+const money = n => Number(n||0).toLocaleString('es-EC',{style:'currency',currency:'USD'});
+let CONFIG = {company_name:'', city_default:'', letterhead:''};
+
+let FECHA = $('#fecha').value;
+let ITEMS = [];
+let SELEC = null;
+let VIEW = 'all'; // all | paid | pending | soon | expired
+
+/* ====== colores por figura ====== */
+function colorForFigure(name){
+  const n=(name||'').toUpperCase().trim();
+  const map={
+    "5TA LINEA":"#60a5fa","5TA":"#60a5fa","3ERA LINEA":"#38bdf8",
+    "DIAGONAL":"#f59e0b","DIAGONAL 1":"#f59e0b","DIAGONAL 2":"#fbbf24",
+    "ESPADA":"#22c55e","HORIZONTAL":"#a78bfa","LLENA 1":"#ef4444","LLENA 2":"#fb923c",
+    "MARCO ROTO":"#eab308","AJEDREZ":"#06b6d4","CORAZON":"#f43f5e"
+  };
+  for(const k of Object.keys(map)){ if(n.startsWith(k)) return map[k]; }
+  let h=0; for(let i=0;i<n.length;i++){h=(h*31+n.charCodeAt(i))>>>0;} h%=360;
+  return `hsl(${h} 70% 55%)`;
+}
+
+/* ====== CONFIG ====== */
+async function loadConfig(){
+  const r = await fetch('/api/pagos/config'); const j = await r.json();
+  if(j.ok){
+    CONFIG = j.config || CONFIG;
+    $('#cfgEmpresa').value = CONFIG.company_name || '';
+    $('#cfgCiudad').value  = CONFIG.city_default || '';
+    $('#cfgMembrete').value= CONFIG.letterhead || '';
+    $('#cfgPathExample').textContent = CONFIG.letterhead || '';
+  }
+}
+async function saveConfig(){
+  const payload = {
+    company_name: $('#cfgEmpresa').value.trim(),
+    city_default: $('#cfgCiudad').value.trim(),
+    letterhead: $('#cfgMembrete').value.trim()
+  };
+  const r = await fetch('/api/pagos/config',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+  const j = await r.json();
+  if(j.ok){ CONFIG=j.config; alert('Configuración guardada'); closeCfg(); }
+  else{ alert('No se pudo guardar'); }
+}
+function openCfg(){ $('#modalCfg').style.display='flex'; }
+function closeCfg(){ $('#modalCfg').style.display='none'; }
+$('#btnCfg').onclick=openCfg; $('#cfgCancelar').onclick=closeCfg; $('#cfgGuardar').onclick=saveConfig;
+$('#cfgMembrete').addEventListener('input',()=>$('#cfgPathExample').textContent=$('#cfgMembrete').value.trim());
+
+/* ====== DATOS ====== */
+async function loadItems(){
+  const r = await fetch('/api/premios-pendientes?fecha='+encodeURIComponent(FECHA));
+  const j = await r.json();
+  if(!j.ok){ alert('Error cargando premios'); return; }
+  ITEMS = j.items || [];
+  updateKpis();
+  renderList();
+  clearForm();
+}
+
+/* ====== KPI logic ====== */
+function daysLeft(it){
+  const cad = new Date(it.fecha_caduca+'T00:00:00');
+  return Math.max( Math.ceil((cad - new Date())/(1000*60*60*24)), 0 );
+}
+function updateKpis(){
+  const paid     = ITEMS.filter(x=>x.pagado).length;
+  const pending  = ITEMS.filter(x=>!x.pagado && !x.expirado).length;
+  const soon     = ITEMS.filter(x=>!x.pagado && !x.expirado && daysLeft(x)<=7).length;
+  const expired  = ITEMS.filter(x=>!x.pagado && x.expirado).length;
+  $('#kpiPaid').textContent    = paid;
+  $('#kpiPending').textContent = pending;
+  $('#kpiSoon').textContent    = soon;
+  $('#kpiExpired').textContent = expired;
+}
+
+/* ====== RENDER ====== */
+function dueClass(expirado, d){
+  if(expirado || d<=3) return 'red';
+  if(d<=7) return 'orange';
+  return 'yellow';
+}
+
+function matchesView(it){
+  if(VIEW==='paid')    return it.pagado;
+  if(VIEW==='pending') return !it.pagado && !it.expirado;
+  if(VIEW==='soon')    return !it.pagado && !it.expirado && daysLeft(it)<=7;
+  if(VIEW==='expired') return !it.pagado && it.expirado;
+  return true;
+}
+
+function renderList(){
+  const cont = $('#lista');
+  cont.innerHTML = '';
+
+  const head = document.createElement('div');
+  head.className='row head';
+  head.style.setProperty('--accent', '#23375e');
+  head.innerHTML = `<div>Figura / Boleto</div><div>Planilla</div><div>Sector</div><div>Monto</div><div>Estado</div><div style="text-align:right">Acciones</div>`;
+  cont.appendChild(head);
+
+  const q = ($('#busca').value||'').toLowerCase();
+
+  ITEMS.filter(it=>{
+    const s = (it.figura+' '+it.boleto+' '+(it.nombre||'')).toLowerCase();
+    return s.includes(q) && matchesView(it);
+  }).forEach(it=>{
+    const color = colorForFigure(it.figura);
+    const row = document.createElement('div'); row.className='row';
+    row.style.setProperty('--accent', color);
+
+    const d = daysLeft(it);
+
+    let estadoHTML = '';
+    if(it.pagado){
+      const f = (it.fecha_pago||'').replace('T',' ');
+      estadoHTML = `
+        <div class="state">
+          <span class="tag green">PAGADO</span>
+          <span class="tag outline">por <b>${(it.pagado_por||'-')}</b></span>
+          <span class="tag ghost">${f}</span>
+        </div>`;
+    }else{
+      const cclass = dueClass(it.expirado, d);
+      const dueLbl = it.expirado? 'Vencido' : 'Caduca: '+it.fecha_caduca;
+      estadoHTML = `
+        <div class="state">
+          <span class="tag ${cclass==='red' ? 'red' : 'yellow'}">${it.expirado?'VENCIDO':'PENDIENTE'}</span>
+          <span class="tag ${cclass}">${dueLbl}</span>
+          <span class="tag outline">${d} días</span>
+        </div>`;
+    }
+
+    let accHTML = '';
+    if(!it.pagado){
+      accHTML = `<div class="pay-actions">
+        <button class="btn primary pill" data-act="pagar">Pagar</button>
+      </div>`;
+    }else{
+      const rid = it.recibo_id || '';
+      accHTML = `<div class="pay-actions">
+        <a class="btn ghost pill" href="/recibos/${rid}.pdf" target="_blank">Imprimir</a>
+      </div>`;
+    }
+
+    row.innerHTML = `
+      <div>
+        <span class="figtag" style="--ac:${color}">${it.figura}</span>
+        <span class="muted"> · Boleto ${it.boleto}</span>
+      </div>
+      <div>${it.nombre||'-'}</div>
+      <div>${it.sector||'-'}</div>
+      <div style="font-variant-numeric:tabular-nums">${money(it.premio||0)}</div>
+      <div>${estadoHTML}</div>
+      <div style="text-align:right">${accHTML}</div>
+    `;
+
+    row.querySelector('[data-act="pagar"]')?.addEventListener('click',()=>startPay(it));
+    cont.appendChild(row);
+  });
+}
+
+/* ====== FORM ====== */
+function startPay(it){
+  SELEC = it;
+  $('#rightEmpty').style.display='none';
+  $('#formBox').style.display='block';
+
+  $('#f_figura').value  = it.figura;
+  $('#f_boleto').value  = it.boleto;
+  $('#f_ganador').value = it.nombre || '';
+  $('#f_premio').value  = money(it.premio||0);
+  $('#f_caduca').value  = it.fecha_caduca;
+
+  $('#f_ciudad').value  = CONFIG.city_default || '';
+  $('#f_empresa').value = CONFIG.company_name || '';
+
+  $('#f_ci').value=''; $('#f_cobrador').value=''; $('#f_tel').value='';
+}
+
+function clearForm(){
+  SELEC = null;
+  $('#rightEmpty').style.display='flex';
+  $('#formBox').style.display='none';
+}
+
+async function pagar(){
+  if(!SELEC){ alert('Selecciona un premio.'); return; }
+  const fd = new FormData();
+  fd.append('fecha', FECHA);
+  fd.append('figura', SELEC.figura);
+  fd.append('boleto', SELEC.boleto);
+  fd.append('ganador_nombre', SELEC.nombre||'');
+  fd.append('premio', String(SELEC.premio||0));
+  fd.append('cobrador_ci', $('#f_ci').value.trim());
+  fd.append('cobrador_nombre', $('#f_cobrador').value.trim());
+  fd.append('telefono', $('#f_tel').value.trim());
+  fd.append('ciudad', $('#f_ciudad').value.trim());
+  fd.append('empresa', $('#f_empresa').value.trim());
+
+  if(!$('#f_ci').value.trim() || !$('#f_cobrador').value.trim()){
+    alert('CI y nombre del cobrador son obligatorios'); return;
+  }
+
+  const r = await fetch('/api/premios/pagar',{method:'POST', body:fd});
+  const j = await r.json().catch(()=>({ok:false}));
+  if(!j.ok){ alert(j.msg||'Error al pagar'); return; }
+  window.open(j.recibo,'_blank');
+  await loadItems();
+  clearForm();
+}
+
+/* ====== CSV ====== */
+function exportCSV(){
+  const rows = [["Figura","Boleto","Planilla","Sector","Premio","Estado","Fecha Caduca","Pagado por","Fecha pago"]];
+  ITEMS.forEach(it=>{
+    rows.push([it.figura, it.boleto, it.nombre||'', it.sector||'', it.premio||0, it.pagado?'pagado':(it.expirado?'vencido':'pendiente'), it.fecha_caduca, it.pagado_por||'', it.fecha_pago||'']);
+  });
+  const csv = rows.map(r=>r.map(x=>`"${String(x).replace(/"/g,'""')}"`).join(",")).join("\n");
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`premios_${FECHA}.csv`; a.click();
+}
+
+/* ====== KPI filter clicks ====== */
+document.querySelectorAll('.kpi').forEach(k=>{
+  k.addEventListener('click', ()=>{
+    document.querySelectorAll('.kpi').forEach(x=>x.classList.remove('active'));
+    k.classList.add('active');
+    const f = k.getAttribute('data-filter');
+    VIEW = f; // paid, pending, soon, expired
+    renderList();
+  });
+});
+
+/* ====== Eventos ====== */
+$('#btnCargar').onclick = ()=>{ FECHA=$('#fecha').value; loadItems(); }
+$('#fecha').addEventListener('change', ()=>{ FECHA=$('#fecha').value; loadItems(); });
+$('#busca').addEventListener('input', renderList);
+$('#btnCSV').onclick = exportCSV;
+$('#btnPagar').onclick = pagar;
+$('#btnCancelar').onclick = clearForm;
+
+/* ====== Init ====== */
+(async function(){
+  await loadConfig();
+  await loadItems();
+})();
+</script>
+</body>
+</html>

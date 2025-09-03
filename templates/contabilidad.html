@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>Contabilidad | GL Bingo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- Iconos + Gráficos -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+  <style>
+    :root{
+      --bg:#0b1121; --panel:#0f1731; --card:#121a2f; --muted:#9eb0d6; --ink:#e9f1ff;
+      --primary:#6ea8fe; --accent:#10b981; --warn:#ffd166; --danger:#ef4444; --info:#38bdf8; --vio:#8b5cf6;
+      --r:16px; --shadow:0 10px 30px rgba(0,0,0,.32);
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:linear-gradient(180deg,#0b1121,#0e1630 60%,#0b1121);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial}
+    a{color:var(--primary);text-decoration:none}
+
+    /* Layout */
+    .layout{display:grid;grid-template-columns:260px 1fr;min-height:100vh}
+    .aside{background:#0b1429;border-right:1px solid #16264a;padding:14px 10px}
+    .brand{display:flex;gap:10px;align-items:center;margin-bottom:16px;padding:6px 8px}
+    .brand img{width:42px;height:42px;border-radius:8px}
+    .brand .t{font-weight:800;letter-spacing:.3px}
+    .menu a{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;color:#cfe0ff}
+    .menu a:hover{background:#15224b}
+    .menu a.active{background:#1b2e60;color:#fff;font-weight:700}
+
+    .content{padding:18px}
+    .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+    .user{display:flex;align-items:center;gap:12px}
+    .user img{width:36px;height:36px;border-radius:50%}
+
+    /* Panels & controls */
+    .panel{background:var(--panel);border-radius:var(--r);box-shadow:var(--shadow);padding:16px}
+    .filters{display:grid;grid-template-columns:repeat(12,1fr);gap:10px;align-items:end}
+    .filters .f{display:flex;flex-direction:column;gap:6px}
+    label{font-size:.8rem;color:var(--muted)}
+    input[type="date"],input[type="text"],input[type="number"],select{
+      background:#0b1323;border:1px solid #293a64;color:var(--ink);border-radius:10px;padding:10px 12px;width:100%
+    }
+    .btn{border:none;cursor:pointer;border-radius:12px;padding:10px 14px;font-weight:800}
+    .btn-primary{background:var(--primary);color:#08122c}
+    .btn-ghost{background:#16264d;color:#cfe0ff;border:1px solid #2a4377}
+    .btn-danger{background:var(--danger);color:#fff}
+    .quick{display:flex;gap:8px;flex-wrap:wrap}
+
+    .grid{display:grid;gap:14px}
+    .kpis{grid-template-columns:repeat(6,1fr)}
+    .card{background:radial-gradient(130% 140% at 100% 0%,#16203b 0%,#121a2f 42%);border-radius:var(--r);box-shadow:var(--shadow);padding:14px}
+    .kpi{cursor:pointer;transition:transform .08s ease}
+    .kpi:hover{transform:translateY(-2px)}
+    .kpi .h{display:flex;align-items:center;gap:8px;color:#a3b7e8;font-weight:700}
+    .kpi .v{margin-top:6px;font-size:1.55rem;font-weight:900}
+    .kpi small{color:#7fb0ff}
+
+    .section{margin-top:16px}
+    .section h3{margin:0 0 8px 2px;color:#d7e4ff}
+
+    /* Tablas */
+    table{width:100%;border-collapse:collapse}
+    thead{background:#1a2a56}
+    th,td{padding:9px 8px;text-align:center;border-bottom:1px solid #1b2a4f}
+    .pill{display:inline-block;padding:3px 8px;border-radius:999px;font-size:.75rem}
+    .pill.caja{background:#173a4b;color:#90f0df}
+    .pill.banco{background:#3a214f;color:#f7c6ff}
+    .money{font-weight:900;text-align:right}
+    .file{background:#0b1323;border:1px dashed #324574;border-radius:10px;padding:10px;color:#a9b9e5;width:100%}
+    .muted{color:var(--muted)}
+    .legend{display:flex;gap:12px;align-items:center}
+    .dot{width:10px;height:10px;border-radius:50%}
+
+    /* Modal */
+    .modal-back{position:fixed;inset:0;background:#0008;display:none;align-items:center;justify-content:center;z-index:60}
+    .modal{width:min(1020px,92vw);max-height:88vh;background:var(--card);border-radius:14px;box-shadow:var(--shadow);display:flex;flex-direction:column}
+    .modal header{padding:12px 16px;border-bottom:1px solid #1e2c52;display:flex;align-items:center;justify-content:space-between}
+    .modal header h4{margin:0}
+    .modal .body{padding:12px 16px;overflow:auto}
+    .modal .foot{padding:12px 16px;border-top:1px solid #1e2c52;text-align:right}
+    .close{background:#223867;border:1px solid #36518f;color:#e6efff;border-radius:10px;padding:6px 10px;cursor:pointer}
+
+    @media (max-width:1200px){ .kpis{grid-template-columns:repeat(3,1fr)} }
+    @media (max-width:860px){
+      .layout{grid-template-columns:1fr}
+      .aside{position:sticky;top:0;z-index:5}
+      .kpis{grid-template-columns:repeat(2,1fr)}
+      .filters{grid-template-columns:repeat(2,1fr)}
+    }
+    @media (max-width:560px){ .kpis{grid-template-columns:1fr} }
+  </style>
+</head>
+<body>
+<div class="layout">
+
+  <!-- Lateral -->
+  <aside class="aside">
+    <div class="brand">
+      <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo">
+      <div>
+        <div class="t">GL Bingo</div>
+        <small class="muted">Panel</small>
+      </div>
+    </div>
+    <nav class="menu">
+      <a href="/dashboard"><i class="bi bi-house-door"></i> Dashboard</a>
+      <a href="/usuarios"><i class="bi bi-person-badge"></i> Usuarios</a>
+      <a href="/juego"><i class="bi bi-dice-5"></i> Juego</a>
+      <a class="active" href="/contabilidad"><i class="bi bi-graph-up"></i> Contabilidad</a>
+      <a href="/vendedores"><i class="bi bi-people"></i> Vendedores</a>
+      <a href="/asignar-planillas"><i class="bi bi-ui-checks-grid"></i> Asignar Planillas</a>
+      <a href="/impresion"><i class="bi bi-printer"></i> Impresión de Boletos</a>
+      <a href="/cobro"><i class="bi bi-cash-coin"></i> Cobro de Caja</a>
+      <a href="/pago-premios"><i class="bi bi-trophy"></i> Pago de Premios</a>
+      <a href="/sorteo"><i class="bi bi-dice-3"></i> Sorteo</a>
+      <a href="/crear-figuras"><i class="bi bi-square-fill" style="color:#22c55e"></i> Crear Figuras</a>
+      <a href="/escoger-figuras"><i class="bi bi-square-fill" style="color:#3b82f6"></i> Escoger Figuras</a>
+      <a href="/boletin"><i class="bi bi-file-earmark-text"></i> Boletín</a>
+    </nav>
+  </aside>
+
+  <!-- Contenido -->
+  <main class="content">
+    <div class="topbar">
+      <h2 style="margin:0">Contabilidad</h2>
+      <div class="user">
+        <img src="{{ url_for('static', filename='avatars/' + (avatar or 'avatar-male.png')) }}" alt="">
+        <div>
+          <div style="font-weight:700">{{ usuario }}</div>
+          <small class="muted">{{ rol }}</small>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filtros globales -->
+    <div class="panel section">
+      <div class="filters" id="filtros">
+        <div class="f" style="grid-column:span 3">
+          <label>Desde</label>
+          <input type="date" id="f-desde">
+        </div>
+        <div class="f" style="grid-column:span 3">
+          <label>Hasta</label>
+          <input type="date" id="f-hasta">
+        </div>
+        <div class="f" style="grid-column:span 3">
+          <label>&nbsp;</label>
+          <button class="btn btn-primary" id="btnActualizar"><i class="bi bi-arrow-repeat"></i> Actualizar</button>
+        </div>
+        <div class="f" style="grid-column:span 3">
+          <label>Rangos rápidos</label>
+          <div class="quick">
+            <button class="btn btn-ghost" data-r="hoy">Hoy</button>
+            <button class="btn btn-ghost" data-r="7d">7 días</button>
+            <button class="btn btn-ghost" data-r="30d">30 días</button>
+            <button class="btn btn-ghost" data-r="ytd">Año en curso</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- KPIs -->
+    <div class="grid kpis" id="kpis" style="margin-top:12px"></div>
+
+    <!-- Gráficas principales -->
+    <div class="grid" style="grid-template-columns:repeat(2,1fr);margin-top:10px">
+      <div class="card">
+        <div class="legend" style="justify-content:space-between">
+          <h3 style="margin:0">Resultado del período</h3>
+          <div class="legend">
+            <span class="dot" style="background:var(--info)"></span><small class="muted">Ingresos/Gastos/Sueldos/Premios/Utilidad</small>
+          </div>
+        </div>
+        <canvas id="chResultado" height="170"></canvas>
+      </div>
+      <div class="card">
+        <div class="legend" style="justify-content:space-between">
+          <h3 style="margin:0">Boletos: Impresos / Vendidos / Devueltos</h3>
+          <div class="legend">
+            <span class="dot" style="background:var(--primary)"></span><small class="muted">Comparativo</small>
+          </div>
+        </div>
+        <canvas id="chBoletos" height="170"></canvas>
+      </div>
+      <div class="card">
+        <div class="legend" style="justify-content:space-between">
+          <h3 style="margin:0">Distribución de costos</h3>
+          <div class="legend">
+            <span class="dot" style="background:var(--danger)"></span><small class="muted">Gastos</small>
+            <span class="dot" style="background:var(--vio)"></span><small class="muted">Sueldos</small>
+          </div>
+        </div>
+        <canvas id="chCostos" height="170"></canvas>
+      </div>
+      <div class="card">
+        <div class="legend" style="justify-content:space-between">
+          <h3 style="margin:0">Ingresos vs Premios pagados</h3>
+        </div>
+        <canvas id="chIngPrem" height="170"></canvas>
+      </div>
+    </div>
+
+    <!-- Vendedor: curvas -->
+    <div class="grid section" id="cardsVendedores" style="grid-template-columns:1fr 1fr">
+      <div class="card">
+        <div class="legend" style="justify-content:space-between">
+          <h3 style="margin:0">Curva: VENTAS por vendedor</h3>
+          <div class="legend">
+            <span class="dot" style="background:var(--accent)"></span><small class="muted">Vendidos</small>
+          </div>
+        </div>
+        <canvas id="chCurvaVentas" height="190"></canvas>
+      </div>
+      <div class="card">
+        <div class="legend" style="justify-content:space-between">
+          <h3 style="margin:0">Curva: DEVUELTOS por vendedor</h3>
+          <div class="legend">
+            <span class="dot" style="background:var(--danger)"></span><small class="muted">Devueltos</small>
+          </div>
+        </div>
+        <canvas id="chCurvaDevueltos" height="190"></canvas>
+      </div>
+    </div>
+
+    <!-- Banco -->
+    <div class="section">
+      <h3>Banco de la empresa</h3>
+      <div class="panel">
+        <form id="frmDeposito" enctype="multipart/form-data" class="grid" style="grid-template-columns:repeat(6,1fr)">
+          <div class="f" style="grid-column:span 2">
+            <label>Fecha depósito</label>
+            <input type="date" name="fecha" id="b-fecha">
+          </div>
+          <div class="f" style="grid-column:span 2">
+            <label>Monto</label>
+            <input type="number" step="0.01" name="monto" id="b-monto" placeholder="0.00">
+          </div>
+          <div class="f" style="grid-column:span 2">
+            <label>Referencia</label>
+            <input type="text" name="referencia" placeholder="N° depósito / nota">
+          </div>
+          <div class="f" style="grid-column:span 3">
+            <label>Comprobante (PDF/JPG/PNG)</label>
+            <input type="file" name="comprobante" class="file" accept=".pdf,.jpg,.jpeg,.png,.webp">
+          </div>
+          <input type="hidden" name="cuenta" value="Empresa">
+          <input type="hidden" name="monto_comprobante" id="b-monto-confirm">
+          <div class="f" style="grid-column:1 / -1">
+            <button class="btn btn-primary" type="submit"><i class="bi bi-bank"></i> Registrar depósito (bloqueado)</button>
+          </div>
+        </form>
+
+        <div style="margin-top:14px;overflow:auto">
+          <table>
+            <thead><tr><th>Fecha</th><th>Tipo</th><th>Monto</th><th>Referencia</th><th>Comprobante</th><th>Estado</th><th>Acción</th></tr></thead>
+            <tbody id="tbBanco"><tr><td colspan="7" class="muted">—</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Gastos -->
+    <div class="section">
+      <h3>Gastos</h3>
+      <div class="panel">
+        <!-- Filtro de gastos por fechas -->
+        <div class="grid" style="grid-template-columns:repeat(6,1fr);margin-bottom:10px">
+          <div class="f" style="grid-column:span 2"><label>Gastos: desde</label><input type="date" id="gx-desde"></div>
+          <div class="f" style="grid-column:span 2"><label>Gastos: hasta</label><input type="date" id="gx-hasta"></div>
+          <div class="f" style="grid-column:span 2"><label>&nbsp;</label><button class="btn btn-ghost" id="btnGastosReload"><i class="bi bi-search"></i> Buscar gastos</button></div>
+        </div>
+
+        <form id="frmGasto" enctype="multipart/form-data" class="grid" style="grid-template-columns:repeat(6,1fr)">
+          <div class="f" style="grid-column:span 2">
+            <label>Fecha (solo día actual)</label>
+            <input type="date" name="fecha" id="g-fecha">
+          </div>
+          <div class="f" style="grid-column:span 2">
+            <label>Categoría</label>
+            <input type="text" name="categoria" placeholder="Gasto / Sueldo / ...">
+          </div>
+          <div class="f" style="grid-column:span 2">
+            <label>Medio</label>
+            <select name="medio" id="g-medio">
+              <option value="caja">Caja</option>
+              <option value="banco">Banco</option>
+            </select>
+          </div>
+          <div class="f" style="grid-column:span 2">
+            <label>Monto</label>
+            <input type="number" step="0.01" name="monto" id="g-monto" placeholder="0.00">
+          </div>
+          <div class="f" style="grid-column:span 2">
+            <label>Descripción</label>
+            <input type="text" name="descripcion" placeholder="Detalle">
+          </div>
+          <div class="f" style="grid-column:span 2">
+            <label>Comprobante (PDF/JPG/PNG)</label>
+            <input type="file" name="comprobante" class="file" accept=".pdf,.jpg,.jpeg,.png,.webp">
+          </div>
+          <input type="hidden" name="monto_comprobante" id="g-monto-confirm">
+          <div class="f" style="grid-column:1 / -1">
+            <button class="btn btn-primary" type="submit"><i class="bi bi-receipt"></i> Registrar gasto</button>
+          </div>
+        </form>
+
+        <div style="margin-top:14px;overflow:auto">
+          <table>
+            <thead><tr><th>Fecha</th><th>Categoría</th><th>Medio</th><th>Monto</th><th>Descripción</th><th>Comprobante</th><th>Acción</th></tr></thead>
+            <tbody id="tbGastos"><tr><td colspan="7" class="muted">—</td></tr></tbody>
+          </table>
+        </div>
+
+        <div class="card" style="margin-top:12px">
+          <div class="legend" style="justify-content:space-between">
+            <h3 style="margin:0">Gastos por día (rango seleccionado)</h3>
+          </div>
+          <canvas id="chGastosDia" height="150"></canvas>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- Modal genérico -->
+<div class="modal-back" id="mb">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="mtitle">
+    <header>
+      <h4 id="mtitle">Detalle</h4>
+      <button class="close" id="mclose"><i class="bi bi-x-lg"></i> Cerrar</button>
+    </header>
+    <div class="body" id="mbody">Cargando…</div>
+    <div class="foot"><small class="muted" id="mfoot"></small></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const $ = (q,ctx=document)=>ctx.querySelector(q);
+  const $$ = (q,ctx=document)=>Array.from(ctx.querySelectorAll(q));
+  const today = new Date().toISOString().slice(0,10);
+
+  // Presets (30 días)
+  (function defaults(){
+    const now = new Date();
+    const d1 = new Date(now.getTime()-30*86400000);
+    $('#f-desde').value = d1.toISOString().slice(0,10);
+    $('#f-hasta').value = today;
+    $('#gx-desde').value = $('#f-desde').value;
+    $('#gx-hasta').value = $('#f-hasta').value;
+    $('#b-fecha').value = today;
+    $('#g-fecha').value = today;
+  })();
+
+  // Rápidos
+  $$('#filtros [data-r]').forEach(b=>{
+    b.onclick = ()=>{
+      const now = new Date(); let d1=new Date(now), d2=new Date(now);
+      if(b.dataset.r==='7d') d1 = new Date(now.getTime()-7*86400000);
+      else if(b.dataset.r==='30d') d1 = new Date(now.getTime()-30*86400000);
+      else if(b.dataset.r==='ytd') d1 = new Date(now.getFullYear(),0,1);
+      $('#f-desde').value = d1.toISOString().slice(0,10);
+      $('#f-hasta').value = d2.toISOString().slice(0,10);
+      $('#gx-desde').value = $('#f-desde').value;
+      $('#gx-hasta').value = $('#f-hasta').value;
+      cargarTodo();
+    };
+  });
+  $('#btnActualizar').onclick = cargarTodo;
+  $('#btnGastosReload').onclick = (e)=>{ e.preventDefault(); cargarGastos(); };
+
+  const money = n => Number(n||0).toLocaleString('es-EC',{style:'currency',currency:'USD'});
+  const compLink = p => p ? `<a href="/static/${String(p).replace(/^\/?static\/?/,'')}" target="_blank">Ver</a>` : '—';
+
+  // ===== Gráficas & caches =====
+  let chRes=null, chBol=null, chCos=null, chIngPrem=null, chGastosDia=null, chCurvaVentas=null, chCurvaDevueltos=null;
+  let resumenCache=null, gastosCache=[], bancoCache=[], premiosPagadosCache=[];
+
+  async function cargarResumen(){
+    const qs = new URLSearchParams({desde:$('#f-desde').value,hasta:$('#f-hasta').value}).toString();
+    const r = await fetch('/api/contabilidad/resumen?'+qs);
+    const j = await r.json();
+    if(!j.ok){ alert('No se pudo cargar el resumen'); return; }
+    resumenCache = j;
+    premiosPagadosCache = j.premios_detalle || [];
+
+    // KPIs (clickables)
+    const kpis = $('#kpis'); kpis.innerHTML='';
+    const items = [
+      ['boletos_impresos','bi-grid-3x3-gap-fill','Boletos impresos', j.boletos_impresos],
+      ['boletos_vendidos','bi-bag-check-fill','Boletos vendidos', j.boletos_vendidos],
+      ['boletos_devueltos','bi-bag-x-fill','Boletos devueltos', j.boletos_devueltos],
+      ['ingresos_brutos','bi-cash-coin','Ingresos brutos', money(j.ingresos_brutos)],
+      ['ganancia_vendedores','bi-people-fill','Ganancia vendedores', money(j.ganancia_vendedores)],
+      ['ganancia_empresa','bi-building','Ganancia empresa', money(j.ganancia_empresa)],
+      ['premios_pagados_total','bi-trophy-fill','Premios pagados', money(j.premios_pagados_total)],
+      ['premios_por_caducar','bi-hourglass-split','Premios por caducar', j.premios_por_caducar],
+      ['premios_caducados','bi-hourglass-bottom','Premios caducados', j.premios_caducados],
+      ['gastos_total','bi-receipt','Gastos', money(j.gastos_total)],
+      ['sueldos_total','bi-person-badge-fill','Sueldos', money(j.sueldos_total)],
+      ['utilidad_neta','bi-clipboard-check-fill','Utilidad neta', money(j.utilidad_neta)],
+      ['efectivo_cobrado','bi-cash','Efectivo cobrado', money(j.efectivo_cobrado)],
+      ['transferencias_cobradas','bi-phone-flip','Transferencias cobradas', money(j.transferencias_cobradas)],
+      ['saldo_caja','bi-wallet2','Saldo en caja', money(j.saldo_caja)],
+      ['saldo_banco','bi-bank','Saldo en banco', money(j.saldo_banco)]
+    ];
+    items.forEach(([key,icon,label,val])=>{
+      const el = document.createElement('div');
+      el.className='card kpi'; el.dataset.key=key;
+      el.innerHTML=`<div class="h"><i class="bi ${icon}"></i> ${label}</div><div class="v">${val}</div>`;
+      el.addEventListener('click', ()=>openModalForKey(key));
+      kpis.appendChild(el);
+    });
+
+    // Gráficas base
+    chRes && chRes.destroy();
+    chRes = new Chart($('#chResultado'), {type:'bar',
+      data:{labels:['Ingresos','Gastos','Sueldos','Premios','Utilidad'],
+            datasets:[{data:[j.ingresos_brutos,j.gastos_total,j.sueldos_total,j.premios_pagados_total,j.utilidad_neta]}]},
+      options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}} });
+
+    chBol && chBol.destroy();
+    chBol = new Chart($('#chBoletos'), {type:'bar',
+      data:{labels:['Impresos','Vendidos','Devueltos'],
+            datasets:[{data:[j.boletos_impresos,j.boletos_vendidos,j.boletos_devueltos]}]},
+      options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}} });
+
+    chCos && chCos.destroy();
+    chCos = new Chart($('#chCostos'), {type:'doughnut',
+      data:{labels:['Gastos','Sueldos'],datasets:[{data:[j.gastos_total,j.sueldos_total]}]},
+      options:{responsive:true,plugins:{legend:{position:'bottom'}}} });
+
+    chIngPrem && chIngPrem.destroy();
+    chIngPrem = new Chart($('#chIngPrem'), {type:'bar',
+      data:{labels:['Ingresos','Premios pagados'],datasets:[{data:[j.ingresos_brutos,j.premios_pagados_total]}]},
+      options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}} });
+  }
+
+  // Banco
+  async function cargarBanco(){
+    const qs = new URLSearchParams({desde:$('#f-desde').value,hasta:$('#f-hasta').value}).toString();
+    const r = await fetch('/api/banco/movimientos?'+qs);
+    const j = await r.json();
+    const tb = $('#tbBanco'); tb.innerHTML='';
+    const items = j.items || []; bancoCache = items;
+    if(items.length===0){ tb.innerHTML='<tr><td colspan="7" class="muted">Sin movimientos en el período.</td></tr>'; return; }
+    items.forEach(m=>{
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${m.fecha||''}</td>
+        <td>${(m.tipo||'').toUpperCase()}</td>
+        <td class="money">${money(m.monto)}</td>
+        <td style="text-align:left">${m.referencia||''}</td>
+        <td>${compLink(m.comprobante)}</td>
+        <td>${m.locked?'Bloqueado':'Editable'}</td>
+        <td>${m.locked?'—':`<button class="btn btn-ghost" data-delb="${m.id}"><i class="bi bi-trash"></i></button>`}</td>`;
+      tb.appendChild(tr);
+    });
+    $$('button[data-delb]').forEach(b=>{
+      b.onclick = async ()=>{
+        if(!confirm('¿Eliminar movimiento del banco?')) return;
+        const r = await fetch('/api/banco/movimientos/'+b.dataset.delb,{method:'DELETE'});
+        const x = await r.json();
+        if(x.ok) cargarBanco(); else alert(x.error||'No se pudo eliminar');
+      };
+    });
+  }
+
+  // Depósito
+  $('#frmDeposito').addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    $('#b-monto-confirm').value = $('#b-monto').value;
+    const fd = new FormData(e.target);
+    const r = await fetch('/api/banco/deposito', {method:'POST', body:fd});
+    const j = await r.json();
+    if(j.ok){ e.target.reset(); $('#b-fecha').value=today; cargarBanco(); cargarResumen(); }
+    else{ alert(j.error || 'Error registrando el depósito'); }
+  });
+
+  // Gastos
+  function agruparPorDia(items){
+    const map={}; items.forEach(x=>{ (map[x.fecha]=map[x.fecha]||[]).push(x); });
+    const order = Object.keys(map).sort();
+    return {labels:order,values:order.map(f=>map[f].reduce((s,g)=>s+Number(g.monto||0),0))};
+  }
+  async function cargarGastos(){
+    const qs = new URLSearchParams({desde:$('#gx-desde').value,hasta:$('#gx-hasta').value}).toString();
+    const r = await fetch('/api/gastos?'+qs); const j = await r.json();
+    const tb = $('#tbGastos'); tb.innerHTML=''; const items = j.items||[]; gastosCache = items;
+    if(items.length===0){ tb.innerHTML='<tr><td colspan="7" class="muted">Sin gastos en el rango.</td></tr>'; }
+    else{
+      items.forEach(g=>{
+        const tr=document.createElement('tr');
+        tr.innerHTML = `
+          <td>${g.fecha||''}</td>
+          <td>${g.categoria||''}</td>
+          <td><span class="pill ${g.medio}">${g.medio}</span></td>
+          <td class="money">${money(g.monto)}</td>
+          <td style="text-align:left">${g.descripcion||''}</td>
+          <td>${compLink(g.comprobante)}</td>
+          <td><button class="btn btn-ghost" data-del="${g.id}"><i class="bi bi-trash"></i></button></td>`;
+        tb.appendChild(tr);
+      });
+      $$('button[data-del]').forEach(b=>{
+        b.onclick = async ()=>{
+          if(!confirm('¿Eliminar gasto?')) return;
+          const r = await fetch('/api/gastos/'+b.dataset.del,{method:'DELETE'});
+          const x = await r.json();
+          if(x.ok){ cargarGastos(); cargarResumen(); }
+        };
+      });
+    }
+    const ag = agruparPorDia(items);
+    chGastosDia && chGastosDia.destroy();
+    chGastosDia = new Chart($('#chGastosDia'), {type:'bar',
+      data:{labels:ag.labels,datasets:[{data:ag.values}]},
+      options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}} });
+  }
+
+  // Alta de gasto (solo hoy)
+  $('#frmGasto').addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    if($('#g-fecha').value !== today){ alert('Los gastos solo se pueden registrar el día actual.'); return; }
+    $('#g-monto-confirm').value = $('#g-monto').value;
+    const fd = new FormData(e.target);
+    const r = await fetch('/api/gastos', {method:'POST', body:fd});
+    const j = await r.json();
+    if(j.ok){ e.target.reset(); $('#g-fecha').value=today; cargarGastos(); cargarResumen(); }
+    else{ alert(j.error || 'Error guardando gasto'); }
+  });
+
+  // Vendedores: curvas
+  function lineChart(el, labels, data, color){
+    return new Chart(el,{type:'line',
+      data:{labels, datasets:[{data, borderColor:color, backgroundColor:color+'33', tension:.35, fill:true, pointRadius:3}]},
+      options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}}});
+  }
+  async function cargarVendedoresCurvas(){
+    const qs = new URLSearchParams({desde:$('#f-desde').value,hasta:$('#f-hasta').value}).toString();
+    let items=null;
+    try{ const rx=await fetch('/api/contabilidad/vendedores_ranking?'+qs); if(rx.ok){ const j=await rx.json(); items=j.items||null; } }catch{}
+    if(!items){
+      try{
+        const [rv,rd]=await Promise.all([fetch('/api/contabilidad/ventas-vendedores?'+qs),fetch('/api/contabilidad/devueltos-vendedores?'+qs)]);
+        if(rv.ok && rd.ok){
+          const jv=await rv.json(), jd=await rd.json(), map={};
+          (jv.items||[]).forEach(x=>{ map[x.vendedor]=map[x.vendedor]||{vendedor:x.vendedor,vendidos:0,devueltos:0}; map[x.vendedor].vendidos=+x.vendidos||0; });
+          (jd.items||[]).forEach(x=>{ map[x.vendedor]=map[x.vendedor]||{vendedor:x.vendedor,vendidos:0,devueltos:0}; map[x.vendedor].devueltos=+x.devueltos||0; });
+          items=Object.values(map);
+        }
+      }catch{}
+    }
+    if(!items || !items.length){ $('#cardsVendedores').style.display='none'; return; }
+    $('#cardsVendedores').style.display='grid';
+    const topV=[...items].sort((a,b)=>(b.vendidos||0)-(a.vendidos||0)).slice(0,12);
+    const topD=[...items].sort((a,b)=>(b.devueltos||0)-(a.devueltos||0)).slice(0,12);
+    chCurvaVentas && chCurvaVentas.destroy();
+    chCurvaDevueltos && chCurvaDevueltos.destroy();
+    chCurvaVentas   = lineChart($('#chCurvaVentas'),   topV.map(x=>x.vendedor), topV.map(x=>x.vendidos||0),  '#10b981');
+    chCurvaDevueltos= lineChart($('#chCurvaDevueltos'),topD.map(x=>x.vendedor), topD.map(x=>x.devueltos||0),'#ef4444');
+  }
+
+  // ===== Modal =====
+  const mb = $('#mb'), mtitle=$('#mtitle'), mbody=$('#mbody'), mfoot=$('#mfoot');
+  $('#mclose').onclick = ()=> mb.style.display='none';
+  mb.addEventListener('click', e=>{ if(e.target===mb) mb.style.display='none'; });
+
+  function openModal(title, html, foot=''){ mtitle.textContent=title; mbody.innerHTML=html; mfoot.textContent=foot||''; mb.style.display='flex'; }
+  function tabla(items, cols){
+    const th = cols.map(c=>`<th>${c[0]}</th>`).join('');
+    const rows = items.map(it=>'<tr>'+cols.map(([_,fn])=>`<td>${fn(it)}</td>`).join('')+'</tr>').join('');
+    return `<div style="overflow:auto"><table><thead><tr>${th}</tr></thead><tbody>${rows || `<tr><td colspan="${cols.length}" class="muted">Sin datos.</td></tr>`}</tbody></table></div>`;
+  }
+
+  async function openModalForKey(key){
+    const j = resumenCache||{}; if(!j.rango) return;
+    const rango = `Rango: ${j.rango.desde} → ${j.rango.hasta}`;
+
+    // --- GASTOS ---
+    if(key==='gastos_total' || key==='sueldos_total'){
+      if(!gastosCache.length){ await cargarGastos(); }
+      const soloSueldos = key==='sueldos_total';
+      const data = soloSueldos ? gastosCache.filter(x=>(x.categoria||'').toLowerCase()==='sueldo') : gastosCache;
+      const cols = [
+        ['Fecha', x=>x.fecha||''],
+        ['Categoría', x=>x.categoria||''],
+        ['Medio', x=>`<span class="pill ${x.medio}">${x.medio}</span>`],
+        ['Monto', x=>`<span class="money">${money(x.monto)}</span>`],
+        ['Descripción', x=>x.descripcion||''],
+        ['Comp', x=>compLink(x.comprobante)]
+      ];
+      const tot = data.reduce((s,x)=>s+Number(x.monto||0),0);
+      openModal(soloSueldos?'Detalle de sueldos':'Detalle de gastos', tabla(data, cols),
+        `${rango} — Total: ${money(tot)}`);
+      return;
+    }
+
+    // --- PREMIOS ---
+    if(key==='premios_pagados_total'){
+      const items = premiosPagadosCache||[];
+      const cols = [
+        ['Fecha sorteo', x=>x.fecha_sorteo||''],
+        ['Figura', x=>x.figura||''],
+        ['Boleto', x=>x.boleto||''],
+        ['Ganador', x=>x.ganador||x.ganador_nombre||''],
+        ['Premio', x=>`<span class="money">${money(x.premio)}</span>`],
+        ['Pago', x=>x.fecha_pago||''],
+        ['Recibo', x=>x.recibo_id||'']
+      ];
+      openModal('Premios pagados', tabla(items, cols), `${rango} — Total pagado: ${money(j.premios_pagados_total)}`);
+      return;
+    }
+    if(key==='premios_por_caducar'){
+      try{
+        const qs = new URLSearchParams({desde:j.rango.desde,hasta:j.rango.hasta}).toString();
+        const r = await fetch('/api/premios/por-caducar?'+qs);
+        if(r.ok){
+          const x = await r.json();
+          const cols = [['Fecha sorteo',y=>y.fecha_sorteo||''],['Figura',y=>y.figura||''],['Boleto',y=>y.boleto||''],['Caduca',y=>y.fecha_caduca||''],['Premio',y=>`<span class="money">${money(y.premio)}</span>`]];
+          openModal('Premios por caducar', tabla(x.items||[], cols), `${rango} — Cantidad: ${(x.items||[]).length}`);
+          return;
+        }
+      }catch{}
+      openModal('Premios por caducar', `<p class="muted">No hay detalle disponible. KPI: <strong>${j.premios_por_caducar}</strong>.</p>`, rango);
+      return;
+    }
+
+    // --- SALDOS ---
+    if(key==='saldo_banco'){
+      const cols=[['Fecha',m=>m.fecha||''],['Tipo',m=>(m.tipo||'').toUpperCase()],['Monto',m=>`<span class="money">${money(m.monto)}</span>`],['Referencia',m=>m.referencia||''],['Comprobante',m=>compLink(m.comprobante)],['Estado',m=>m.locked?'Bloqueado':'Editable']];
+      openModal('Movimientos de banco', tabla(bancoCache, cols), `${rango} — Saldo banco: ${money(j.saldo_banco)}`);
+      return;
+    }
+    if(key==='saldo_caja'){
+      if(!gastosCache.length){ await cargarGastos(); }
+      const gastosCaja = gastosCache.filter(x=>x.medio==='caja').reduce((s,x)=>s+Number(x.monto||0),0);
+      const html = `
+        <p>Efectivo cobrado: <strong>${money(j.efectivo_cobrado)}</strong></p>
+        <p>Gastos pagados en caja (rango gastos): <strong>${money(gastosCaja)}</strong></p>
+        <hr>
+        <p><strong>Saldo estimado en caja = Efectivo cobrado − Gastos en caja</strong></p>
+        <h3 style="margin:6px 0">${money(j.efectivo_cobrado - gastosCaja)}</h3>`;
+      openModal('Detalle de saldo en caja', html, rango);
+      return;
+    }
+
+    // --- VENTAS / DEVUELTOS: ir a curvas ---
+    if(key==='boletos_vendidos' || key==='boletos_devueltos'){
+      $('#cardsVendedores').scrollIntoView({behavior:'smooth', block:'start'}); return;
+    }
+
+    // --- Otros KPIs: explicación y fórmula ---
+    const explicaciones = {
+      ingresos_brutos: `Suma de ventas brutas del período.`,
+      ganancia_vendedores: `Comisiones pagadas a vendedores (incluye extra-meta si aplica).`,
+      ganancia_empresa: `Ingresos brutos − Ganancia vendedores.`,
+      utilidad_neta: `Ganancia empresa − Premios pagados − Gastos − Sueldos.`,
+      boletos_impresos: `Total de boletos impresos dentro del rango.`,
+      premios_caducados: `Cantidad de premios caducados dentro del rango.`,
+      efectivo_cobrado: `Total cobrado en efectivo desde Caja.`,
+      transferencias_cobradas: `Total cobrado vía transferencia desde Caja.`
+    };
+    openModal('Detalle', `<p class="muted">${explicaciones[key]||'Valor del indicador'}.</p><p>Valor: <strong>${(typeof j[key]==='number')? money(j[key]): String(j[key])}</strong></p>`, rango);
+  }
+
+  async function cargarTodo(){
+    await Promise.all([cargarResumen(), cargarBanco(), cargarGastos(), cargarVendedoresCurvas()]);
+  }
+
+  cargarTodo();
+})();
+</script>
+</body>
+</html>

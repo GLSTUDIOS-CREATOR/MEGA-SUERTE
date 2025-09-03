@@ -1,0 +1,519 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>Escoger Figuras por Fecha | GL Bingo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  {% if url_for %}<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">{% endif %}
+  <style>
+    :root{
+      /* ===== Paleta GL Studios (oscuro elegante + acentos claros) ===== */
+      --bg:#0b1220; --bg2:#0c1529;
+      --panel:#0f1629; --panel2:#121a31;
+      --line:#1b2a48; --line-soft:#21355e;
+      --text:#e9eefb; --muted:#a7b7d2; --soft:#d7e2f7;
+
+      --brand:#18c49c; --brand-2:#0fb28d; --brand-3:#0a8b72;
+      --accent:#7aa2ff;
+      --danger:#ff5e66; --danger-2:#ff7b82;
+
+      --sidebar:#17243f; --sidebar-w:260px;
+      --shadow:0 18px 40px rgba(3,10,22,.35);
+
+      --red:#ff0000; --red-b:#b71d1d;
+
+      /* Topbar + banner claros para contraste */
+      --topbar-bg1: rgba(255,255,255,.96);
+      --topbar-bg2: rgba(255,255,255,.90);
+      --topbar-text:#0b1220;
+      --topbar-chip-bg:#ffffff; --topbar-chip-text:#0b1220; --topbar-chip-border:rgba(8,17,35,.12);
+
+      --banner-bg1:#ffffff; --banner-bg2:#f6f8fc;
+      --banner-text:#0b1220; --banner-border:rgba(8,17,35,.10);
+    }
+
+    :root, input, select, textarea, button { color-scheme: dark; }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      background:
+        radial-gradient(1200px 800px at -10% -10%, #132448 0%, rgba(19,36,72,0) 55%),
+        radial-gradient(900px 600px at 110% 10%, rgba(26,197,156,.14) 0%, rgba(26,197,156,0) 60%),
+        linear-gradient(180deg, var(--bg) 0%, var(--bg2) 100%);
+      color:var(--text);
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* ===== Layout ===== */
+    .app{display:flex; min-height:100vh}
+    .sidebar{
+      width:var(--sidebar-w); background:var(--sidebar);
+      border-right:1px solid #0e1528; color:#fff; position:sticky; top:0; height:100vh;
+      box-shadow:var(--shadow); overflow-y:auto
+    }
+    .sb-head{padding:16px 18px; text-align:center; border-bottom:1px solid #0e1528}
+    .sb-logo{width:56px;height:56px;border-radius:12px;object-fit:cover;box-shadow:0 6px 18px rgba(0,0,0,.35)}
+    .sb-title{margin:10px 0 0; font-weight:900; letter-spacing:.4px}
+    .nav{padding:12px}
+    .nav a{
+      display:flex; align-items:center; gap:12px; padding:11px 12px; border-radius:12px;
+      color:#e6eefc; text-decoration:none; font-weight:700; transition:.16s; border:1px solid transparent
+    }
+    .nav a:hover{background:#1b2b52; border-color:#2a3b66}
+    .nav a.active{background:#152747; border:1px solid #2a3b66}
+    .icon{width:20px; text-align:center}
+
+    .main{flex:1; display:flex; flex-direction:column; min-width:0}
+
+    /* ===== Topbar clara ===== */
+    .topbar{
+      display:flex; align-items:center; justify-content:space-between;
+      padding:14px 22px;
+      background:linear-gradient(180deg, var(--topbar-bg1) 0%, var(--topbar-bg2) 100%);
+      border-bottom:1px solid rgba(8,17,35,.12);
+      color:var(--topbar-text);
+      position:sticky; top:0; z-index:10; backdrop-filter: blur(6px);
+      box-shadow: 0 10px 24px rgba(2,10,26,.08);
+    }
+    .chip{padding:6px 12px; border-radius:999px; background:#17223f; color:#cbd5e1; font-weight:800; border:1px solid #1f2c4d}
+    .topbar .chip{
+      background:var(--topbar-chip-bg); color:var(--topbar-chip-text);
+      border:1px solid var(--topbar-chip-border)
+    }
+    .chip.small{padding:4px 10px; font-size:12px}
+
+    .content{max-width:1240px; margin:26px auto; padding:0 20px; width:100%}
+
+    /* ===== Banner claro ===== */
+    .banner{
+      display:flex; align-items:center; justify-content:center; gap:10px;
+      background:linear-gradient(180deg, var(--banner-bg1) 0%, var(--banner-bg2) 100%);
+      color:var(--banner-text);
+      border:1px solid var(--banner-border);
+      border-radius:14px; padding:10px 16px; margin-bottom:18px;
+      box-shadow: 0 14px 26px rgba(2,10,26,.06);
+      font-weight:900; letter-spacing:.2px
+    }
+
+    /* ===== Cards simétricas ===== */
+    .grid{display:grid; grid-template-columns: 1fr 1fr; gap:22px; align-items:stretch}
+    @media (max-width:1100px){ .grid{grid-template-columns:1fr} }
+
+    .card{
+      background:radial-gradient(120% 100% at 0% 0%, rgba(255,255,255,.03) 0%, rgba(255,255,255,0) 40%), var(--panel);
+      border:1px solid var(--line);
+      border-radius:18px; padding:22px; box-shadow:var(--shadow);
+      display:flex; flex-direction:column; min-height:620px;
+    }
+    .card h3{margin:0 0 14px; font-size:18px; color:#e5efff; text-align:center; letter-spacing:.3px}
+    .stack{display:flex; flex-direction:column; gap:16px}
+
+    /* ===== Form ===== */
+    .row{display:grid; grid-template-columns: 140px 1fr; gap:12px; align-items:center}
+    .row--actions{display:flex; gap:10px; justify-content:flex-end}
+    .row--inline{display:flex; gap:12px; align-items:center; flex-wrap:wrap}
+    .label{font-weight:900; color:#dce6ff; text-align:right}
+
+    .input, select{
+      padding:12px 14px; border:1px solid var(--line-soft); border-radius:12px;
+      background:#0f1a33; color:#e8eefc; outline:none; min-height:44px; transition:.15s; width:100%;
+      box-shadow: inset 0 0 0 999px rgba(255,255,255,0);
+    }
+    .input:focus, select:focus{border-color:#2b4b8e; box-shadow:0 0 0 3px rgba(122,162,255,.18)}
+    .input::-webkit-calendar-picker-indicator{filter:invert(1)}
+    select{min-width:280px}
+
+    .btn{
+      padding:12px 14px; border-radius:12px; border:1px solid transparent; cursor:pointer;
+      font-weight:900; text-decoration:none; display:inline-flex; align-items:center; gap:8px; transition:.16s
+    }
+    .btn:hover{transform: translateY(-1px)}
+    .btn:active{transform: translateY(0)}
+    .btn:disabled{opacity:.55; cursor:not-allowed}
+    .btn-primary{background:linear-gradient(180deg,var(--brand) 0%, var(--brand-2) 100%); color:#03231f; box-shadow:0 6px 18px rgba(24,196,156,.2)}
+    .btn-primary:hover{filter:saturate(1.08)}
+    .btn-secondary{background:#1a2546; color:#e8eefc; border:1px solid #2a3a68}
+    .btn-danger{background:linear-gradient(180deg,var(--danger-2) 0%, var(--danger) 100%); color:#2b0f12}
+    .btn-ghost{background:transparent; color:#9fb5ff; border:1px solid #2b3b69}
+
+    /* ===== Fecha con icono ===== */
+    .date-field{position:relative; display:flex; align-items:center}
+    .date-field input[type="date"]{ padding-left:46px; min-width:230px; }
+    .date-field input[type="date"]::-webkit-calendar-picker-indicator{ opacity:0; width:0; height:0; pointer-events:none }
+    .date-btn{
+      position:absolute; left:10px; width:24px; height:24px; border:0; border-radius:8px;
+      display:inline-flex; align-items:center; justify-content:center; background:transparent; color:#fff; cursor:pointer;
+    }
+    .date-placeholder{ position:absolute; left:46px; color:var(--muted); pointer-events:none; opacity:.88; }
+    .date-field.has-value .date-placeholder{opacity:0}
+
+    /* ===== Preview ===== */
+    .preview-box{
+      border:1px dashed var(--line); border-radius:14px; padding:16px; min-height:360px;
+      display:flex; align-items:center; justify-content:center;
+      background:linear-gradient(180deg, rgba(255,255,255,.03) 0%, rgba(255,255,255,.015) 100%);
+    }
+    .bingo-head{display:grid; grid-template-columns:repeat(5,64px); gap:10px; justify-content:center; margin:0 0 14px}
+    .bingo-head .h{
+      width:64px;height:36px; display:flex; align-items:center; justify-content:center;
+      background:#122038; border:1px solid #223051; border-radius:12px; font-weight:900; letter-spacing:2px
+    }
+    .grid-board{display:grid; grid-template-columns:repeat(5,64px); grid-template-rows:repeat(5,64px); gap:10px; justify-content:center}
+    .cell{width:64px;height:64px;border-radius:14px;border:2px solid var(--line); background:#fff; color:#0b1220; display:flex; align-items:center; justify-content:center; font-weight:900}
+    .cell.active{background:var(--red); color:#fff; border-color:var(--red-b)}
+    .cell.locked{background:#e9eef6; color:#9aa3b2; border-style:dashed}
+    .empty{color:var(--muted); text-align:center}
+
+    /* ===== Resumen ===== */
+    .totalbar{
+      margin-top:auto; background:linear-gradient(180deg,#0c1834 0%, #0a142c 100%);
+      border:1px solid #203059; padding:12px 16px; border-radius:14px; display:flex; align-items:center; gap:12px
+    }
+    .kpi{font-weight:900}
+    .kpi .num{font-size:22px; color:#e7fff7}
+    .note{font-size:12px; color:#8ea0c2; text-align:center}
+
+    /* ===== Lista derecha ===== */
+    .list{display:flex; flex-direction:column; gap:12px; overflow:auto}
+    .item{
+      display:grid; grid-template-columns:1fr 150px 96px 96px; gap:12px; align-items:center;
+      border:1px solid var(--line-soft); background:rgba(10,16,30,.55); border-radius:14px; padding:12px
+    }
+    .dot{width:10px;height:10px;border-radius:999px;background:var(--brand); display:inline-block; margin-right:6px; box-shadow:0 0 0 3px rgba(31,197,156,.18)}
+    .price{display:flex; align-items:center; gap:8px; justify-content:flex-end}
+    .price .prefix{padding:8px 10px; background:#0b152e; border:1px solid #22345f; border-radius:10px}
+    .price input{
+      width:110px; text-align:right; padding:10px 12px; border-radius:10px;
+      border:1px solid #2a3a68; background:#0f1a33; color:#eafff7
+    }
+    .price input::-webkit-outer-spin-button,
+    .price input::-webkit-inner-spin-button{ -webkit-appearance: none; margin: 0; }
+
+    /* ===== Foco accesible ===== */
+    a:focus, button:focus, input:focus, select:focus{
+      outline: 2px solid rgba(122,162,255,.55);
+      outline-offset: 2px;
+    }
+
+    @media (prefers-reduced-motion: reduce){
+      *{transition:none !important}
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sb-head">
+        <img class="sb-logo" src="{{ url_for('static', filename='img/logo.png') }}" alt="GL Studios">
+        <div class="sb-title">GL Bingo</div>
+      </div>
+      <nav class="nav">
+        <a href="/dashboard"><span class="icon">🏠</span> Dashboard</a>
+        <a href="/usuarios"><span class="icon">🙂</span> Usuarios <span class="icon">💼</span></a>
+        <a href="/juego"><span class="icon">🎲</span> Juego</a>
+        <a href="/contabilidad"><span class="icon">📊</span> Contabilidad</a>
+        <a href="/vendedores"><span class="icon">🧾</span> Vendedores</a>
+        <a href="/asignar-planillas"><span class="icon">📄</span> Asignar Planillas</a>
+        <a href="/impresion"><span class="icon">🖨️</span> Impresión de Boletos</a>
+        <a href="/cobro"><span class="icon">💵</span> Cobro de Caja</a>
+        <a href="/sorteos"><span class="icon">🎟️</span> Sorteo</a>
+        <a href="/figuras/crear"><span class="icon">🟩</span> Crear Figuras</a>
+        <a href="/escoger-figuras" class="active"><span class="icon">🟦</span> Escoger Figuras</a>
+        <a href="/boletin"><span class="icon">📝</span> Boletín</a>
+      </nav>
+    </aside>
+
+    <!-- Main -->
+    <section class="main">
+      <div class="topbar">
+        <div style="font-weight:900; font-size:18px">Escoger Figuras por Fecha</div>
+        <div class="row--inline">
+          <span class="chip">GL STUDIOS</span>
+          <span class="chip">{{ session.get('usuario','Invitado') }}</span>
+        </div>
+      </div>
+
+      <main class="content">
+        <div class="banner">
+          <span>Figuras guardadas para</span> <strong id="headlineDate">—</strong>
+        </div>
+
+        {% with msgs = get_flashed_messages(with_categories=true) %}
+          {% if msgs %}
+            <div style="margin-bottom:16px;">
+              {% for cat, msg in msgs %}
+                <div style="padding:12px 14px;border-radius:12px;margin-bottom:8px; border:1px solid var(--banner-border); background:rgba(255,255,255,.06); color:#0b1220">{{ msg }}</div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+
+        <div class="grid">
+          <!-- Columna izquierda -->
+          <div class="card">
+            <h3>Plan del día</h3>
+            <div class="stack" style="flex:1">
+              <form id="formSel" method="POST" action="/escoger-figuras/guardar" class="stack" style="flex:1">
+                <input type="hidden" name="seleccion" id="seleccionField" value="">
+
+                <div class="row">
+                  <div class="label">Fecha</div>
+                  <div class="row--inline">
+                    <div class="date-field" id="dateField">
+                      <button type="button" class="date-btn" id="btnCal" title="Abrir calendario" aria-label="Abrir calendario">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                          <rect x="3" y="4" width="18" height="17" rx="3" stroke="white" stroke-width="1.8"/>
+                          <path d="M8 2v4M16 2v4" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+                          <path d="M3 9h18" stroke="white" stroke-width="1.8" />
+                        </svg>
+                      </button>
+                      <input id="fecha" name="fecha" class="input" type="date" value="{{ fecha_inicial or '' }}">
+                      <span class="date-placeholder">dd/mm/aaaa</span>
+                    </div>
+                    <span id="fechaNice" class="chip small"></span>
+                    <a class="btn btn-secondary" href="/figuras/crear">➕ Nueva figura</a>
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="label">Figura</div>
+                  <div class="row--inline" style="width:100%">
+                    <select id="figSelect" style="flex:1; min-width:300px">
+                      <option value="" selected disabled>— Selecciona una figura —</option>
+                    </select>
+                    <button type="button" class="btn btn-primary" id="btnAgregar" disabled>Agregar</button>
+                  </div>
+                </div>
+
+                <div class="preview-box" id="preview">
+                  <div class="empty">Selecciona una figura para ver su forma. Luego agrégala y asigna su valor.</div>
+                </div>
+
+                <div class="totalbar">
+                  <div class="kpi">Resumen:&nbsp;<span id="resumenLbl" class="num">0 figuras · Total $0.00</span></div>
+                  <div class="row--actions" style="margin-left:auto">
+                    <button type="button" id="btnLimpiar" class="btn btn-ghost">Limpiar lista</button>
+                    <button type="submit" class="btn btn-primary" id="btnGuardar" disabled>Guardar para la fecha</button>
+                  </div>
+                </div>
+              </form>
+
+              <div class="note">Todo alineado y simétrico: edita los valores en la lista de la derecha.</div>
+            </div>
+          </div>
+
+          <!-- Columna derecha -->
+          <div class="card">
+            <h3>Figuras seleccionadas</h3>
+            <div id="selList" class="list" style="flex:1">
+              <div class="empty" id="emptySel" style="text-align:center; margin:auto">Aún no hay figuras para esta fecha.</div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </section>
+  </div>
+
+  <script>
+    /* ===== Utilidades BINGO y helpers ===== */
+    const letters = ['B','I','N','G','O'];
+    const defaultPos = Array.from({length:25},(_,k)=> letters[k%5] + (Math.floor(k/5)+1));
+    const $ = sel => document.querySelector(sel);
+
+    function buildBoard(container, colores, pos){
+      container.innerHTML = `
+        <div class="stack" style="width:100%">
+          <div class="bingo-head">
+            <div class="h">B</div><div class="h">I</div><div class="h">N</div><div class="h">G</div><div class="h">O</div>
+          </div>
+          <div class="grid-board" id="gridPrev"></div>
+        </div>`;
+      const g = container.querySelector('#gridPrev');
+      for(let r=1;r<=5;r++){
+        for(let c=0;c<5;c++){
+          const idx = (r-1)*5 + c;
+          const code = (pos?.[idx]) || (letters[c] + r);
+          const color = (colores?.[idx] || '#FFFFFF').toUpperCase();
+          const d = document.createElement('div');
+          d.className = 'cell' + ((color==='#FF0000' && code!=='N3') ? ' active':'') + (code==='N3'?' locked':'');
+          d.textContent = code; g.appendChild(d);
+        }
+      }
+    }
+
+    /* ===== Referencias ===== */
+    const selectEl = $('#figSelect');
+    const previewEl = $('#preview');
+    const btnAgregar = $('#btnAgregar');
+    const btnGuardar = $('#btnGuardar');
+    const btnLimpiar = $('#btnLimpiar');
+    const fechaEl = $('#fecha');
+    const fechaNice = $('#fechaNice');
+    const dateField = $('#dateField');
+    const headlineDate = $('#headlineDate');
+    const resumenLbl = $('#resumenLbl');
+    const selList = $('#selList');
+    const emptySel = $('#emptySel');
+    const btnCal = $('#btnCal');
+
+    /* ===== Estado ===== */
+    let FIGS = [];      // catálogo
+    let SELECTED = [];  // [{nombre, valor}]
+
+    /* ===== Cargar catálogo desde XML ===== */
+    async function loadXML(){
+      try{
+        const res = await fetch('{{ url_for("static", filename="db/datos_figuras.xml") }}', {cache:'no-store'});
+        if(!res.ok) throw new Error('No se pudo cargar datos_figuras.xml');
+        const txt = await res.text();
+        const xml = new DOMParser().parseFromString(txt, "application/xml");
+        const nodes = [...xml.getElementsByTagName('figura')];
+        FIGS = nodes.map(n=>{
+          const nombre = n.getAttribute('nombre')||'';
+          const colores = Array(25).fill('#FFFFFF');
+          const pos = defaultPos.slice();
+          for(let i=1;i<=25;i++){
+            const cel = n.querySelector(`celda[idx="${i}"]`);
+            if(cel){
+              colores[i-1] = (cel.getAttribute('color')||'#FFFFFF').toUpperCase();
+              pos[i-1] = cel.getAttribute('pos') || defaultPos[i-1];
+            }
+          }
+          const n3 = pos.indexOf('N3'); if(n3>=0) colores[n3] = '#FFFFFF';
+          return {nombre, colores, pos};
+        });
+        FIGS.sort((a,b)=> a.nombre.localeCompare(b.nombre, undefined, {sensitivity:'base'}));
+        FIGS.forEach(f=>{
+          const o = document.createElement('option');
+          o.value = f.nombre; o.textContent = f.nombre;
+          selectEl.appendChild(o);
+        });
+      }catch(e){
+        previewEl.innerHTML = '<div class="empty">No se pudo cargar el catálogo de figuras.</div>';
+      }
+    }
+
+    /* ===== Fecha bonita + placeholder ===== */
+    function pretty(iso){
+      if(!iso) return '';
+      const dt = new Date(iso + 'T00:00:00');
+      return dt.toLocaleDateString('es-ES', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+    }
+    function refreshFechaUI(){
+      const v = fechaEl.value;
+      dateField.classList.toggle('has-value', !!v);
+      const nice = pretty(v);
+      fechaNice.textContent = v ? nice : '';
+      headlineDate.textContent = v ? nice : '—';
+      btnGuardar.disabled = !v || SELECTED.length===0;
+    }
+    fechaEl.addEventListener('input', refreshFechaUI);
+    fechaEl.addEventListener('change', ()=>{ refreshFechaUI(); cargarParaFecha(fechaEl.value); });
+    btnCal.addEventListener('click', ()=>{ if (fechaEl.showPicker) fechaEl.showPicker(); else fechaEl.focus(); });
+
+    /* ===== Preview figura ===== */
+    selectEl.addEventListener('change', ()=>{
+      const fig = FIGS.find(x=> x.nombre === selectEl.value);
+      btnAgregar.disabled = !fig;
+      if(!fig){
+        previewEl.innerHTML = '<div class="empty">Selecciona una figura…</div>';
+        return;
+      }
+      buildBoard(previewEl, fig.colores, fig.pos);
+    });
+
+    /* ===== Lista seleccionada ===== */
+    function findIndexByName(name){ return SELECTED.findIndex(it => it.nombre === name); }
+    function totalValor(){ return SELECTED.reduce((a,b)=> a + (parseFloat(b.valor)||0), 0); }
+
+    function renderSel(){
+      selList.innerHTML = '';
+      const total = totalValor();
+      resumenLbl.textContent = `${SELECTED.length} figuras · Total $${total.toFixed(2)}`;
+
+      if(SELECTED.length === 0){
+        emptySel.style.display='';
+        selList.appendChild(emptySel);
+        btnGuardar.disabled = true;
+        return;
+      }
+      emptySel.style.display='none';
+      btnGuardar.disabled = !fechaEl.value;
+
+      SELECTED.forEach(({nombre, valor})=>{
+        const row = document.createElement('div');
+        row.className = 'item';
+        row.innerHTML = `
+          <div><span class="dot"></span><strong>${nombre}</strong></div>
+          <div class="price">
+            <span class="prefix">$</span>
+            <input type="number" min="0" step="0.01" value="${(parseFloat(valor)||0).toFixed(2)}" data-nombre="${nombre}">
+          </div>
+          <a class="btn btn-secondary" href="/figuras/crear?nombre=${encodeURIComponent(nombre)}">Editar</a>
+          <button class="btn btn-danger" type="button">Quitar</button>
+        `;
+        const input = row.querySelector('input');
+        input.addEventListener('input', ()=>{
+          const i = findIndexByName(nombre);
+          if(i>=0){ SELECTED[i].valor = Math.max(0, parseFloat(input.value)||0); resumenLbl.textContent = `${SELECTED.length} figuras · Total $${totalValor().toFixed(2)}`; }
+        });
+        input.addEventListener('blur', ()=>{ input.value = (parseFloat(input.value)||0).toFixed(2); });
+        row.querySelector('button').onclick = ()=>{
+          const i = findIndexByName(nombre);
+          if(i>=0){ SELECTED.splice(i,1); renderSel(); }
+        };
+        selList.appendChild(row);
+      });
+    }
+
+    $('#btnAgregar').addEventListener('click', ()=>{
+      const name = selectEl.value;
+      if(!name) return;
+      if(findIndexByName(name) === -1){ SELECTED.push({nombre:name, valor:0}); }
+      renderSel();
+    });
+
+    $('#btnLimpiar').addEventListener('click', ()=>{
+      SELECTED = []; renderSel(); refreshFechaUI();
+    });
+
+    /* ===== Cargar/guardar por fecha ===== */
+    async function cargarParaFecha(fecha){
+      if(!fecha){ SELECTED = []; renderSel(); return; }
+      try{
+        const res = await fetch(`/api/figuras-por-fecha?fecha=${encodeURIComponent(fecha)}`);
+        const data = await res.json();
+        let arr = (data && data.figuras) ? data.figuras : [];
+        SELECTED = arr.map(x => typeof x === 'string' ? ({nombre:x, valor:0}) : ({nombre:x.nombre, valor: parseFloat(x.valor)||0}));
+        renderSel();
+      }catch{
+        SELECTED = []; renderSel();
+      }
+    }
+
+    document.getElementById('formSel').addEventListener('submit', (e)=>{
+      if(!fechaEl.value){ e.preventDefault(); alert('Selecciona una fecha.'); return; }
+      document.getElementById('seleccionField').value = JSON.stringify(SELECTED);
+    });
+
+    /* ===== Init ===== */
+    (function initFromServer(){
+      const fechaInicial = "{{ fecha_inicial or '' }}";
+      const pre = {{ (preseleccion or [])|tojson }};
+      if(fechaInicial){
+        fechaEl.value = fechaInicial;
+        SELECTED = (pre||[]).map(x => typeof x === 'string' ? ({nombre:x, valor:0}) : ({nombre:x.nombre, valor: parseFloat(x.valor)||0}));
+      }
+      renderSel();
+      refreshFechaUI();
+      loadXML().then(()=>{
+        const f = fechaEl.value;
+        if(f && {{ (preseleccion|length or 0) }} === 0){ cargarParaFecha(f); }
+      });
+    })();
+  </script>
+</body>
+</html>

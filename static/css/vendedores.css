@@ -1,0 +1,151 @@
+body {
+    background: #f6f7fb;
+    min-height: 100vh;
+    font-family: 'Montserrat', Arial, sans-serif;
+}
+.container-main {
+    max-width: 970px;
+    margin: 40px auto 0 auto;
+    background: #fff;
+    border-radius: 28px;
+    box-shadow: 0 8px 36px #1e93ce19;
+    padding: 36px 42px 22px 42px;
+}
+.logo-center {
+    text-align: center;
+    margin-bottom: 10px;
+}
+.logo-center img {
+    height: 60px;
+    border-radius: 10px;
+    background: #fff;
+    box-shadow: 0 2px 12px #50b4e715;
+}
+.titulo-main {
+    font-size: 2.4rem;
+    font-weight: 800;
+    color: #213455;
+    text-align: center;
+    margin-bottom: 26px;
+    letter-spacing: 1px;
+}
+.form-add {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 20px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+.form-add input {
+    border: 1.3px solid #d6dbe6;
+    border-radius: 7px;
+    padding: 12px 13px;
+    font-size: 1.09rem;
+    width: 200px;
+    background: #f8fafc;
+    font-family: 'Montserrat', Arial, sans-serif;
+    transition: border 0.2s;
+}
+.form-add input:focus {
+    border: 1.3px solid #48a3e8;
+    outline: none;
+    background: #fff;
+}
+.btn-agregar {
+    background: linear-gradient(90deg, #2274b6 70%, #23bfae 100%);
+    color: #fff;
+    font-weight: 700;
+    border-radius: 8px;
+    border: none;
+    font-size: 1.07rem;
+    padding: 0 32px;
+    cursor: pointer;
+    transition: background 0.2s;
+    box-shadow: 0 1px 6px #b4cef344;
+    height: 48px;
+}
+.btn-agregar:hover {
+    background: linear-gradient(90deg, #165d95 60%, #159e91 100%);
+}
+.tabla-vendedores {
+    width: 100%;
+    border-radius: 13px;
+    border-collapse: collapse;
+    font-size: 1.09rem;
+    margin-bottom: 10px;
+    overflow: hidden;
+    background: #f8fafc;
+}
+.tabla-vendedores th, .tabla-vendedores td {
+    padding: 13px 12px;
+    text-align: left;
+}
+.tabla-vendedores thead {
+    background: #e6eaf4;
+    color: #223657;
+    font-size: 1.1rem;
+}
+.tabla-vendedores tbody tr:nth-child(even) {
+    background: #f2f4f9;
+}
+.tabla-vendedores tbody tr:nth-child(odd) {
+    background: #fff;
+}
+.tabla-vendedores tbody tr:hover {
+    background: #e4f2ff !important;
+}
+.btn-accion {
+    border: none;
+    background: none;
+    font-size: 1.15em;
+    cursor: pointer;
+    padding: 7px;
+    border-radius: 5px;
+    margin-right: 6px;
+}
+.btn-accion.eliminar {
+    color: #e74949;
+    background: #fff2f2;
+}
+.btn-accion.eliminar:hover {
+    background: #fadada;
+    color: #c00;
+}
+.back-link {
+    color: #2274b6;
+    font-weight: 500;
+    margin-left: 3px;
+    text-decoration: none;
+}
+.back-link:hover {
+    text-decoration: underline;
+}
+@media (max-width: 800px) {
+    .container-main { padding: 18px 4vw; }
+    .form-add input { width: 100px; }
+    .btn-agregar { width: 100%; }
+}
+@media (max-width: 560px) {
+    .titulo-main { font-size: 1.45rem; }
+    .container-main { padding: 10px 1vw; }
+}
+.input-editar-tabla {
+    width: 98%;
+    max-width: 120px;
+    padding: 6px 7px;
+    border: 1.3px solid #b5c3df;
+    border-radius: 6px;
+    font-size: 1rem;
+    background: #fff;
+    margin: 0;
+    box-sizing: border-box;
+    font-family: 'Montserrat', Arial, sans-serif;
+}
+.btn-accion.guardar,
+.btn-accion.cancelar {
+    padding: 6px 10px;
+    font-size: 1.1em;
+    margin-right: 2px;
+}
+.btn-accion.cancelar { color: #888 !important; background: none;}
+.btn-accion.guardar { color: #27b26a !important; background: none;}

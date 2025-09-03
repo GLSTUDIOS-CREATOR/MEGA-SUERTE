@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>Impresión | GL Bingo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#f6f8fc; --panel:#ffffff; --ink:#1b2240; --muted:#7b81a6;
+      --brand:#1c3faa; --brand-weak:#eaf0ff; --brand-weak-2:#eef4ff;
+      --accent:#0fb79a; --accent-weak:#e9fbf6;
+      --danger:#e43f4f; --danger-weak:#ffe9ec;
+      --ring:#e6e9f7; --ring-2:#d6dbfb;
+      --r:14px; --shadow:0 10px 28px rgba(27,34,64,.08);
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter, ui-sans-serif, system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;background:var(--bg);color:var(--ink)}
+    a{color:inherit;text-decoration:none}
+
+    .app{display:grid;grid-template-columns:260px 1fr;min-height:100vh}
+
+    /* Sidebar */
+    .sidebar{background:#111a33;color:#dfe6ff;display:flex;flex-direction:column}
+    .logo{display:flex;align-items:center;gap:12px;padding:18px 16px;border-bottom:1px solid rgba(255,255,255,.07)}
+    .logo img{width:44px;height:44px;border-radius:10px;background:#fff;padding:4px}
+    .logo .t{font-weight:900;letter-spacing:.3px}
+    .nav{list-style:none;margin:8px 8px 12px;padding:0}
+    .nav a{display:flex;align-items:center;gap:10px;padding:10px 12px;color:#c9d2ff;border-radius:10px;font-weight:700}
+    .nav a:hover{background:rgba(255,255,255,.08)}
+    .nav a.active{background:var(--accent);color:#0b2d27}
+    .logout{display:block;margin:8px;background:var(--danger);color:#fff;text-align:center;padding:10px;border-radius:10px;font-weight:900}
+
+    /* Main */
+    main{padding:22px}
+    .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+    .title{margin:0;font-size:1.8rem;font-weight:900;color:var(--brand)}
+    .who{display:flex;align-items:center;gap:10px}
+    .who img{width:36px;height:36px;border-radius:50%}
+
+    .cols{display:grid;grid-template-columns:1.1fr 1fr;gap:18px}
+    .card{background:var(--panel);border-radius:var(--r);box-shadow:var(--shadow)}
+    .card .hd{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--ring)}
+    .card .hd h3{margin:0;font-size:1.05rem}
+    .card .bd{padding:16px}
+
+    .step{display:flex;align-items:center;gap:8px;font-weight:900;color:var(--brand)}
+    .step .dot{width:22px;height:22px;border-radius:50%;display:grid;place-content:center;background:var(--brand);color:#fff;font-size:.8rem}
+
+    .grid{display:grid;gap:12px}
+    .grid.cols-2{grid-template-columns:1fr 1fr}
+    .grid.cols-3{grid-template-columns:repeat(3,1fr)}
+    label{font-size:.82rem;color:#6672a6;font-weight:800;margin-bottom:6px;display:block}
+    input,select{width:100%;padding:10px;border:1px solid var(--ring);border-radius:12px;background:#fff;font-weight:700;color:var(--ink)}
+    input[readonly]{background:#f5f7ff;color:#6973a6}
+    .help{font-size:.82rem;color:var(--muted);margin-top:6px}
+
+    .btn{display:inline-flex;align-items:center;gap:8px;border:none;border-radius:12px;padding:12px 16px;font-weight:900;cursor:pointer}
+    .btn-primary{background:var(--brand);color:#fff}
+    .btn-ghost{background:var(--brand-weak);color:var(--brand)}
+    .btn-accent{background:var(--accent);color:#07221c}
+
+    .note{background:var(--brand-weak-2);border:1px dashed var(--ring-2);color:#3a458a;border-radius:10px;padding:10px;display:flex;gap:8px;align-items:flex-start}
+
+    .preview{display:grid;grid-template-rows:auto 1fr auto;gap:10px;height:340px}
+    .preview .img{border:1px dashed var(--ring);border-radius:12px;display:flex;align-items:center;justify-content:center;background:#fafbff;min-height:160px}
+    .preview .img img{max-height:150px;max-width:100%}
+    .kv{display:grid;grid-template-columns:140px 1fr;gap:6px;font-size:.92rem}
+    .kv .k{color:#6c75a8;font-weight:800}
+    .kv .v{font-weight:900}
+
+    table{width:100%;border-collapse:collapse}
+    th,td{padding:10px 8px;text-align:center;border-bottom:1px solid var(--ring);font-size:.95rem}
+    thead{background:var(--danger-weak);color:#a51822}
+    .pill{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-size:.82rem;font-weight:900}
+    .pill-red{background:var(--danger-weak);color:#c01e29}
+    .pill-blue{background:#eef2ff;color:#3b45b1}
+    .pill-green{background:var(--accent-weak);color:#0b6e5d}
+
+    .history .hd h3{color:#b02b32}
+
+    /* Modal */
+    .modal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:50}
+    .modal .box{background:#fff;border-radius:14px;box-shadow:0 30px 60px rgba(0,0,0,.2);max-width:940px;width:92%}
+    .modal .box .hd{border-bottom:1px solid var(--ring)}
+    .modal .box .bd{max-height:70vh;overflow:auto}
+
+    @media (max-width:1100px){ .cols{grid-template-columns:1fr} .preview{height:auto} }
+    @media (max-width:900px){ .app{grid-template-columns:1fr} .sidebar{display:none} main{padding:12px} }
+  </style>
+</head>
+<body>
+<div class="app">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="logo">
+      <img src="{{ url_for('static', filename='img/logo.png') }}" alt="GL Bingo">
+      <div class="t">GL Bingo</div>
+    </div>
+    <ul class="nav">
+      <li><a href="/dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
+      <li><a href="/usuarios"><i class="bi bi-people-fill"></i> Usuarios</a></li>
+      <li><a href="/juego"><i class="bi bi-dice-5-fill"></i> Juego</a></li>
+      <li><a href="/contabilidad"><i class="bi bi-bar-chart-fill"></i> Contabilidad</a></li>
+      <li><a href="/vendedores"><i class="bi bi-person-badge-fill"></i> Vendedores</a></li>
+      <li><a href="/asignar-planillas"><i class="bi bi-journal-text"></i> Asignar Planillas</a></li>
+      <li><a class="active" href="/impresion"><i class="bi bi-printer-fill"></i> Impresión</a></li>
+      <li><a href="/cobro"><i class="bi bi-cash-coin"></i> Cobro de Caja</a></li>
+      <li><a href="/pago-premios"><i class="bi bi-trophy-fill"></i> Pago de Premios</a></li>
+      <li><a href="/sorteo"><i class="bi bi-ticket-perforated"></i> Sorteo</a></li>
+      <li><a href="/crear-figuras"><i class="bi bi-grid-3x3-gap-fill"></i> Crear Figuras</a></li>
+      <li><a href="/escoger-figuras"><i class="bi bi-grid"></i> Escoger Figuras</a></li>
+      <li><a href="/boletin"><i class="bi bi-clipboard2-check"></i> Boletín</a></li>
+      <li><a href="/logs-impresion"><i class="bi bi-clock-history"></i> Logs Impresión</a></li>
+    </ul>
+    <a class="logout" href="{{ url_for('logout') }}"><i class="bi bi-box-arrow-right"></i> Cerrar sesión</a>
+  </aside>
+
+  <!-- Main -->
+  <main>
+    <div class="top">
+      <h1 class="title">Impresión de Boletos & Planillas</h1>
+      <div class="who">
+        <span style="color:var(--muted);font-weight:700">Super Administrador</span>
+        <img src="{{ url_for('static', filename='avatars/' ~ (avatar|default('avatar-male.png'))) }}" alt="avatar">
+      </div>
+    </div>
+
+    <div class="cols">
+      <!-- BOLETOS -->
+      <section class="card" id="panel-boletos">
+        <div class="hd"><div class="step"><span class="dot">1</span> Serie, fecha y valor</div></div>
+        <div class="bd">
+          <form id="formBoletos" method="post" action="/impresion">
+            <input type="hidden" name="form_type" value="boletos">
+
+            <div class="grid cols-3">
+              <div>
+                <label>Serie</label>
+                <select name="serie_archivo" id="serie_archivo" required>
+                  {% for f, letra in series %}
+                  <option value="{{ f }}" data-letra="{{ letra }}">{{ letra }} — {{ f }}</option>
+                  {% endfor %}
+                </select>
+                <div class="help">Esta serie se aplica también a <b>Planillas</b>.</div>
+              </div>
+              <div>
+                <label>Fecha sorteo</label>
+                <input type="date" name="fecha_sorteo" id="fecha_sorteo" value="{{ fecha_hoy }}" required>
+              </div>
+              <div>
+                <label>Valor</label>
+                <input type="number" step="0.01" min="0" name="valor" id="valor" value="1.00" required>
+              </div>
+            </div>
+
+            <div class="grid cols-3">
+              <div>
+                <label>Teléfono (contacto en boleto)</label>
+                <input type="text" name="telefono" id="telefono" placeholder="0999999999" value="">
+              </div>
+              <div></div>
+              <div></div>
+            </div>
+
+            <div class="hd" style="margin-top:10px;border:0;padding:0"><div class="step"><span class="dot">2</span> Reintegro</div></div>
+            <div class="grid cols-3" style="margin-top:8px">
+              <div>
+                <label>Reintegro especial</label>
+                <select name="reintegro_especial" id="reintegro_especial">
+                  <option value="">— Ninguno —</option>
+                  {% for r in reintegros %}
+                  <option value="{{ r }}">{{ r }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div>
+                <label>Cantidad especial</label>
+                <input type="number" min="0" step="1" name="cant_reintegro_especial" id="cant_reintegro_especial" value="0">
+              </div>
+              <div>
+                <label>Incluir reintegros aleatorios</label>
+                <select name="incluir_aleatorio" id="incluir_aleatorio">
+                  <option value="1" selected>Sí</option>
+                  <option value="0">No</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="grid cols-3" style="margin-top:12px">
+              <div class="note" style="grid-column:1 / -1">
+                <i class="bi bi-info-circle"></i>
+                <div>Se bloquea <b>Desde</b> y se fija con la <b>continuación automática</b> del día/serie. No se permite reimprimir la misma fecha con serie distinta.</div>
+              </div>
+
+              <div>
+                <label>Desde (bloqueado)</label>
+                <input type="number" name="serie_inicio" id="serie_inicio" readonly>
+              </div>
+              <div>
+                <label>Hasta</label>
+                <input type="number" name="serie_fin" id="serie_fin" min="1" required>
+                <div class="help"><span id="tot_boletos">0</span> boletos</div>
+              </div>
+              <div style="display:flex;align-items:flex-end;gap:10px">
+                <button class="btn btn-primary" type="submit"><i class="bi bi-printer"></i> Imprimir Boletos</button>
+                <button class="btn btn-ghost" type="button" id="btnHistorial"><i class="bi bi-clock-history"></i> Historial</button>
+              </div>
+            </div>
+
+            <!-- Reintegro debajo de boletos -->
+            <div style="margin-top:14px">
+              <label style="font-weight:900;color:#5a64a1">Reintegro seleccionado</label>
+              <div class="preview" style="height:auto">
+                <div class="img" id="imgPreview"><span style="color:#8b92bb;font-size:.9rem">Selecciona un reintegro para ver la imagen…</span></div>
+              </div>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <!-- PREVIEW + PLANILLAS -->
+      <section class="card">
+        <div class="hd"><div class="step"><span class="dot">3</span> Vista previa & Planillas</div></div>
+        <div class="bd">
+          <div class="grid cols-2">
+            <!-- Vista previa -->
+            <div>
+              <div class="preview">
+                <div style="font-weight:900;color:#5a64a1">Vista previa</div>
+                <div class="img" id="imgPreview2"><span style="color:#8b92bb;font-size:.9rem">Sin reintegro…</span></div>
+                <div class="kv">
+                  <div class="k">Serie</div><div class="v" id="kv-serie">—</div>
+                  <div class="k">Fecha sorteo</div><div class="v" id="kv-fecha">—</div>
+                  <div class="k">Valor</div><div class="v" id="kv-valor">$0,00</div>
+                  <div class="k">Rango</div><div class="v" id="kv-rango">—</div>
+                  <div class="k">Total boletos</div><div class="v" id="kv-tot">0</div>
+                  <div class="k">Reintegro esp.</div><div class="v" id="kv-rei">—</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Planillas vinculadas -->
+            <div>
+              <form id="formPlanilla" method="post" action="/impresion">
+                <input type="hidden" name="form_type" value="planilla">
+                <div class="grid cols-2">
+                  <div>
+                    <label>Serie (vinculada)</label>
+                    <input type="text" id="serie_planilla_show" readonly>
+                    <input type="hidden" name="serie_archivo_planilla" id="serie_archivo_planilla">
+                  </div>
+                  <div>
+                    <label>Fecha planilla</label>
+                    <input type="date" name="fecha_planilla" id="fecha_planilla" value="{{ fecha_hoy }}" required>
+                  </div>
+                  <div>
+                    <label>Desde (boleto)</label>
+                    <input type="number" name="planilla_inicio" id="planilla_inicio" required>
+                  </div>
+                  <div>
+                    <label>Hasta (boleto)</label>
+                    <input type="number" name="planilla_fin" id="planilla_fin" required>
+                    <div class="help"><span id="planillas_estimadas">0</span> planillas estimadas / <span id="planillas_boletos">0</span> boletos</div>
+                  </div>
+                </div>
+                <div style="margin-top:10px">
+                  <button class="btn btn-accent" type="submit"><i class="bi bi-printer"></i> Imprimir Planillas</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- HISTORIAL DEL DÍA -->
+    <section class="card history" style="margin-top:18px">
+      <div class="hd"><i class="bi bi-calendar-day"></i><h3>Ya impreso hoy (resaltado en rojo)</h3></div>
+      <div class="bd">
+        <div class="grid cols-2" style="margin-bottom:10px">
+          <div>
+            <label>Fecha</label>
+            <input type="date" id="hist_fecha" value="{{ fecha_hoy }}">
+          </div>
+          <div>
+            <label>Serie</label>
+            <select id="hist_serie">
+              <option value="">— Todas —</option>
+              {% for f, letra in series %}
+              <option value="{{ f }}" data-letra="{{ letra }}">{{ letra }} — {{ f }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+
+        <div class="note" style="background:var(--danger-weak);border-color:#f6c2c9;color:#7b151b;margin-bottom:12px">
+          <i class="bi bi-exclamation-triangle"></i>
+          <div>El <b>Desde</b> de boletos se fija con la <b>continuación</b> del día y serie. Aquí se muestran en rojo los registros impresos para la selección.</div>
+        </div>
+
+        <table id="tbl_hist">
+          <thead>
+            <tr>
+              <th>Hora</th><th>Tipo</th><th>Serie</th><th>Rango</th>
+              <th>Total</th><th>Reint. esp.</th><th>Cant.</th><th>Aleatorios</th>
+            </tr>
+          </thead>
+          <tbody><!-- JS --></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- MODAL HISTORIAL COMPLETO -->
+<div class="modal" id="modalHist">
+  <div class="box">
+    <div class="hd" style="display:flex;align-items:center;gap:10px;padding:12px 16px">
+      <i class="bi bi-clock-history"></i><h3 style="margin:0">Historial de Impresiones</h3>
+    </div>
+    <div class="bd" style="padding:12px 16px">
+      <table id="tbl_hist_modal">
+        <thead>
+          <tr>
+            <th>Fecha/Hora</th><th>Tipo</th><th>Serie</th><th>Fecha (sorteo/planilla)</th>
+            <th>Desde</th><th>Hasta</th><th>Total</th><th>Reint. esp.</th><th>Cant.</th><th>Aleatorios</th>
+          </tr>
+        </thead>
+        <tbody><!-- JS --></tbody>
+      </table>
+    </div>
+    <div class="bd" style="padding:12px 16px;display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn btn-ghost" type="button" id="closeModal"><i class="bi bi-x-lg"></i> Cerrar</button>
+      <a class="btn btn-primary" href="/logs-impresion" target="_blank"><i class="bi bi-box-arrow-up-right"></i> Abrir logs</a>
+      <a class="btn btn-accent" href="/logs-impresion.csv"><i class="bi bi-file-earmark-spreadsheet"></i> CSV</a>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const $ = (q, el=document)=> el.querySelector(q);
+  const $$ = (q, el=document)=> Array.from(el.querySelectorAll(q));
+  const money = n => Number(n||0).toLocaleString('es-EC',{style:'currency',currency:'USD'});
+  const reiPath = (name)=> name ? "{{ url_for('static', filename='REINTEGROS/') }}"+name : "";
+
+  // --- refs Boletos
+  const serieSel = $("#serie_archivo");
+  const fechaInp = $("#fecha_sorteo");
+  const valorInp = $("#valor");
+  const telInp   = $("#telefono");
+  const reiSel   = $("#reintegro_especial");
+  const cantEsp  = $("#cant_reintegro_especial");
+  const aleSel   = $("#incluir_aleatorio");
+  const desdeInp = $("#serie_inicio");
+  const hastaInp = $("#serie_fin");
+  const totSpan  = $("#tot_boletos");
+  const img1 = $("#imgPreview"), img2 = $("#imgPreview2");
+  const kvSerie=$("#kv-serie"), kvFecha=$("#kv-fecha"), kvValor=$("#kv-valor"),
+        kvRango=$("#kv-rango"), kvTot=$("#kv-tot"), kvRei=$("#kv-rei");
+
+  // Planillas vinculadas
+  const seriePlanillaShow = $("#serie_planilla_show");
+  const seriePlanilla     = $("#serie_archivo_planilla");
+  const planI = $("#planilla_inicio");
+  const planF = $("#planilla_fin");
+  const planEst = $("#planillas_estimadas");
+  const planBols= $("#planillas_boletos");
+  const fechaPlan = $("#fecha_planilla");
+
+  // Historial
+  const hFecha = $("#hist_fecha");
+  const hSerie = $("#hist_serie");
+  const tblHist = $("#tbl_hist tbody");
+  const btnHistModal = $("#btnHistorial");
+  const modal = $("#modalHist");
+  const tblHistModal = $("#tbl_hist_modal tbody");
+  $("#closeModal").onclick = ()=> modal.style.display='none';
+  window.addEventListener('click', e=>{ if(e.target===modal) modal.style.display='none'; });
+
+  // ---- Preview + sincronización
+  function updatePreview(){
+    const opt = serieSel.options[serieSel.selectedIndex];
+    const letra = opt ? opt.getAttribute('data-letra') : "—";
+    kvSerie.textContent = (letra ? letra+" — " : "") + (opt ? opt.value : "—");
+    kvFecha.textContent = fechaInp.value || "—";
+    kvValor.textContent = money(valorInp.value);
+
+    const d = Number(desdeInp.value||0), h = Number(hastaInp.value||0);
+    const tot = (d && h && h>=d) ? (h-d+1) : 0;
+    kvRango.textContent = (d&&h) ? (d+" — "+h) : "—";
+    kvTot.textContent = tot;
+    kvRei.textContent = reiSel.value || "—";
+
+    // imagen reintegro
+    const path = reiPath(reiSel.value);
+    const inner = path ? `<img src="${path}" alt="Reintegro">` : `<span style="color:#8b92bb;font-size:.9rem">Sin reintegro…</span>`;
+    img1.innerHTML = inner;
+    img2.innerHTML = inner;
+
+    // Planillas sincronizadas
+    seriePlanillaShow.value = (letra ? letra+" — " : "") + (opt ? opt.value : "");
+    seriePlanilla.value = opt ? opt.value : "";
+    planI.value = desdeInp.value || "";
+    planF.value = hastaInp.value || "";
+
+    const boletos = tot;
+    const estimadas = Math.ceil(boletos / 40); // 40 boletos por planilla (PDF)
+    planEst.textContent = Number.isFinite(estimadas)? estimadas : 0;
+    planBols.textContent = boletos;
+  }
+
+  function updateTotals(){
+    const d = Number(desdeInp.value||0), h = Number(hastaInp.value||0);
+    const tot = (d && h && h>=d) ? (h-d+1) : 0;
+    totSpan.textContent = tot;
+    updatePreview();
+  }
+
+  // ---- Continuación automática (lee /logs-impresion.json)
+  async function setContinuacion(){
+    try{
+      const res = await fetch('/logs-impresion.json');
+      const js = await res.json();
+      const fecha = (fechaInp.value||"").trim();
+      const serie = (serieSel.value||"").trim();
+      let maxHasta = 0;
+
+      if (js && js.rows){
+        for (const r of js.rows){
+          if ((r.tipo||'').toLowerCase()!=='boletos') continue;
+          if ((r.serie_archivo||'').trim() !== serie) continue;
+          if ((r.fecha_sorteo||'').trim() !== fecha) continue;
+          const h = parseInt(r.hasta||'0',10);
+          if (!isNaN(h) && h>maxHasta) maxHasta = h;
+        }
+      }
+      const nextStart = (maxHasta>0) ? (maxHasta+1) : 1;
+      desdeInp.value = nextStart;
+      if (!hastaInp.value || Number(hastaInp.value) < nextStart){
+        hastaInp.value = nextStart;
+      }
+      updateTotals();
+      paintHistory(js);
+    }catch(e){
+      console.warn('No se pudo leer logs-impresion.json', e);
+      desdeInp.value = 1;
+      updateTotals();
+    }
+  }
+
+  // ---- Historial día/serie (resaltado)
+  function paintHistory(js){
+    const fecha = (hFecha.value||"").trim();
+    const serie = (hSerie.value||"").trim();
+    tblHist.innerHTML = '';
+    if (!(js && js.rows)) return;
+
+    js.rows.forEach(r=>{
+      const tipo = (r.tipo||'').toLowerCase();
+      const fechaR = tipo==='boletos' ? (r.fecha_sorteo||'') : (r.fecha_planilla||'');
+      const okFecha = fechaR.startsWith(fecha);
+      const okSerie = !serie || ((r.serie_archivo||'')===serie);
+      if(!okFecha || !okSerie) return;
+
+      const isBoletos = (tipo==='boletos');
+      const rei = r.reintegro_especial || '';
+      const cant = r.cant_reintegro_especial || '';
+      const ale = (r.incluir_aleatorio==='1') ? 'Sí' : (r.incluir_aleatorio==='0' ? 'No' : '');
+      const tot = r.total_boletos || (isBoletos ? '' : (parseInt(r.hasta||0,10)-parseInt(r.desde||0,10)+1));
+
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><span class="pill pill-red">${r.fecha_hora||''}</span></td>
+        <td>${isBoletos?'<span class="pill pill-blue">Boletos</span>':'<span class="pill pill-green">Planilla</span>'}</td>
+        <td>${r.serie_archivo||''}</td>
+        <td>${(r.desde||'')} — ${(r.hasta||'')}</td>
+        <td>${tot||''}</td>
+        <td>${rei||'—'}</td>
+        <td>${cant||'—'}</td>
+        <td>${ale||'—'}</td>
+      `;
+      tblHist.appendChild(tr);
+    });
+  }
+
+  // ---- Modal historial completo
+  $("#btnHistorial").onclick = async ()=>{
+    try{
+      const res = await fetch('/logs-impresion.json');
+      const js = await res.json();
+      const tblHistModal = $("#tbl_hist_modal tbody");
+      tblHistModal.innerHTML = '';
+      (js.rows||[]).slice().reverse().forEach(r=>{
+        const tipo = (r.tipo||'').toLowerCase();
+        const fecha = (tipo==='boletos') ? (r.fecha_sorteo||'') : (r.fecha_planilla||'');
+        const ale = (r.incluir_aleatorio==='1') ? 'Sí' : (r.incluir_aleatorio==='0' ? 'No' : '');
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${r.fecha_hora||''}</td>
+          <td>${r.tipo||''}</td>
+          <td>${r.serie_archivo||''}</td>
+          <td>${fecha}</td>
+          <td>${r.desde||''}</td>
+          <td>${r.hasta||''}</td>
+          <td>${r.total_boletos||''}</td>
+          <td>${r.reintegro_especial||'—'}</td>
+          <td>${r.cant_reintegro_especial||'—'}</td>
+          <td>${ale||'—'}</td>
+        `;
+        tblHistModal.appendChild(tr);
+      });
+      modal.style.display='flex';
+    }catch(e){
+      alert('No se pudo abrir el historial.');
+    }
+  };
+
+  // ---- Eventos
+  [serieSel, fechaInp].forEach(el=> el.addEventListener('change', setContinuacion));
+  [hastaInp, valorInp, telInp, reiSel, cantEsp, aleSel].forEach(el=> el.addEventListener('input', updateTotals));
+  [hFecha, hSerie].forEach(el=> el.addEventListener('change', async ()=>{
+    const res = await fetch('/logs-impresion.json'); paintHistory(await res.json());
+  }));
+
+  // ---- Init
+  setContinuacion();
+  updatePreview();
+})();
+</script>
+</body>
+</html>

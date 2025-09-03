@@ -1,0 +1,23 @@
+{% for v in asignaciones_mostrar %}
+    <div style="margin:10px 0 10px 0;">
+        <b style="font-size:1.1em;">{{ v.nombre }} {{ v.apellido }}</b>
+        <span style="color:#13c7b0;font-weight:600;">({{ v.seudonimo }})</span>
+        <div style="margin:3px 0;">
+            {% for p in v.planillas %}
+                <span style="display:inline-block;margin:1.5px;">
+                  Planilla #{{ p.numero }} ({{ p.rango }})
+                  <button class="btn-eliminar"
+                    title="Eliminar"
+                    data-fecha="{{ fecha_seleccionada }}"
+                    data-nombre="{{ v.nombre }}"
+                    data-apellido="{{ v.apellido }}"
+                    data-seudonimo="{{ v.seudonimo }}"
+                    data-numero="{{ p.numero }}"
+                    style="background:#e74c3c;color:#fff;border:none;border-radius:5px;padding:2px 7px;cursor:pointer;font-size:0.98em;margin-left:3px;">
+                    &times;
+                  </button>
+                </span>
+            {% endfor %}
+        </div>
+    </div>
+{% endfor %}

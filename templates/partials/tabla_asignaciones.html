@@ -1,0 +1,55 @@
+<table>
+    <thead>
+        <tr>
+            <th>Vendedor</th>
+            <th>Planillas asignadas</th>
+            <th style="text-align:right;">Totales</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% set sum_planillas = 0 %}
+        {% set sum_boletos = 0 %}
+        {% for v in asignaciones_mostrar %}
+            {% set nplan = v.planillas|length %}
+            {% set nboletos = nplan * boletos_por_planilla %}
+            {% set sum_planillas = sum_planillas + nplan %}
+            {% set sum_boletos = sum_boletos + nboletos %}
+            <tr>
+                <td>
+                    <span class="vendedor-nombre">{{ v.nombre }} {{ v.apellido }}</span>
+                    <span class="vendedor-seudonimo">({{ v.seudonimo }})</span>
+                </td>
+                <td>
+                    <div class="planillas-col">
+                        {% for p in v.planillas %}
+                            <span class="planilla-badge">
+                                Planilla #{{ p.numero }} ({{ p.rango }})
+                                <button class="eliminar-planilla" 
+                                    data-fecha="{{ fecha_seleccionada }}"
+                                    data-nombre="{{ v.nombre }}"
+                                    data-apellido="{{ v.apellido }}"
+                                    data-seudonimo="{{ v.seudonimo }}"
+                                    data-numero="{{ p.numero }}"
+                                    title="Eliminar"><i class="bi bi-x"></i></button>
+                            </span>
+                        {% endfor %}
+                    </div>
+                </td>
+                <td class="totales-col">
+                    <span class="tot-badge"><i class="bi bi-files"></i> {{ nplan }} planillas</span>
+                    <span class="tot-badge"><i class="bi bi-ticket"></i> {{ nboletos }} boletos</span>
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+    <tfoot>
+        <tr class="tfoot-global">
+            <td style="font-size:1.13em;">TOTAL GENERAL</td>
+            <td style="font-size:1.12em;"></td>
+            <td class="totales-col" style="font-size:1.11em;">
+                <span class="tot-badge"><i class="bi bi-files"></i> {{ sum_planillas }} planillas</span>
+                <span class="tot-badge"><i class="bi bi-ticket"></i> {{ sum_boletos }} boletos</span>
+            </td>
+        </tr>
+    </tfoot>
+</table>

@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Diseñador Boletín</title>
+<style>
+  body{margin:0;background:#0b1324;color:#e5e7eb;font-family:system-ui,-apple-system,Segoe UI,Roboto}
+  .top{display:flex;gap:10px;align-items:center;padding:12px 16px;background:#0f172a;border-bottom:1px solid #1f2a44}
+  .date{background:#0b1220;border:1px solid #22304a;border-radius:10px;padding:8px 10px;color:#e5e7eb}
+  .btn{padding:8px 12px;border-radius:10px;border:1px solid #263554;cursor:pointer;background:#0f1d3a;color:#e2e8f0}
+  .btn.brand{background:#2563eb;border-color:#1e4ec3;color:#fff}
+  .wrap{display:flex;gap:12px;padding:14px}
+  .canvas{flex:1;height:650px;background:#0b1220;border:1px dashed #2a385a;border-radius:12px;position:relative;overflow:auto}
+  .item{position:absolute;border:1px solid #355; background:#102040; color:#fff; border-radius:10px; cursor:move; padding:6px 8px; user-select:none}
+  .item .sz{position:absolute;right:6px;bottom:6px;background:#2563eb;border-radius:6px;padding:2px 6px;font-size:11px}
+  .right{width:300px}
+  .card{background:#0f172a;border:1px solid #1f2a44;border-radius:12px;padding:12px;margin-bottom:12px}
+  .row{display:flex;gap:8px;align-items:center;margin-bottom:8px}
+  input{background:#0b1220;border:1px solid #22304a;border-radius:10px;padding:8px 10px;color:#e5e7eb;width:100%}
+  label{font-size:12px;color:#9aa5be}
+</style>
+</head>
+<body data-initial-fecha="{{ fecha_inicial }}">
+  <div class="top">
+    <strong>Diseñador Boletín</strong>
+    <span style="flex:1"></span>
+    <label>Fecha</label>
+    <input id="fecha" type="date" class="date">
+    <button class="btn" onclick="location.href='/boletin?fecha='+FECHA">Volver</button>
+    <button id="btnSave" class="btn brand">Guardar</button>
+  </div>
+
+  <div class="wrap">
+    <div class="canvas" id="canvas"></div>
+    <div class="right">
+      <div class="card">
+        <div class="row"><label>Logo X</label><input id="logo_x"></div>
+        <div class="row"><label>Logo Y</label><input id="logo_y"></div>
+        <div class="row"><label>Logo W</label><input id="logo_w"></div>
+        <div class="row"><label>Logo H</label><input id="logo_h"></div>
+      </div>
+      <div class="card">
+        <div class="row"><label>Total X</label><input id="total_x"></div>
+        <div class="row"><label>Total Y</label><input id="total_y"></div>
+        <div class="row"><label>Total Size</label><input id="total_size"></div>
+      </div>
+    </div>
+  </div>
+
+<script>
+let FECHA = document.body.dataset.initialFecha || new Date().toISOString().slice(0,10);
+document.getElementById("fecha").value = FECHA;
+
+let LAYOUT = null;
+let FIGS = [];
+const canvas = document.getElementById("canvas");
+
+async function loadLayout(){
+  const r = await fetch(`/api/boletin-layout/get?fecha=${FECHA}`);
+  const j = await r.json();
+  LAYOUT = j.layout || {};
+  FIGS = j.figuras || [];
+  render();
+  fillSide();
+}
+function fillSide(){
+  const L = LAYOUT.logo || {x:26,y:22,w:170,h:72};
+  document.getElementById("logo_x").value=L.x;
+  document.getElementById("logo_y").value=L.y;
+  document.getElementById("logo_w").value=L.w;
+  document.getElementById("logo_h").value=L.h;
+
+  const T = LAYOUT.total || {x:570,y:24,size:34};
+  document.getElementById("total_x").value=T.x;
+  document.getElementById("total_y").value=T.y;
+  document.getElementById("total_size").value=T.size;
+
+  ["logo_x","logo_y","logo_w","logo_h","total_x","total_y","total_size"].forEach(id=>{
+    document.getElementById(id).addEventListener("input", ()=>{
+      const v = Number(document.getElementById(id).value||0);
+      if(id.startsWith("logo_")){
+        const k = id.split("_")[1];
+        LAYOUT.logo = LAYOUT.logo || {};
+        LAYOUT.logo[k]=v;
+      }else{
+        const k = id.split("_")[1];
+        LAYOUT.total = LAYOUT.total || {};
+        LAYOUT.total[k]=v;
+      }
+    });
+  });
+}
+function render(){
+  canvas.innerHTML = "";
+  const figsLay = LAYOUT.figs || {};
+  FIGS.forEach(f=>{
+    const pos = figsLay[f.nombre] || {x:50,y:160,size:100};
+    const d = document.createElement("div");
+    d.className="item";
+    d.style.left = pos.x+"px";
+    d.style.top  = pos.y+"px";
+    d.style.width = pos.size+"px";
+    d.style.height = pos.size+"px";
+    d.textContent = f.nombre;
+    const sz = document.createElement("div");
+    sz.className="sz"; sz.textContent = pos.size;
+    d.appendChild(sz);
+    canvas.appendChild(d);
+
+    // Drag simple
+    let ox=0, oy=0, drag=false;
+    d.addEventListener("mousedown", e=>{ drag=true; ox=e.offsetX; oy=e.offsetY; });
+    window.addEventListener("mouseup", ()=> drag=false);
+    window.addEventListener("mousemove", e=>{
+      if(!drag) return;
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left - ox;
+      const y = e.clientY - rect.top - oy;
+      d.style.left = Math.max(0,x)+"px";
+      d.style.top  = Math.max(0,y)+"px";
+      savePos();
+    });
+
+    // Rueda = tamaño
+    d.addEventListener("wheel", e=>{
+      e.preventDefault();
+      let s = parseInt(d.style.width)||pos.size;
+      s += (e.deltaY<0? 6 : -6);
+      s = Math.max(60, Math.min(180, s));
+      d.style.width = s+"px";
+      d.style.height = s+"px";
+      sz.textContent = s;
+      savePos();
+    });
+
+    function savePos(){
+      const x = parseInt(d.style.left)||0;
+      const y = parseInt(d.style.top)||0;
+      const s = parseInt(d.style.width)||pos.size;
+      LAYOUT.figs = LAYOUT.figs || {};
+      LAYOUT.figs[f.nombre] = {x:x,y:y,size:s};
+    }
+  });
+}
+
+document.getElementById("fecha").addEventListener("change", e=>{
+  FECHA = e.target.value;
+  loadLayout();
+});
+document.getElementById("btnSave").addEventListener("click", async ()=>{
+  const r = await fetch("/api/boletin-layout/save", {
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body: JSON.stringify({fecha:FECHA, layout:LAYOUT})
+  });
+  const j = await r.json();
+  alert(j.ok ? "Layout guardado." : "Error al guardar.");
+});
+
+loadLayout();
+</script>
+</body>
+</html>

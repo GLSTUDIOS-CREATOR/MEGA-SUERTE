@@ -1,0 +1,244 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;900&display=swap');
+
+/* --- Fondo gris y estructura base --- */
+body {
+    min-height: 100vh;
+    margin: 0;
+    font-family: 'Montserrat', Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #ededed;
+    overflow: hidden;
+    position: relative;
+}
+
+/* --- Círculos animados --- */
+.circles-bg {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.circles-bg span {
+    position: absolute;
+    border-radius: 50%;
+    opacity: 0.13;
+    background: linear-gradient(120deg, #16a5fd, #c1fffa);
+    animation: moveCircle 18s linear infinite alternate;
+    mix-blend-mode: lighten;
+    filter: blur(1.5px);
+}
+.circles-bg .c1 {
+    width: 240px; height: 240px; left: 8vw; top: 12vh;
+    animation-delay: 0s;
+}
+.circles-bg .c2 {
+    width: 130px; height: 130px; right: 11vw; top: 24vh;
+    background: linear-gradient(120deg, #3fffbf, #33aaff);
+    animation-delay: 4s;
+}
+.circles-bg .c3 {
+    width: 190px; height: 190px; left: 20vw; bottom: 7vh;
+    background: linear-gradient(120deg, #e9f5ff, #51e6a7);
+    animation-delay: 8s;
+}
+.circles-bg .c4 {
+    width: 110px; height: 110px; right: 23vw; bottom: 9vh;
+    background: linear-gradient(120deg, #b4e1ff, #fffbf0);
+    animation-delay: 11s;
+}
+.circles-bg .c5 {
+    width: 170px; height: 170px; left: 70vw; top: 40vh;
+    background: linear-gradient(120deg, #b1b1b1, #79ffd5);
+    animation-delay: 13s;
+}
+
+@keyframes moveCircle {
+    0%   { transform: translateY(0) scale(1); }
+    30%  { transform: translateY(-30px) scale(1.04);}
+    50%  { transform: translateY(10px) scale(0.97);}
+    80%  { transform: translateY(-14px) scale(1.01);}
+    100% { transform: translateY(0) scale(1); }
+}
+
+/* --- Contenedor login --- */
+.login-container {
+    background: #fff;
+    box-shadow: 0 8px 36px rgba(40,90,140,0.14), 0 1.5px 8px rgba(10,100,100,0.10);
+    border-radius: 30px;
+    padding: 48px 34px 38px 34px;
+    width: 380px;
+    max-width: 94vw;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    animation: fadeInUp 1s cubic-bezier(.19,1,.22,1);
+    margin: 40px 0;
+    position: relative;
+    z-index: 2;
+}
+
+@keyframes fadeInUp {
+  from {transform: translateY(60px); opacity: 0;}
+  to {transform: translateY(0); opacity: 1;}
+}
+
+/* --- Logo --- */
+.logo {
+    width: 94px;
+    height: 94px;
+    border-radius: 22px;
+    margin-bottom: 14px;
+    box-shadow: 0 3px 16px rgba(36,150,220,0.17);
+    animation: bounceLogo 1.4s cubic-bezier(.23,1.15,.22,1.1);
+    background: #fff;
+    object-fit: contain;
+}
+
+@keyframes bounceLogo {
+  0% { transform: scale(0.5) rotate(-20deg); opacity: 0; }
+  60% { transform: scale(1.08) rotate(5deg); opacity: 1; }
+  90% { transform: scale(0.97) rotate(-2deg);}
+  100% { transform: scale(1) rotate(0);}
+}
+
+/* --- Título --- */
+h2 {
+    color: #23a6d5;
+    margin-bottom: 22px;
+    font-size: 1.45rem;
+    font-weight: 900;
+    letter-spacing: 1.3px;
+}
+
+/* --- Inputs y botón --- */
+form {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+form input[type="text"],
+form input[type="password"] {
+    width: 100%;
+    padding: 14px;
+    margin: 10px 0 16px 0;
+    border: 1.5px solid #e4eaf7;
+    border-radius: 8px;
+    font-size: 16px;
+    background: #f9fbfd;
+    color: #222;
+    transition: border 0.2s;
+    font-family: inherit;
+    box-sizing: border-box;
+}
+
+form input:focus {
+    border-color: #23a6d5;
+    background: #fff;
+}
+
+button {
+    width: 100%;
+    padding: 13px;
+    background: linear-gradient(90deg, #23a6d5 70%, #23d5ab 100%);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.12rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    cursor: pointer;
+    margin-top: 4px;
+    box-shadow: 0 2px 10px rgba(33, 186, 232, 0.09);
+    transition: background 0.18s, transform 0.13s;
+}
+
+button:hover {
+    background: linear-gradient(90deg, #23d5ab 10%, #23a6d5 100%);
+    transform: scale(1.03);
+}
+
+/* --- Mensaje de error --- */
+.msg p.error {
+    color: #e52b36;
+    font-weight: bold;
+    margin-bottom: 14px;
+    font-size: 15px;
+}
+
+/* --- Footer --- */
+footer {
+    margin-top: 30px;
+    font-size: 14px;
+    color: #6b849e;
+    letter-spacing: 1.1px;
+}
+
+/* --- Input de contraseña con ojo --- */
+.input-password {
+    position: relative;
+    width: 100%;
+    margin-bottom: 18px;
+}
+.input-password input[type="password"], .input-password input[type="text"] {
+    width: 100%;
+    padding-right: 40px !important;
+}
+.toggle-eye {
+    position: absolute;
+    top: 52%;
+    right: 12px;
+    transform: translateY(-50%);
+    cursor: pointer;
+    user-select: none;
+    z-index: 10;
+    transition: opacity 0.15s;
+}
+.toggle-eye svg {
+    vertical-align: middle;
+    opacity: 0.8;
+    transition: opacity 0.18s;
+}
+.toggle-eye:hover svg {
+    opacity: 1;
+}
+
+/* --- Responsive --- */
+@media (max-width: 600px) {
+    .login-container {
+        width: 98vw;
+        padding: 22px 8vw 26px 8vw;
+        margin: 18px 0;
+    }
+    .logo { width: 70px; height: 70px; }
+    h2 { font-size: 1.09rem; }
+    .circles-bg span {
+        opacity: 0.09;
+    }
+}
+.logo-wrap {
+    margin-bottom: 10px;
+    padding: 13px 0 7px 0;
+    border-radius: 24px;
+    box-shadow: 0 2px 14px 0 rgba(44,77,97,0.07);
+    background: rgba(255,255,255,0.92);
+}
+footer {
+    text-align: center;
+    color: #789;
+    font-size: 13px;
+    margin-top: 10px;
+    letter-spacing: .7px;
+}
+footer b {
+    color: #23a6d5;
+}
+footer hr {
+    opacity: .18;
+}

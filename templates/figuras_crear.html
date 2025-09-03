@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>Crear Figuras | GL Bingo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  {% if url_for %}<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">{% endif %}
+  <style>
+    :root{
+      --bg:#0b1220; --panel:#0f1629; --line:#1f2a44; --text:#e5e7eb; --muted:#9fb0c9;
+      --brand:#1fc59c; --danger:#e84c4c; --chip:#1f2a44; --hover:#16213a; --shadow:0 10px 26px rgba(0,0,0,.28);
+      --sidebar:#1b2743; --sidebar-w:260px; --red:#ff0000; --red-b:#b71d1d;
+    }
+    *{box-sizing:border-box} html,body{height:100%}
+    body{margin:0;background:linear-gradient(180deg,#0b1220 0%,#0b1324 100%);color:var(--text);
+         font-family:system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+    .app{display:flex;min-height:100vh}
+
+    /* Sidebar */
+    .sidebar{width:var(--sidebar-w); background:var(--sidebar); border-right:1px solid #0e1528; color:#fff; position:sticky; top:0; height:100vh; box-shadow:var(--shadow); overflow-y:auto}
+    .sb-head{padding:14px 18px; text-align:center; border-bottom:1px solid #0e1528}
+    .sb-logo{width:56px;height:56px;border-radius:12px;object-fit:cover;box-shadow:0 6px 18px rgba(0,0,0,.35)}
+    .sb-title{margin:8px 0 0 0; font-weight:800; letter-spacing:.4px}
+    .nav{padding:12px}
+    .nav a{display:flex; align-items:center; gap:12px; padding:10px 12px; border-radius:12px; color:#e6eefc; text-decoration:none; transition:.15s; font-weight:700}
+    .nav a:hover{background:var(--hover); color:#fff}
+    .nav a.active{background:#122038; color:#fff; border:1px solid #223051}
+    .icon{width:20px; text-align:center}
+
+    /* Main */
+    .main{flex:1; display:flex; flex-direction:column; min-width:0}
+    .topbar{display:flex; align-items:center; justify-content:space-between; padding:12px 20px; border-bottom:1px solid var(--line); background:rgba(15,22,41,.6); backdrop-filter: blur(6px); position:sticky; top:0; z-index:10}
+    .user .chip{padding:3px 10px; border-radius:999px; background:#1f2a44; color:#cbd5e1}
+
+    .content{max-width:1280px;margin:22px auto;padding:0 18px;width:100%}
+    .card{background:var(--panel); border:1px solid var(--line); border-radius:16px; padding:18px; box-shadow:var(--shadow)}
+    .grid2{display:grid; grid-template-columns:1fr 1fr; gap:18px}
+    @media (max-width:1100px){ .grid2{grid-template-columns:1fr} }
+
+    /* Selector superior */
+    .toolbar-top{display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:14px}
+    .label{font-weight:800}
+    select{
+      padding:10px 12px; border:1px solid var(--line); border-radius:12px; background:#0b1220; color:#e5e7eb;
+      min-width:280px; outline:none
+    }
+    .btn{padding:10px 14px; border-radius:12px; border:none; cursor:pointer; font-weight:800; text-decoration:none; display:inline-block}
+    .btn-primary{background:var(--brand); color:#0b1220}
+    .btn-secondary{background:#212943; color:#fff}
+    .btn-danger{background:#e84c4c; color:#fff}
+
+    /* Board */
+    .board-wrap{padding:10px; border:1px dashed var(--line); border-radius:16px}
+    .bingo-head{display:grid; grid-template-columns:repeat(5,76px); gap:10px; justify-content:center; margin-bottom:10px}
+    .bingo-head .h{width:76px;height:40px; display:flex; align-items:center; justify-content:center; background:#122038; border:1px solid #223051; border-radius:12px; font-weight:900; letter-spacing:2px}
+    .grid{display:grid; grid-template-columns:repeat(5,76px); grid-template-rows:repeat(5,76px); gap:10px; justify-content:center}
+    .cell{width:76px; height:76px; border-radius:16px; border:2px solid var(--line); background:#ffffff; color:#0b1220; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:18px; cursor:pointer; transition:.12s transform, .12s box-shadow}
+    .cell:hover{transform:translateY(-1px); box-shadow:0 6px 16px rgba(0,0,0,.25)}
+    .cell.active{background:var(--red); color:#fff; border-color:var(--red-b)}
+    .cell.locked{background:#e8ebf2; color:#9ca3af; border-style:dashed; cursor:not-allowed}
+    .toolbar{display:flex; gap:10px; flex-wrap:wrap; margin-top:14px}
+
+    .input, textarea{width:100%; padding:12px; border:1px solid var(--line); border-radius:12px; background:#0b1220; color:#e5e7eb}
+    .input:focus, textarea:focus{border-color:#2b86ff; box-shadow:0 0 0 2px rgba(43,134,255,.2)}
+    .hint{font-size:.95rem; color:#9fb0c9}
+    .actions{display:flex; justify-content:flex-end; gap:10px; margin-top:16px}
+
+    /* Flash */
+    .flash-area{margin-bottom:12px}
+    .flash{padding:10px 12px; border-radius:10px; margin-bottom:8px}
+    .success{background:#0f5132; color:#d1fae5}
+    .warning{background:#664d03; color:#fff3cd}
+    .danger{background:#842029; color:#f8d7da}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sb-head">
+        <img class="sb-logo" src="{{ url_for('static', filename='img/logo.png') }}" alt="GL Studios">
+        <div class="sb-title">GL Bingo</div>
+      </div>
+      <nav class="nav">
+        <a href="/dashboard"><span class="icon">🏠</span> Dashboard</a>
+        <a href="/usuarios"><span class="icon">🙂</span> Usuarios <span class="icon">💼</span></a>
+        <a href="/juego"><span class="icon">🎲</span> Juego</a>
+        <a href="/contabilidad"><span class="icon">📊</span> Contabilidad</a>
+        <a href="/vendedores"><span class="icon">🧾</span> Vendedores</a>
+        <a href="/asignar-planillas"><span class="icon">📄</span> Asignar Planillas</a>
+        <a href="/impresion"><span class="icon">🖨️</span> Impresión de Boletos</a>
+        <a href="/cobro"><span class="icon">💵</span> Cobro de Caja</a>
+        <a href="/sorteos"><span class="icon">🎟️</span> Sorteo</a>
+        <a href="/crear-figuras" class="active"><span class="icon">🟩</span> Crear Figuras</a>
+        <a href="/escoger-figuras"><span class="icon">🟦</span> Escoger Figuras</a>
+        <a href="/boletin"><span class="icon">📝</span> Boletín</a>
+      </nav>
+    </aside>
+
+    <!-- Main -->
+    <section class="main">
+      <div class="topbar">
+        <div style="font-weight:900">Crear Figuras</div>
+        <div class="user">
+          <span class="chip">GL STUDIOS</span>
+          <span class="chip">{{ session.get('usuario','Invitado') }}</span>
+        </div>
+      </div>
+
+      <main class="content">
+        {% with msgs = get_flashed_messages(with_categories=true) %}
+          {% if msgs %}
+            <div class="flash-area">
+              {% for cat, msg in msgs %}
+                <div class="flash {{cat}}">{{ msg }}</div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+
+        <!-- Selector para ESCOGER figura ya creada -->
+        <div class="card toolbar-top">
+          <span class="label">Cargar figura guardada:</span>
+          <select id="figSelect">
+            <option value="" selected disabled>— Selecciona una figura —</option>
+          </select>
+          <button type="button" class="btn btn-secondary" id="btnCargar" disabled>Cargar en el tablero</button>
+          <a class="btn btn-primary" href="/escoger-figuras">Ver lista</a>
+        </div>
+
+        <form method="POST" id="formFig">
+          <input type="hidden" name="grid" id="gridField" value="">
+          <input type="hidden" name="grid_pos" id="gridPosField" value="">
+          <div class="grid2">
+            <!-- Tablero -->
+            <div class="card">
+              <div class="board-wrap">
+                <div class="bingo-head">
+                  <div class="h">B</div><div class="h">I</div><div class="h">N</div><div class="h">G</div><div class="h">O</div>
+                </div>
+
+                <div class="grid" id="grid">
+                  {% set letters = ['B','I','N','G','O'] %}
+                  {% set colores = figura.colores if figura else None %}
+                  {% for r in range(1,6) %}
+                    {% for c in range(0,5) %}
+                      {% set code = letters[c] ~ r %}
+                      {% set idx = (r-1)*5 + c + 1 %}
+                      {% set is_center = (code == 'N3') %}
+                      {% set activo = (not is_center) and (colores and colores[idx-1] == '#FF0000') %}
+                      <div class="cell {% if activo %}active{% endif %} {% if is_center %}locked{% endif %}"
+                           data-idx="{{ idx }}" data-pos="{{ code }}">{{ code }}</div>
+                    {% endfor %}
+                  {% endfor %}
+                </div>
+
+                <div class="toolbar">
+                  <button class="btn btn-secondary" type="button" onclick="limpiar()">Limpiar</button>
+                  <button class="btn btn-secondary" type="button" onclick="activarTodo()">Activar todo</button>
+                  <button class="btn btn-secondary" type="button" onclick="invertir()">Invertir</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Formulario -->
+            <div class="card">
+              <label class="label">Nombre de la figura *</label>
+              <input class="input" type="text" name="nombre" id="inpNombre"
+                     placeholder="Ej: Letra X / Cuadro Esquina"
+                     value="{{ (figura.nombre if figura else request.args.get('nombre','')) or '' }}">
+
+              <label class="label">Descripción (opcional)</label>
+              <textarea class="input" name="descripcion" id="inpDesc" rows="5" placeholder="Notas o detalles...">{{ figura.descripcion if figura else '' }}</textarea>
+
+              <div class="hint" style="margin-top:10px;">
+                La casilla <strong>N3</strong> es “free” y queda siempre blanca.
+              </div>
+
+              <div class="actions">
+                <button class="btn btn-danger" type="button" id="btnNueva">Nueva figura</button>
+                <button class="btn btn-primary" type="submit">Guardar</button>
+              </div>
+            </div>
+          </div>
+        </form>
+      </main>
+    </section>
+  </div>
+
+  <script>
+    // ——— Utilidades
+    const letters = ['B','I','N','G','O'];
+    const defaultPos = Array.from({length:25},(_,k)=> letters[k%5] + (Math.floor(k/5)+1)); // B1,I1,N1,G1,O1, B2,...
+
+    const gridEl = document.getElementById('grid');
+    const form   = document.getElementById('formFig');
+    const inpNombre = document.getElementById('inpNombre');
+    const inpDesc   = document.getElementById('inpDesc');
+
+    function setCellStateByArrays(colores, pos){
+      const cells = gridEl.querySelectorAll('.cell');
+      cells.forEach((c,i)=>{
+        if(c.classList.contains('locked')) return; // N3
+        c.classList.remove('active');
+        const code = c.dataset.pos; // B1, I1, ...
+        const idx = i;              // nuestro orden ya es por filas (B..O)
+        const color = (colores && colores[idx]) ? colores[idx].toUpperCase() : '#FFFFFF';
+        if(color === '#FF0000' && code !== 'N3') c.classList.add('active');
+      });
+    }
+
+    function toggleCell(el){ if (!el.classList.contains('locked')) el.classList.toggle('active'); }
+    function limpiar(){
+      gridEl.querySelectorAll('.cell').forEach(c=>{ if(!c.classList.contains('locked')) c.classList.remove('active'); });
+    }
+    function activarTodo(){
+      gridEl.querySelectorAll('.cell').forEach(c=>{ if(!c.classList.contains('locked')) c.classList.add('active'); });
+    }
+    function invertir(){
+      gridEl.querySelectorAll('.cell').forEach(c=>{ if(!c.classList.contains('locked')) c.classList.toggle('active'); });
+    }
+    function prepararEnvio(){
+      const colores=[], posiciones=[];
+      gridEl.querySelectorAll('.cell').forEach(c=>{
+        posiciones.push(c.dataset.pos);
+        colores.push(c.classList.contains('active') ? '#FF0000' : '#FFFFFF');
+      });
+      const n3 = posiciones.indexOf('N3'); if (n3>=0) colores[n3] = '#FFFFFF';
+      document.getElementById('gridField').value = colores.join(',');
+      document.getElementById('gridPosField').value = posiciones.join(',');
+    }
+    function resetNueva(){
+      limpiar();
+      inpNombre.value = '';
+      inpDesc.value = '';
+      document.getElementById('figSelect').value = '';
+      document.getElementById('btnCargar').disabled = true;
+    }
+
+    gridEl.querySelectorAll('.cell').forEach(cell=> cell.addEventListener('click', ()=> toggleCell(cell)));
+    form.addEventListener('submit', ()=> prepararEnvio());
+    document.getElementById('btnNueva').addEventListener('click', resetNueva);
+
+    // ——— Cargar nombres desde XML para ESCOGER figura
+    const selectEl = document.getElementById('figSelect');
+    const btnCargar = document.getElementById('btnCargar');
+    let FIGS = []; // {nombre, fecha, descripcion, colores[25], pos[25]}
+
+    async function loadXML(){
+      try{
+        const res = await fetch('{{ url_for("static", filename="db/datos_figuras.xml") }}', {cache:'no-store'});
+        if(!res.ok) throw new Error('XML no encontrado');
+        const txt = await res.text();
+        const xml = new DOMParser().parseFromString(txt, "application/xml");
+        const nodes = Array.from(xml.getElementsByTagName('figura'));
+        FIGS = nodes.map(n=>{
+          const nombre = n.getAttribute('nombre')||'';
+          const fecha = n.getAttribute('fecha')||'';
+          const descNode = n.getElementsByTagName('descripcion')[0];
+          const descripcion = descNode ? (descNode.textContent||'') : '';
+          const colores = Array(25).fill('#FFFFFF');
+          const pos = defaultPos.slice();
+          for(let i=1;i<=25;i++){
+            const cel = n.querySelector(`celda[idx="${i}"]`);
+            if(cel){
+              colores[i-1] = (cel.getAttribute('color')||'#FFFFFF').toUpperCase();
+              pos[i-1] = cel.getAttribute('pos') || defaultPos[i-1];
+            }
+          }
+          const n3 = pos.indexOf('N3'); if(n3>=0) colores[n3] = '#FFFFFF';
+          return {nombre, fecha, descripcion, colores, pos};
+        });
+        FIGS.sort((a,b)=> a.nombre.localeCompare(b.nombre, undefined, {sensitivity:'base'}));
+        FIGS.forEach(f=>{ const o=document.createElement('option'); o.value=f.nombre; o.textContent=f.nombre; selectEl.appendChild(o); });
+      }catch(e){ /* sin XML, el selector queda vacío */ }
+    }
+
+    // habilita botón cargar solo si hay selección
+    selectEl.addEventListener('change', ()=>{
+      btnCargar.disabled = !selectEl.value;
+    });
+
+    // Cargar selección en el tablero y en los inputs
+    btnCargar.addEventListener('click', ()=>{
+      const name = selectEl.value;
+      const fig = FIGS.find(x=> x.nombre === name);
+      if(!fig) return;
+      setCellStateByArrays(fig.colores, fig.pos);
+      inpNombre.value = fig.nombre;
+      inpDesc.value   = fig.descripcion || '';
+      window.scrollTo({top: 0, behavior: 'smooth'});
+    });
+
+    loadXML();
+  </script>
+</body>
+</html>

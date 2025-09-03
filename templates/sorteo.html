@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Sorteo | GL Bingo</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg:#0f172a; --bg-2:#0b1228; --card:#ffffff; --line:#e6e8ef;
+      --muted:#64748b; --text:#111827; --primary:#4f46e5; --primary-100:#eef2ff;
+    }
+    html,body{height:100%}
+    body{background:#f6f7fb;color:var(--text)}
+    .app{min-height:100%; display:grid; grid-template-columns: 280px 1fr;}
+    .sidebar{background:linear-gradient(180deg, var(--bg-2) 0%, var(--bg) 100%);color:#e2e8f0;padding:18px 14px;position:sticky;top:0;height:100vh;overflow:auto;border-right:1px solid rgba(255,255,255,.06)}
+    .brand{display:flex;align-items:center;gap:.75rem;padding:10px 10px;margin-bottom:6px}
+    .logo{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;color:#fff;font-weight:800;background:conic-gradient(from 180deg,#7c3aed, #22d3ee, #7c3aed);box-shadow:0 8px 26px rgba(34,211,238,.25)}
+    .brand h5{margin:0;font-weight:800;letter-spacing:.3px}
+    .side-link{display:flex;align-items:center;gap:.7rem;padding:10px 12px;margin:3px 0;border-radius:10px;color:#cbd5e1;text-decoration:none;transition:.15s ease;font-weight:600}
+    .side-link i{width:22px;text-align:center}
+    .side-link:hover{background:rgba(148,163,184,.12);color:#fff}
+    .side-link.active{background:rgba(99,102,241,.18);color:#fff;box-shadow:inset 0 0 0 1px rgba(99,102,241,.35)}
+    .topbar{background:#0b1021;color:#e5e7eb;padding:12px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.08)}
+    .topbar h4{margin:0;font-weight:800}
+    .pill{background:rgba(255,255,255,.06);padding:.35rem .6rem;border-radius:999px;font-weight:700;color:#e5e7eb}
+    .pill b{color:#fff}
+    .content{padding:26px}
+    .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:0 4px 16px rgba(2,6,23,.04)}
+    .box h6{font-weight:800;color:#0b1228}
+    .small-label{font-size:.85rem;color:var(--muted);margin-bottom:.35rem}
+    .readonly{background:#f8fafc}
+    .chip{display:inline-flex;align-items:center;gap:.35rem;padding:.32rem .65rem;border-radius:999px;background:var(--primary-100);border:1px solid #e5e7eb;color:#334155;font-weight:700;margin:.15rem .2rem;font-size:.85rem}
+    .chip i{color:#4f46e5}
+    .spinner{text-align:center;font-weight:700;letter-spacing:.15em}
+    @media (max-width: 992px){ .app{grid-template-columns: 86px 1fr} .brand h5,.side-text{display:none} .sidebar{padding:16px 10px} }
+    @media (max-width: 576px){ .content{padding:16px} }
+  </style>
+</head>
+<body>
+<div class="app">
+  <!-- Sidebar (enlaces seguros en texto plano / si no existen las rutas, NO rompe el render) -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="logo">GL</div>
+      <h5>GL Bingo</h5>
+    </div>
+    <nav>
+      <a class="side-link" href="/dashboard"><i class="bi bi-speedometer2"></i><span class="side-text">Dashboard</span></a>
+      <a class="side-link" href="/usuarios"><i class="bi bi-people"></i><span class="side-text">Usuarios</span></a>
+      <a class="side-link" href="/juego"><i class="bi bi-dice-5"></i><span class="side-text">Juego</span></a>
+      <a class="side-link" href="/contabilidad"><i class="bi bi-cash-coin"></i><span class="side-text">Contabilidad</span></a>
+      <a class="side-link" href="/vendedores"><i class="bi bi-person-vcard"></i><span class="side-text">Vendedores</span></a>
+      <a class="side-link" href="/asignar-planillas"><i class="bi bi-clipboard2-check"></i><span class="side-text">Asignar Planillas</span></a>
+      <a class="side-link" href="/impresion-boletos"><i class="bi bi-printer"></i><span class="side-text">Impresión de Boletos</span></a>
+      <a class="side-link" href="/cobro-caja"><i class="bi bi-currency-exchange"></i><span class="side-text">Cobro de Caja</span></a>
+      <a class="side-link" href="/pago-premios"><i class="bi bi-trophy"></i><span class="side-text">Pago de Premios</span></a>
+
+      <div class="mt-2"></div>
+      <a class="side-link active" href="/sorteo"><i class="bi bi-stars"></i><span class="side-text">Sorteo</span></a>
+      <a class="side-link" href="/crear-figuras"><i class="bi bi-shapes"></i><span class="side-text">Crear Figuras</span></a>
+      <a class="side-link" href="/escoger-figuras"><i class="bi bi-grid-3x3-gap"></i><span class="side-text">Escoger Figuras</span></a>
+      <a class="side-link" href="/boletin"><i class="bi bi-newspaper"></i><span class="side-text">Boletín</span></a>
+
+      <div class="text-secondary small mt-4">© GL Studios</div>
+    </nav>
+  </aside>
+
+  <!-- Main -->
+  <main>
+    <!-- Topbar -->
+    <div class="topbar">
+      <div class="d-flex align-items-center gap-3">
+        <h4>Sorteo</h4>
+        <span class="pill">Boletos: <b>{{ boletos_impresos }}</b></span>
+        <span class="pill">Boleto: <b>{{ valor_boleto }}</b></span>
+        <span class="pill">Reintegro: <b>{{ reintegro_dia }}</b></span>
+      </div>
+      <div class="d-flex align-items-center gap-2">
+        <button class="btn btn-outline-primary" id="btn-guardar"><i class="bi bi-save2 me-1"></i>Guardar spinners</button>
+        <button class="btn btn-success" id="btn-activar"><i class="bi bi-check2-circle me-1"></i>Activar (generar XMLs)</button>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div class="content">
+      <!-- Fecha -->
+      <div class="box mb-3">
+        <div class="row g-2 align-items-end">
+          <div class="col-auto">
+            <label class="small-label">Fecha del sorteo</label>
+            <input id="fecha" type="date" class="form-control" value="{{ fecha }}">
+          </div>
+          <div class="col-auto">
+            <button class="btn btn-secondary" id="btn-cargar"><i class="bi bi-arrow-repeat me-1"></i>Cargar</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="row g-3">
+        <!-- Datos -->
+        <div class="col-12 col-lg-6">
+          <div class="box">
+            <h6 class="mb-3">Datos del día</h6>
+            <div class="mb-2">
+              <label class="small-label">Nombre del evento</label>
+              <input class="form-control readonly" value="Sorteo {{ fecha }}" readonly>
+            </div>
+            <div class="mb-2">
+              <label class="small-label">Serie (detectada por impresiones)</label>
+              <input class="form-control readonly" value="{{ serie_detectada }}" readonly>
+            </div>
+            <div class="row g-2">
+              <div class="col-6">
+                <label class="small-label">Primer boleto</label>
+                <input class="form-control readonly" value="{{ primer_boleto }}" readonly>
+              </div>
+              <div class="col-6">
+                <label class="small-label">Último boleto</label>
+                <input class="form-control readonly" value="{{ ultimo_boleto }}" readonly>
+              </div>
+            </div>
+            <div class="row g-2 mt-1">
+              <div class="col-6">
+                <label class="small-label">Reintegro del día</label>
+                <input class="form-control readonly" value="{{ reintegro_dia }}" readonly>
+              </div>
+              <div class="col-6">
+                <label class="small-label">Valor del boleto</label>
+                <input class="form-control readonly" value="{{ valor_boleto }}" readonly>
+              </div>
+            </div>
+            <div class="row g-2 mt-1">
+              <div class="col-6">
+                <label class="small-label">Boletos impresos hoy</label>
+                <input class="form-control readonly" value="{{ boletos_impresos }}" readonly>
+              </div>
+              <div class="col-6">
+                <label class="small-label">Total a jugar (boletos × valor)</label>
+                <input class="form-control readonly" value="{{ total_a_jugar }}" readonly>
+              </div>
+            </div>
+            <div class="mt-2">
+              <label class="small-label">Total premios del día (TL1+TL2+Figuras)</label>
+              <input class="form-control readonly" value="{{ total_premios }}" readonly>
+            </div>
+          </div>
+        </div>
+
+        <!-- Figuras -->
+        <div class="col-12 col-lg-6">
+          <div class="box">
+            <h6 class="mb-3">Figuras a jugar</h6>
+            <div class="row g-2">
+              <div class="col-6">
+                <label class="small-label">Tabla Llena 1 (valor)</label>
+                <input class="form-control readonly" value="{{ tl1 }}" readonly>
+              </div>
+              <div class="col-6">
+                <label class="small-label">Tabla Llena 2 (valor)</label>
+                <input class="form-control readonly" value="{{ tl2 }}" readonly>
+              </div>
+              <div class="col-6">
+                <label class="small-label">Tabla Llena 3 (valor)</label>
+                <input class="form-control readonly" value="{{ tl3 }}" readonly>
+              </div>
+              <div class="col-6">
+                <label class="small-label">Tabla Llena 4 (valor)</label>
+                <input class="form-control readonly" value="{{ tl4 }}" readonly>
+              </div>
+            </div>
+            <div class="small-label mt-3">Figuras personalizadas (nombre / valor)</div>
+            <div>
+              {% if figs_resto and figs_resto|length>0 %}
+                {% for f in figs_resto %}
+                  <span class="chip"><i class="bi bi-puzzle-fill"></i>{{ f.nombre }} — {{ f.valor }}</span>
+                {% endfor %}
+              {% else %}
+                <div class="text-muted">No hay figuras para esta fecha.</div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Asignaciones -->
+      <div class="box mt-3">
+        <h6 class="mb-3">Asignaciones del día</h6>
+        <div class="table-responsive">
+          <table class="table table-sm table-striped align-middle">
+            <thead class="table-light"><tr><th>Desde</th><th>Hasta</th><th>Vendedor</th></tr></thead>
+            <tbody>
+              {% for a in asignaciones %}
+                <tr><td>{{ a.desde }}</td><td>{{ a.hasta }}</td><td>{{ a.vendedor }}</td></tr>
+              {% else %}
+                <tr><td colspan="3" class="text-muted">No hay asignaciones para esta fecha.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        <div class="row g-2 mt-2">
+          <div class="col-auto">
+            <label class="small-label">Consultar vendedor por boleto</label>
+            <input id="q-boleto" class="form-control" placeholder="Ej. 123">
+          </div>
+          <div class="col-auto align-self-end">
+            <button id="btn-consultar" class="btn btn-outline-primary"><i class="bi bi-search me-1"></i>Consultar</button>
+          </div>
+          <div class="col-12 mt-1"><div id="resp-vend" class="text-secondary"></div></div>
+        </div>
+      </div>
+
+      <!-- Spinners -->
+      <div class="box mt-3">
+        <div class="d-flex align-items-center justify-content-between">
+          <h6 class="mb-3">Spinners (4 dígitos, 20)</h6>
+          <div class="d-flex gap-2">
+            <button id="btn-limpiar" class="btn btn-light border"><i class="bi bi-eraser me-1"></i>Limpiar</button>
+          </div>
+        </div>
+        <div class="row g-2">
+          {% for i in range(20) %}
+            <div class="col-6 col-sm-4 col-md-3 col-lg-2">
+              <input class="form-control spinner" data-i="{{ i+1 }}" maxlength="4" pattern="\\d{4}" placeholder="0000"
+                     value="{{ spinners[i] if spinners and spinners|length>i else '' }}">
+            </div>
+          {% endfor %}
+        </div>
+        <div class="form-text mt-2">“Guardar spinners” los guarda localmente por fecha. “Activar” escribe además los XMLs.</div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Toast -->
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index:1080">
+  <div id="toast" class="toast align-items-center text-bg-dark border-0" role="alert">
+    <div class="d-flex">
+      <div class="toast-body" id="toast-msg">Listo</div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  const $ = s => document.querySelector(s);
+  const $$ = s => Array.from(document.querySelectorAll(s));
+  function keyFor(fecha){ return `spinners:${fecha}`; }
+  function readSpinners(){ return $$('.spinner').map(el => (el.value||'').replace(/\D/g,'').slice(0,4)); }
+  function writeSpinners(list){ $$('.spinner').forEach((el,i)=> el.value = (list[i]||'')); }
+  function toast(m){ $('#toast-msg').textContent=m; new bootstrap.Toast($('#toast'),{delay:2200}).show(); }
+
+  $('#btn-cargar').addEventListener('click', ()=>{
+    const f = $('#fecha').value || '';
+    const u = new URL(window.location.href); u.searchParams.set('fecha', f);
+    window.location.href = u.toString();
+  });
+
+  $('#btn-consultar').addEventListener('click', async ()=>{
+    const b = ($('#q-boleto').value||'').trim();
+    const f = ($('#fecha').value||'').trim();
+    if(!b) return;
+    const r = await fetch(`/api/vendedor-por-boleto?fecha=${encodeURIComponent(f)}&boleto=${encodeURIComponent(b)}`);
+    const j = await r.json();
+    $('#resp-vend').textContent = j.vendedor ? `Vendedor: ${j.vendedor}` : 'No asignado';
+  });
+
+  $('#btn-guardar').addEventListener('click', ()=>{
+    const f = ($('#fecha').value||'').trim();
+    localStorage.setItem(keyFor(f), JSON.stringify(readSpinners()));
+    toast('Spinners guardados para ' + f);
+  });
+
+  $('#btn-limpiar').addEventListener('click', ()=> writeSpinners(Array(20).fill('')));
+
+  $('#btn-activar').addEventListener('click', async ()=>{
+    const f = ($('#fecha').value||'').trim();
+    const spins = readSpinners();
+    localStorage.setItem(keyFor(f), JSON.stringify(spins));
+    const r = await fetch('/api/activar-sorteo', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({fecha:f, spinners:spins})});
+    const j = await r.json().catch(()=>({ok:false,mensaje:'Error inesperado'}));
+    toast(j.mensaje || (j.ok ? 'Activado' : 'Error'));
+  });
+
+  // Prefill local por fecha
+  (function init(){
+    const f = ($('#fecha').value||'').trim();
+    const raw = localStorage.getItem(keyFor(f)); if(raw){ try{ writeSpinners(JSON.parse(raw)); }catch{} }
+  })();
+</script>
+</body>
+</html>

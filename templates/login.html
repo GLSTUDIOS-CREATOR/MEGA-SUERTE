@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Iniciar Sesión | GL Studios</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;800&display=swap" rel="stylesheet">
+    <style>
+        html, body {
+            height: 100%;
+            min-height: 100vh;
+        }
+        body {
+            min-height: 100vh;
+            margin: 0;
+            font-family: 'Montserrat', Arial, sans-serif;
+            background: #f4f7fb;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        /* Fondo animado centrado y elegante */
+        .bg-circles {
+            position: fixed;
+            width: 100vw; height: 100vh;
+            left: 0; top: 0;
+            z-index: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+        .circle {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.19;
+            filter: blur(1px);
+            animation: float2 16s ease-in-out infinite alternate;
+        }
+        .c1 { width: 400px; height: 400px; left: -120px; top: 12vh; background: #24e2ff;}
+        .c2 { width: 220px; height: 220px; right: 4vw; top: 6vh; background: #1490f2; animation-delay: 5s;}
+        .c3 { width: 150px; height: 150px; left: 13vw; bottom: 6vh; background: #ffe39c; animation-delay: 2s;}
+        .c4 { width: 120px; height: 120px; right: 15vw; bottom: 7vh; background: #f7a9ec; animation-delay: 3s;}
+        .c5 { width: 100px; height: 100px; left: 50vw; top: 84vh; background: #9fffc3; animation-delay: 7s;}
+        .c6 { width: 60px;  height: 60px;  right: 4vw; bottom: 16vh; background: #24e2ff; animation-delay: 9s;}
+        @keyframes float2 {
+            0%   { transform: translateY(0) scale(1);}
+            100% { transform: translateY(-45px) scale(1.09);}
+        }
+        /* Centrado absoluto login-box */
+        .main-center {
+            min-height: 100vh;
+            width: 100vw;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            z-index: 2;
+        }
+        .login-box {
+            width: 340px;
+            padding: 2.3rem 2rem 2.2rem;
+            background: #fff;
+            border-radius: 18px;
+            box-shadow: 0 7px 40px #1875d735, 0 1.5px 8px #b9e5fa55;
+            text-align: center;
+            position: relative;
+            margin: 0;
+        }
+        .login-box img {
+            width: 80px;
+            margin-bottom: 8px;
+            margin-top: -10px;
+            filter: drop-shadow(0 0 2px #40e4ff80);
+        }
+        .login-box h2 {
+            font-size: 1.47rem;
+            font-weight: 800;
+            color: #1a3152;
+            margin-bottom: 2.2rem;
+            letter-spacing: 0.1rem;
+        }
+        .login-box input {
+            width: 100%;
+            padding: 0.82rem 0.9rem;
+            margin-bottom: 15px;
+            border: 1.4px solid #e2e6ee;
+            border-radius: 10px;
+            background: #f4f7fc;
+            font-size: 1.07rem;
+            color: #1a3152;
+            outline: none;
+            transition: border-color 0.2s;
+            font-family: 'Montserrat', Arial, sans-serif;
+            letter-spacing: .03em;
+        }
+        .login-box input:focus {
+            border: 1.5px solid #1999ed;
+            background: #eaf6fc;
+        }
+        .input-pwd-wrap {
+            position: relative;
+        }
+        .pwd-toggle {
+            position: absolute;
+            right: 18px;
+            top: 56%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            width: 25px;
+            height: 25px;
+            opacity: 0.72;
+        }
+        .pwd-toggle:hover { opacity: 1; }
+        .login-box button {
+            width: 100%;
+            padding: 0.85rem 0;
+            margin-top: 7px;
+            background: linear-gradient(90deg, #1991f5 15%, #1addff 95%);
+            border: none;
+            color: #fff;
+            font-weight: 700;
+            font-size: 1.18rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 12px #14c3fa21;
+            cursor: pointer;
+            letter-spacing: .04em;
+            transition: background .2s, box-shadow .2s;
+        }
+        .login-box button:hover {
+            background: linear-gradient(90deg, #1addff 10%, #1991f5 90%);
+            box-shadow: 0 3px 18px #14c3fa45;
+        }
+        .error {
+            color: #d80031;
+            background: #ffe2ec;
+            padding: 8px 14px 6px 14px;
+            border-radius: 7px;
+            margin-bottom: 12px;
+            font-size: .99rem;
+        }
+        .footer {
+            width: 100vw;
+            bottom: 0;
+            left: 0;
+            z-index: 10;
+            text-align: center;
+            font-size: 1.07rem;
+            font-family: 'Montserrat', Arial, sans-serif;
+            color: #7da0d1;
+            background: transparent;
+            padding-bottom: 14px;
+            letter-spacing: .04em;
+            user-select: none;
+            position: fixed;
+        }
+        .footer b {
+            color: #0fa4ff;
+        }
+        @media (max-width: 600px) {
+            .login-box { width: 96vw; padding: 1.7rem 0.7rem 1.6rem;}
+            .login-box img { width: 52px; }
+            .login-box h2 { font-size: 1rem;}
+        }
+    </style>
+</head>
+<body>
+    <!-- Fondo animado -->
+    <div class="bg-circles">
+        <div class="circle c1"></div>
+        <div class="circle c2"></div>
+        <div class="circle c3"></div>
+        <div class="circle c4"></div>
+        <div class="circle c5"></div>
+        <div class="circle c6"></div>
+    </div>
+
+    <div class="main-center">
+        <form class="login-box" method="POST" autocomplete="off">
+            <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo GL Studios">
+            <h2>Iniciar Sesión</h2>
+            {% with messages = get_flashed_messages(category_filter=["error"]) %}
+              {% if messages %}
+                <div class="error">{{ messages[0] }}</div>
+              {% endif %}
+            {% endwith %}
+            <input name="usuario" type="text" placeholder="Usuario" required autofocus>
+            <div class="input-pwd-wrap">
+                <input id="clave" name="clave" type="password" placeholder="Contraseña" required>
+                <span class="pwd-toggle" onclick="togglePassword()" title="Mostrar/Ocultar contraseña">
+                    <!-- SVG OJO -->
+                    <svg id="eyeOpen" xmlns="http://www.w3.org/2000/svg" height="22" viewBox="0 0 24 24" width="22" fill="#1a3152" style="position:absolute;top:0;left:0;">
+                        <path d="M12 4.5C7 4.5 2.7 8.1 1 12c1.7 3.9 6 7.5 11 7.5s9.3-3.6 11-7.5C21.3 8.1 17 4.5 12 4.5zm0 13c-3.7 0-7.3-2.8-9-6 1.7-3.2 5.3-6 9-6s7.3 2.8 9 6c-1.7 3.2-5.3 6-9 6zm0-10c-2.2 0-4 1.8-4 4s1.8 4 4 4 4-1.8 4-4-1.8-4-4-4zm0 6c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/>
+                    </svg>
+                    <svg id="eyeClosed" xmlns="http://www.w3.org/2000/svg" style="display:none;position:absolute;top:0;left:0;" height="22" viewBox="0 0 24 24" width="22" fill="#1a3152">
+                        <path d="M12 6.5c2.3 0 4.6.9 6.3 2.5C17.6 11.3 15 13.5 12 13.5s-5.6-2.2-6.3-4.5c1.7-1.6 4-2.5 6.3-2.5zm10.7 5.7c-1.9 3.8-6.2 7.3-10.7 7.3s-8.8-3.5-10.7-7.3a.996.996 0 010-.8C2.5 7.5 6.8 4 12 4s9.5 3.5 10.7 7.4a.996.996 0 010 .8z"/>
+                        <line x1="2" y1="2" x2="22" y2="22" stroke="#d80031" stroke-width="2"/>
+                    </svg>
+                </span>
+            </div>
+            <button type="submit">Entrar</button>
+        </form>
+    </div>
+    <div class="footer">
+        &copy; {{ ano_actual or 2025 }} <b>GL Studios</b>. Todos los derechos reservados.
+    </div>
+    <script>
+        function togglePassword() {
+            const pwd = document.getElementById('clave');
+            const open = document.getElementById('eyeOpen');
+            const closed = document.getElementById('eyeClosed');
+            if (pwd.type === "password") {
+                pwd.type = "text";
+                open.style.display = "none";
+                closed.style.display = "block";
+            } else {
+                pwd.type = "password";
+                open.style.display = "block";
+                closed.style.display = "none";
+            }
+        }
+    </script>
+</body>
+</html>

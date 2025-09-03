@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Asignación de Planillas | GL Bingo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <!-- Montserrat -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --sb:#1b2746;--sb-hover:rgba(255,255,255,.10);--sb-active:rgba(255,255,255,.18);
+      --bg:#f6f8ff;--txt:#23213b;--brand:#5b6fe6;--ok:#10b981;--warn:#ffd56b;--danger:#ef4444;
+      --chip:#f3f1fe;--chip2:#e7fff8;--chip3:#fff6df;--card:#ffffff;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);font-family:'Montserrat',Arial,sans-serif;color:var(--txt)}
+
+    .layout{display:grid;grid-template-columns:260px 1fr;min-height:100vh}
+    .sidebar{background:var(--sb);color:#e8eeff;position:sticky;top:0;height:100vh;box-shadow:0 10px 40px rgba(0,0,0,.25);z-index:40}
+    .sb-head{display:flex;align-items:center;gap:12px;padding:16px 14px;border-bottom:1px solid rgba(255,255,255,.08)}
+    .sb-logo{width:44px;height:44px;border-radius:12px;background:#fff;padding:6px;box-shadow:0 3px 14px rgba(0,0,0,.15)}
+    .sb-title{font-weight:900;letter-spacing:.3px}
+    .nav{padding:10px}
+    .sb-link{display:flex;align-items:center;gap:10px;padding:10px 12px;margin:4px 0;border-radius:12px;color:#e8eeff;text-decoration:none;font-weight:700}
+    .sb-link:hover{background:var(--sb-hover)}
+    .sb-link.active{background:var(--sb-active)}
+    .logout{display:block;margin:12px 10px 16px;background:#e84c4c;color:#fff;text-align:center;padding:10px;border-radius:10px;text-decoration:none;font-weight:800}
+
+    .toggle{display:none;position:fixed;left:12px;top:12px;z-index:50;border:1px solid #e5e7eb;background:#fff;padding:8px 12px;border-radius:10px}
+    @media (max-width: 1024px){
+      .layout{grid-template-columns:1fr}
+      .sidebar{position:fixed;left:0;top:0;width:260px;transform:translateX(-100%);transition:.25s}
+      .sidebar.show{transform:none}
+      .toggle{display:inline-flex;align-items:center;gap:8px}
+      main{padding-top:58px}
+    }
+
+    .main-card{max-width:1150px;margin:50px auto 28px;background:var(--card);border-radius:28px;box-shadow:0 8px 40px #d3d0fd48;padding:42px}
+    .logo-gl{width:84px;display:block;margin:0 auto 10px;border-radius:16px;background:#fff;box-shadow:0 3px 16px #a49ce41b}
+    h1{font-size:2.2rem;font-weight:900;text-align:center;color:#23213b;margin-bottom:6px;letter-spacing:.2px}
+    .subtitle{text-align:center;color:#6b6a8a;margin-bottom:22px}
+
+    .chips{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin:18px 0 28px}
+    .chip{display:flex;align-items:center;gap:10px;font-weight:800;border-radius:999px;padding:10px 16px}
+    .chip.i{background:var(--chip)}
+    .chip.a{background:var(--chip2)}
+    .chip.b{background:var(--chip3)}
+    .chip .v{font-size:1.1em}
+
+    .form-row{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-bottom:18px}
+    .form-row select,.form-row input[type="text"],.form-row input[type="date"]{
+      padding:10px 14px;font-size:1em;border:1.5px solid #deddf2;border-radius:9px;outline:none;background:#fbfbff;min-width:220px
+    }
+    .btn{background:var(--brand);color:#fff;padding:10px 20px;border-radius:10px;font-weight:800;border:none;cursor:pointer;transition:transform .08s}
+    .btn:hover{transform:translateY(-1px)}
+    .btn-sec{background:#0ea5e9}
+
+    .alert{padding:12px 16px;border:1px solid #ffd0d0;color:#b72a2a;background:#ffecec;border-radius:10px;display:none;max-width:700px;margin:0 auto 12px}
+    .alert.show{display:block}
+
+    .panel{margin-top:14px;border-radius:16px;background:#f7f8fd;box-shadow:0 2px 16px #dedcf61c;padding:0}
+    table{width:100%;border-collapse:separate;border-spacing:0}
+    th,td{padding:14px 10px}
+    thead tr{background:#f0f0fc}
+    tbody tr{border-bottom:1px solid #e8e7fa}
+    tbody td{background:#fff;vertical-align:middle}
+    .vendedor{font-weight:800}
+    .seud{color:#12bc9b;font-weight:800}
+    .planillas-col{display:flex;flex-wrap:wrap;gap:8px 6px}
+    .pill{background:#5b6fe6;color:#fff;font-weight:800;border-radius:10px;padding:6px 12px;display:flex;gap:10px;align-items:center}
+    .pill small{opacity:.9}
+    .pill .del{background:transparent;border:none;color:#fff;cursor:pointer;font-size:1.1em}
+    tfoot td{background:#edeaff;font-weight:900}
+  </style>
+</head>
+<body>
+
+<div class="layout">
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-head">
+      <img class="sb-logo" src="{{ url_for('static', filename='img/logo.png') }}" alt="GL Studios">
+      <div class="sb-title">GL Bingo</div>
+    </div>
+    <nav class="nav">
+      <a class="sb-link" href="/dashboard">🏠 Dashboard</a>
+      <a class="sb-link" href="/usuarios">🧑‍💼 Usuarios</a>
+      <a class="sb-link" href="/juego">🎲 Juego</a>
+      <a class="sb-link" href="/contabilidad">📊 Contabilidad</a>
+      <a class="sb-link" href="/vendedores">🧾 Vendedores</a>
+      <a class="sb-link active" href="/asignar-planillas">📑 Asignar Planillas</a>
+      <a class="sb-link" href="/impresion">🖨️ Impresión de Boletos</a>
+      <a class="sb-link" href="/cobro">💵 Cobro de Caja</a>
+      <a class="sb-link" href="/pago-premios">🏅 Pago de Premios</a>
+      <a class="sb-link" href="/sorteo">🎟️ Sorteo</a>
+      <a class="sb-link" href="/crear-figuras">🟩 Crear Figuras</a>
+      <a class="sb-link" href="/escoger-figuras">🟦 Escoger Figuras</a>
+      <a class="sb-link" href="/boletin">📋 Boletín</a>
+    </nav>
+    <a class="logout" href="{{ url_for('logout') }}">Cerrar sesión</a>
+  </aside>
+
+  <!-- Main -->
+  <main>
+    <button class="toggle" id="toggleSidebar"><i class="bi bi-list"></i> Menú</button>
+
+    <div class="main-card">
+      <img src="{{ url_for('static', filename='img/logo.png') }}" alt="GL Studios Logo" class="logo-gl">
+      <h1>Asignación de Planillas</h1>
+      <div class="subtitle">Solo se asignan planillas de <b>boletos impresos</b> (por <b>serie</b> y <b>fecha de sorteo</b>).</div>
+
+      <!-- Chips resumen por SERIE+FECHA -->
+      <div class="chips" id="chips">
+        <div class="chip i"><i class="bi bi-printer"></i> Impresas (serie): <span class="v" id="impresasSerie">{{ impresas_serie }}</span></div>
+        <div class="chip a"><i class="bi bi-clipboard2-check"></i> Asignadas (serie): <span class="v" id="asignadasSerie">{{ asignadas_serie }}</span></div>
+        <div class="chip b"><i class="bi bi-file-minus"></i> En blanco (serie): <span class="v" id="blancoSerie">{{ blanco_serie }}</span></div>
+        <div class="chip"><i class="bi bi-grid-3x3-gap"></i> Boletos/planilla: <span class="v">{{ boletos_por_planilla }}</span></div>
+      </div>
+
+      <!-- Alerta -->
+      <div id="alerta" class="alert"></div>
+
+      <!-- Formulario -->
+      <form class="form-row" id="form-asignar" autocomplete="off">
+        <select id="vendedor-select" name="vendedor" required>
+          <option value="">Seleccione vendedor</option>
+          {% for v in vendedores %}
+            <option value="{{ v.nombre }}|{{ v.apellido }}|{{ v.seudonimo }}">{{ v.nombre }} {{ v.apellido }} ({{ v.seudonimo }})</option>
+          {% endfor %}
+        </select>
+
+        <input type="text" name="planillas" id="planillas-input" placeholder="Planillas (ej: 1,2 o 1-5)" autocomplete="off">
+
+        <input type="date" name="fecha" id="fecha-input" value="{{ fecha_seleccionada }}">
+
+        <select id="serie-select" name="serie_archivo" required>
+          {% if series_impresas|length == 0 %}
+            <option value="">— Sin series impresas en {{ fecha_seleccionada }} —</option>
+          {% else %}
+            {% for s in series_impresas %}
+              <option value="{{ s }}" {% if s==serie_seleccionada %}selected{% endif %}>Serie: {{ s }}</option>
+            {% endfor %}
+          {% endif %}
+        </select>
+
+        <button type="submit" class="btn">Asignar</button>
+        <button type="button" class="btn btn-sec" onclick="location.href='/impresion'"><i class="bi bi-printer"></i> Ir a Impresión</button>
+      </form>
+
+      <!-- Filtros de vista -->
+      <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:center;margin:8px 0 14px">
+        <label>Ver día:
+          <select id="fecha-select">
+            {% for f in fechas_disponibles %}
+              <option value="{{ f }}" {% if f==fecha_seleccionada %}selected{% endif %}>{{ f }}</option>
+            {% endfor %}
+          </select>
+        </label>
+        <label>Serie:
+          <select id="serie-select-view">
+            {% if series_impresas|length == 0 %}
+              <option value="">—</option>
+            {% else %}
+              {% for s in series_impresas %}
+                <option value="{{ s }}" {% if s==serie_seleccionada %}selected{% endif %}>{{ s }}</option>
+              {% endfor %}
+            {% endif %}
+          </select>
+        </label>
+        <button class="btn" type="button" onclick="location.href='/dashboard'"><i class="bi bi-speedometer2"></i> Dashboard</button>
+      </div>
+
+      <!-- Tabla -->
+      <div id="tabla-asignaciones" class="panel">
+        {% include 'tabla_asignaciones.html' %}
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+  const sb = document.getElementById('sidebar');
+  document.getElementById('toggleSidebar')?.addEventListener('click', ()=> sb.classList.toggle('show'));
+
+  function showError(msg){
+    const a = document.getElementById('alerta');
+    a.textContent = msg; a.classList.add('show');
+    setTimeout(()=>a.classList.remove('show'), 5000);
+  }
+
+  function updateChips(counters){
+    if(!counters) return;
+    document.getElementById('impresasSerie').textContent  = counters.impresas_serie ?? document.getElementById('impresasSerie').textContent;
+    document.getElementById('asignadasSerie').textContent = counters.asignadas_serie ?? document.getElementById('asignadasSerie').textContent;
+    document.getElementById('blancoSerie').textContent    = counters.blanco_serie ?? document.getElementById('blancoSerie').textContent;
+  }
+
+  // Submit asignación
+  document.getElementById('form-asignar').addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    const fd = new FormData(e.target);
+    try{
+      const r = await fetch('/asignar-planillas', {method:'POST', body:fd});
+      const j = await r.json();
+      if(!j.ok){ showError(j.error||'No se pudo asignar'); return; }
+      document.getElementById('tabla-asignaciones').innerHTML = j.tbody;
+      updateChips(j.contadores);
+      document.getElementById('planillas-input').value='';
+    }catch(err){ showError('Error de red'); }
+  });
+
+  // Cambios de fecha/serie en la vista ⇒ recargar con QS
+  document.getElementById('fecha-select').addEventListener('change', ()=>{
+    const f = document.getElementById('fecha-select').value;
+    const s = document.getElementById('serie-select-view').value;
+    location.href = `?fecha=${encodeURIComponent(f)}&serie=${encodeURIComponent(s)}`;
+  });
+  document.getElementById('serie-select-view').addEventListener('change', ()=>{
+    const f = document.getElementById('fecha-select').value;
+    const s = document.getElementById('serie-select-view').value;
+    location.href = `?fecha=${encodeURIComponent(f)}&serie=${encodeURIComponent(s)}`;
+  });
+
+  // Delegado para eliminar planilla (envía también la serie)
+  document.addEventListener('click', async (e)=>{
+    const btn = e.target.closest('.del');
+    if(!btn) return;
+    const row = btn.closest('.pill');
+    btn.disabled = true;
+    try{
+      const res = await fetch('/eliminar_planilla', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({
+          fecha: btn.dataset.fecha,
+          nombre: btn.dataset.nombre,
+          apellido: btn.dataset.apellido,
+          seudonimo: btn.dataset.seudonimo,
+          numero: btn.dataset.numero,
+          serie: btn.dataset.serie
+        })
+      });
+      const j = await res.json();
+      if(j.ok){
+        document.getElementById('tabla-asignaciones').innerHTML = j.tbody;
+        updateChips(j.contadores);
+      }
+    }catch(_){ showError('No se pudo eliminar'); }
+    finally{ btn.disabled = false; }
+  });
+</script>
+</body>
+</html>

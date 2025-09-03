@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Gestión de Usuarios | GLBINGO</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Tailwind + Icons -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <!-- Tu CSS de usuarios (se mantiene) -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/usuarios.css') }}">
+  <style>
+    @keyframes spin-slow { 0% { transform: rotate(0deg);} 100% { transform: rotate(360deg);} }
+    .animate-spin-slow { animation: spin-slow 8s linear infinite; }
+  </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+
+  <!-- ===== Sidebar (botones del dashboard a la izquierda) ===== -->
+  <!-- Importante: sin @apply; todo con clases Tailwind para que se vea correcto -->
+  <aside id="sidebar"
+         class="fixed inset-y-0 left-0 z-40 hidden md:flex w-64 bg-[#1b2746] text-white shadow-xl flex-col">
+    <div class="px-4 py-5 border-b border-white/10">
+      <div class="flex items-center gap-3">
+        <img src="{{ url_for('static', filename='img/logo.png') }}" class="h-12 w-12 rounded-xl bg-white p-1 shadow" alt="Logo GLBINGO">
+        <div class="text-xl font-black">GL Bingo</div>
+      </div>
+    </div>
+
+    <nav class="p-3 space-y-1 text-[15px] overflow-y-auto">
+      <a href="/dashboard" class="flex items-center gap-3 px-4 py-2 rounded-xl transition hover:bg-white/10 text-white/90 hover:text-white">
+        <span>🏠</span> <span class="truncate">Dashboard</span>
+      </a>
+      <a href="/usuarios" class="flex items-center gap-3 px-4 py-2 rounded-xl bg-white/20 text-white font-extrabold">
+        <span>🧑‍💼</span> <span class="truncate">Usuarios</span>
+      </a>
+      <a href="/juego" class="flex items-center gap-3 px-4 py-2 rounded-xl transition hover:bg-white/10 text-white/90 hover:text-white">
+        <span>🎲</span> <span class="truncate">Juego</span>
+      </a>
+      <a href="/contabilidad" class="flex items-center gap-3 px-4 py-2 rounded-xl transition hover:bg-white/10 text-white/90 hover:text-white">
+        <span>📊</span> <span class="truncate">Contabilidad</span>
+      </a>
+      <a href="/vendedores" class="flex items-center gap-3 px-4 py-2 rounded-xl transition hover:bg-white/10 text-white/90 hover:text-white">
+        <span>🧾</span> <span class="truncate">Vendedores</span>
+      </a>
+      <a href="/asignar-planillas" class="flex items-center gap-3 px-4 py-2 rounded-xl transition hover:bg-white/10 text-white/90 hover:text-white">
+        <span>📑</span> <span class="truncate">Asignar Planillas</span>
+      </a>
+      <a href="/impresion" class="flex items-center gap-3 px-4 py-2 rounded-xl transition hover:bg-white/10 text-white/90 hover:text-white">
+        <span>🖨️</span> <span class="truncate">Impresión de Boletos</span>
+      </a>
+      <a href="/cobro" class="flex items-center gap-3 px-4 py-2 rounded-xl transition hover:bg-white/10 text-white/90 hover:text-white">
+        <span>💵</span> <span class="truncate">Cobro de Caja</span>
+      </a>
+      <a href="/pago-premios" class="flex items-center gap-3 px-4 py-2 rounded-xl transition hover:bg-white/10 text-white/90 hover:text-white">
+        <span>🏅</span> <span class="truncate">Pago de Premios</span>
+      </a>
+      <a href="/sorteo" class="flex items-center gap-3 px-4 py-2 rounded-xl transition hover:bg-white/10 text-white/90 hover:text-white">
+        <span>🎟️</span> <span class="truncate">Sorteo</span>
+      </a>
+      <a href="/crear-figuras" class="flex items-center gap-3 px-4 py-2 rounded-xl transition hover:bg-white/10 text-white/90 hover:text-white">
+        <span>🟩</span> <span class="truncate">Crear Figuras</span>
+      </a>
+      <a href="/escoger-figuras" class="flex items-center gap-3 px-4 py-2 rounded-xl transition hover:bg-white/10 text-white/90 hover:text-white">
+        <span>🟦</span> <span class="truncate">Escoger Figuras</span>
+      </a>
+      <a href="/boletin" class="flex items-center gap-3 px-4 py-2 rounded-xl transition hover:bg-white/10 text-white/90 hover:text-white">
+        <span>📋</span> <span class="truncate">Boletín</span>
+      </a>
+    </nav>
+
+    <div class="mt-auto p-3 border-t border-white/10">
+      <a href="{{ url_for('logout') }}"
+         class="block text-center bg-red-500 hover:bg-red-600 transition font-bold rounded-xl py-2">Cerrar sesión</a>
+    </div>
+  </aside>
+
+  <!-- ===== Contenido (desplazado cuando el sidebar está visible) ===== -->
+  <div class="md:ml-64">
+    <!-- HEADER (se mantiene; solo agrego botón para abrir sidebar en móvil) -->
+    <header class="flex items-center justify-between bg-white shadow px-6 py-4">
+      <div class="flex items-center gap-3">
+        <button id="openSidebar" class="md:hidden mr-2 rounded-lg border border-gray-200 px-3 py-2">
+          <i class="bi bi-list text-xl"></i>
+        </button>
+        <img src="{{ url_for('static', filename='img/logo.png') }}" class="h-12 w-12 animate-spin-slow" alt="Logo GLBINGO">
+        <span class="font-black text-2xl text-gray-800 tracking-widest">GLBINGO</span>
+      </div>
+      <a href="{{ url_for('dashboard') }}"
+         class="bg-gradient-to-r from-pink-500 to-yellow-400 hover:from-yellow-400 hover:to-pink-500 text-white font-bold px-6 py-2 rounded-xl shadow transition">← Volver</a>
+    </header>
+
+    <!-- MAIN (tu código intacto) -->
+    <main class="max-w-6xl mx-auto py-8">
+      <div class="flex flex-col md:flex-row gap-6">
+        <section class="w-full md:w-2/3">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-2xl font-bold text-gray-800">Usuarios del Sistema</h2>
+            <button onclick="document.getElementById('modal-user').classList.remove('hidden')"
+                    class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg shadow transition font-semibold">
+              <i class="bi bi-person-plus"></i> Crear Usuario
+            </button>
+          </div>
+          <div class="bg-white rounded-2xl shadow-lg overflow-x-auto">
+            <table class="tabla-usuarios min-w-full divide-y divide-gray-200">
+              <thead>
+                <tr>
+                  <th>Avatar</th>
+                  <th>Usuario</th>
+                  <th>Rol</th>
+                  <th>Email</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for u in usuarios %}
+                <tr>
+                  <td>
+                    <img src="{{ url_for('static', filename='avatars/' ~ u.avatar) }}" alt="Avatar" class="w-12 h-12 rounded-full border shadow">
+                  </td>
+                  <td class="font-semibold text-gray-700">{{ u.nombre }}</td>
+                  <td>
+                    <span class="px-3 py-1 rounded-lg bg-gray-200 text-gray-800 text-xs font-semibold">{{ u.rol }}</span>
+                  </td>
+                  <td class="text-gray-500">{{ u.email }}</td>
+                  <td class="flex gap-2">
+                    <a href="{{ url_for('editar_usuario', nombre=u.nombre) }}" class="bg-green-500 hover:bg-green-700 text-white px-4 py-1 rounded-lg text-xs">
+                      <i class="bi bi-pencil"></i> Editar
+                    </a>
+                    <form action="{{ url_for('eliminar_usuario_route', nombre=u.nombre) }}" method="post" style="display:inline;">
+                      <button onclick="return confirm('¿Eliminar este usuario?')" class="bg-red-600 hover:bg-red-800 text-white px-3 py-1 rounded-lg text-xs">
+                        <i class="bi bi-trash"></i> Eliminar
+                      </button>
+                    </form>
+                  </td>
+                </tr>
+                {% else %}
+                <tr>
+                  <td colspan="5" class="text-center text-gray-400 py-6">No hay usuarios registrados.</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- MODAL PARA CREAR USUARIO (sin cambios) -->
+        <div id="modal-user" class="hidden fixed inset-0 z-50 bg-black/40 flex items-center justify-center">
+          <form action="{{ url_for('guardar_usuario') }}" method="post"
+                class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 space-y-5" autocomplete="off">
+            <h3 class="text-2xl font-black text-blue-700 mb-2">Crear Usuario</h3>
+
+            <div class="mb-3">
+              <label class="block text-gray-700 font-bold mb-1">Avatar</label>
+              <div class="flex gap-4 items-center">
+                <label>
+                  <input type="radio" name="avatar_select" value="avatar-male.png" checked>
+                  <img src="{{ url_for('static', filename='avatars/avatar-male.png') }}" class="w-12 h-12 rounded-full border shadow cursor-pointer" alt="Masculino">
+                </label>
+                <label>
+                  <input type="radio" name="avatar_select" value="avatar-female.png">
+                  <img src="{{ url_for('static', filename='avatars/avatar-female.png') }}" class="w-12 h-12 rounded-full border shadow cursor-pointer" alt="Femenino">
+                </label>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-gray-700 font-bold">Usuario</label>
+              <input required type="text" name="username" class="input-usuario">
+            </div>
+            <div>
+              <label class="block text-gray-700 font-bold">Correo</label>
+              <input required type="email" name="email" class="input-usuario">
+            </div>
+            <div>
+              <label class="block text-gray-700 font-bold">Rol</label>
+              <select required name="rol" class="input-usuario">
+                {% for r in roles %}
+                <option value="{{ r }}">{{ r }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div>
+              <label class="block text-gray-700 font-bold">Contraseña</label>
+              <div class="flex relative">
+                <input type="password" name="password" id="password" class="input-usuario pr-10">
+                <span class="absolute right-3 top-2 text-xl text-gray-400 cursor-pointer" onclick="togglePassword()">
+                  <i id="eye" class="bi bi-eye"></i>
+                </span>
+              </div>
+            </div>
+            <div class="flex gap-3 pt-2">
+              <button type="submit"
+                      class="bg-gradient-to-r from-blue-600 to-pink-500 hover:from-pink-500 hover:to-blue-700 text-white font-bold px-5 py-2 rounded-lg shadow transition">
+                <i class="bi bi-save"></i> Guardar Cambios
+              </button>
+              <button type="button"
+                      onclick="document.getElementById('modal-user').classList.add('hidden')"
+                      class="bg-gray-300 hover:bg-gray-400 text-gray-700 px-5 py-2 rounded-lg shadow font-semibold transition">
+                Cancelar
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- JS: abrir/cerrar sidebar en móvil + ver contraseña -->
+  <script>
+    const sb = document.getElementById('sidebar');
+    const openBtn = document.getElementById('openSidebar');
+    openBtn?.addEventListener('click', () => {
+      // Mostrar/ocultar en móvil
+      if (sb.classList.contains('hidden')) {
+        sb.classList.remove('hidden');
+        sb.classList.add('flex');
+      } else {
+        sb.classList.add('hidden');
+        sb.classList.remove('flex');
+      }
+    });
+
+    function togglePassword() {
+      const passInput = document.getElementById('password');
+      const eye = document.getElementById('eye');
+      if (passInput.type === "password") {
+        passInput.type = "text";
+        eye.className = "bi bi-eye-slash";
+      } else {
+        passInput.type = "password";
+        eye.className = "bi bi-eye";
+      }
+    }
+  </script>
+</body>
+</html>

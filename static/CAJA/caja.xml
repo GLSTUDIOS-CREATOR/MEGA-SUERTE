@@ -1,0 +1,19 @@
+<?xml version='1.0' encoding='utf-8'?>
+<caja>
+  <dia fecha="2025-09-03">
+    <configuracion>
+      <valor_boleto>0.50</valor_boleto>
+      <comision_vendedor>30.0</comision_vendedor>
+      <comision_extra_meta>5.0</comision_extra_meta>
+      <meta_boletos>60</meta_boletos>
+    </configuracion>
+  </dia>
+  <dia fecha="2025-09-04">
+    <configuracion>
+      <valor_boleto>0.50</valor_boleto>
+      <comision_vendedor>30.0</comision_vendedor>
+      <comision_extra_meta>5.0</comision_extra_meta>
+      <meta_boletos>60</meta_boletos>
+    </configuracion>
+  </dia>
+</caja>

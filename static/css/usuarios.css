@@ -1,0 +1,83 @@
+/* static/usuarios.css */
+
+@keyframes spin-slow {
+  0% { transform: rotate(0deg);}
+  100% { transform: rotate(360deg);}
+}
+.animate-spin-slow {
+  animation: spin-slow 8s linear infinite;
+}
+
+.input-usuario {
+  width: 100%;
+  padding: 0.7rem 1rem;
+  border-radius: 0.75rem;
+  border: 1.5px solid #e0e7ef;
+  background: #f7fafc;
+  font-size: 1rem;
+  font-family: inherit;
+  outline: none;
+  transition: border 0.2s;
+  margin-top: 3px;
+  margin-bottom: 5px;
+}
+.input-usuario:focus {
+  border-color: #60a5fa;
+  background: #fff;
+}
+
+button:active {
+  transform: scale(0.98);
+}
+#modal-user .animate-fade-in {
+  animation: fadeIn 0.3s;
+}
+@keyframes fadeIn {
+  0% { opacity:0; transform:scale(0.96);}
+  100% { opacity:1; transform:scale(1);}
+}
+
+::-webkit-scrollbar-thumb {
+  background: #dbeafe;
+  border-radius: 20px;
+}
+::-webkit-scrollbar {
+  width: 8px;
+  background: #f1f5f9;
+}
+
+/* Extra para tabla usuarios */
+.tabla-usuarios th,
+.tabla-usuarios td {
+  padding: 0.8rem 1rem;
+  text-align: left;
+}
+
+.tabla-usuarios th {
+  background: #f3f4f6;
+  font-weight: bold;
+  color: #4b5563;
+  font-size: 1rem;
+}
+
+.tabla-usuarios tr:hover {
+  background: #f1f5fd;
+  transition: background 0.2s;
+}
+
+/* Modal */
+#modal-user {
+  backdrop-filter: blur(2px);
+}
+
+.avatar-uploader {
+  border: 2px dashed #93c5fd;
+  border-radius: 9999px;
+  width: 96px;
+  height: 96px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f3f4f6;
+}

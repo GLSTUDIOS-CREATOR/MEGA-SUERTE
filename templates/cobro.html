@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Cobro de Caja | GL Bingo</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet"/>
+  <style>
+    :root{
+      --bg:#f6f8fc; --panel:#ffffff; --ink:#1b2240; --muted:#7b81a6;
+      --brand:#1c3faa; --brand-weak:#eaf0ff; --accent:#0fb79a; --danger:#e1494f;
+      --ring:#e6e9f7; --r:14px; --shadow:0 10px 28px rgba(27,34,64,.08)
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter, ui-sans-serif, system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;background:var(--bg);color:var(--ink)}
+    a{color:inherit;text-decoration:none}
+
+    .app{display:grid;grid-template-columns:260px 1fr;min-height:100vh}
+    .sidebar{background:#0f1733;color:#dfe6ff;display:flex;flex-direction:column}
+    .logo{display:flex;align-items:center;gap:12px;padding:18px 16px;border-bottom:1px solid rgba(255,255,255,.07)}
+    .logo img{width:44px;height:44px;border-radius:10px;background:#fff;padding:4px}
+    .logo .t{font-weight:900;letter-spacing:.3px}
+    .nav{list-style:none;margin:8px 8px 12px;padding:0}
+    .nav a{display:flex;align-items:center;gap:10px;padding:10px 12px;color:#c9d2ff;border-radius:10px;font-weight:700}
+    .nav a:hover{background:rgba(255,255,255,.08)}
+    .nav a.active{background:var(--accent);color:#063830}
+    .logout{display:block;margin:8px;background:var(--danger);color:#fff;text-align:center;padding:10px;border-radius:10px;font-weight:900}
+
+    main{padding:22px}
+    .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+    .title{margin:0;font-size:1.85rem;font-weight:900;color:var(--brand)}
+    .user{display:flex;align-items:center;gap:10px}
+    .user img{width:36px;height:36px;border-radius:50%}
+    .btn{display:inline-flex;align-items:center;gap:8px;border:none;border-radius:12px;padding:10px 14px;font-weight:900;cursor:pointer}
+    .btn-primary{background:var(--brand);color:#fff}
+    .btn-ghost{background:var(--brand-weak);color:var(--brand)}
+    .btn-accent{background:var(--accent);color:#073a30}
+    .btn-danger{background:var(--danger);color:#fff}
+    .btn-mini{padding:8px 10px;border-radius:10px}
+
+    .card{background:var(--panel);border-radius:var(--r);box-shadow:var(--shadow)}
+    .card .hd{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--ring)}
+    .card .hd h3{margin:0;font-size:1.06rem}
+    .card .bd{padding:16px}
+
+    .filters{display:grid;grid-template-columns:repeat(12,1fr);gap:10px}
+    .field{display:flex;flex-direction:column;gap:6px}
+    label{font-size:.82rem;color:#6b77a6;font-weight:800}
+    input[type="date"],input[type="number"],input[type="text"]{padding:10px;border:1px solid var(--ring);border-radius:12px;background:#fff;font-weight:800;color:#1b2240}
+    input[readonly]{background:#f5f7ff;color:#6a73a6}
+
+    table{width:100%;border-collapse:collapse;background:#fff}
+    th,td{padding:10px 8px;text-align:center;border-bottom:1px solid var(--ring);font-size:.95rem}
+    thead{background:#eef2ff;color:#3b45b1}
+    tbody tr:hover{background:#f8f9ff}
+    .totals{font-weight:900;background:#f2f6ff}
+    .vend-cell{text-align:left}
+    .vend-cell .name{font-weight:900}
+    .vend-cell .nick{display:block;color:#0fb79a;margin-top:2px;font-weight:800}
+
+    .pill{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-size:.82rem;font-weight:900}
+    .pill-green{background:#e7fbf3;color:#0b6b59}
+    .pill-blue{background:#eef2ff;color:#3b45b1}
+    .pill-red{background:#ffe9ec;color:#b01922}
+
+    /* Etiqueta de transferencia por vendedor */
+    .tag-trans{
+      display:inline-flex;align-items:center;gap:6px;
+      background:#e8f3ff;color:#1459a6;border:1px solid #cfe6ff;
+      border-radius:999px;padding:2px 8px;margin-left:8px;font-size:.74rem;font-weight:900
+    }
+
+    .grid{display:grid;gap:12px}
+    .grid.cols-3{grid-template-columns:repeat(3,1fr)}
+    .kpi{background:#f8fafc;border:1px solid var(--ring);border-radius:12px;padding:12px}
+    .kpi .k{font-size:.82rem;color:#6a72a2;font-weight:800}
+    .kpi .v{font-size:1.2rem;font-weight:900}
+
+    .modal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:50}
+    .modal .box{background:#fff;border-radius:14px;box-shadow:0 30px 60px rgba(0,0,0,.2);max-width:640px;width:92%}
+    .modal .box .hd{padding:12px 16px;border-bottom:1px solid var(--ring);display:flex;align-items:center;gap:10px}
+    .modal .box .bd{padding:12px 16px;max-height:70vh;overflow:auto}
+    @media (max-width:1100px){ .grid.cols-3{grid-template-columns:1fr} }
+  </style>
+</head>
+<body>
+<div class="app">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="logo">
+      <img src="{{ url_for('static', filename='img/logo.png') }}" alt="GL Bingo">
+      <div class="t">GL Bingo</div>
+    </div>
+    <ul class="nav">
+      <li><a href="/dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
+      <li><a href="/usuarios"><i class="bi bi-people-fill"></i> Usuarios</a></li>
+      <li><a href="/juego"><i class="bi bi-dice-5-fill"></i> Juego</a></li>
+      <li><a href="/contabilidad"><i class="bi bi-bar-chart-fill"></i> Contabilidad</a></li>
+      <li><a href="/vendedores"><i class="bi bi-person-badge-fill"></i> Vendedores</a></li>
+      <li><a href="/asignar-planillas"><i class="bi bi-journal-text"></i> Asignar Planillas</a></li>
+      <li><a class="active" href="/cobro"><i class="bi bi-cash-coin"></i> Cobro de Caja</a></li>
+      <li><a href="/sorteo"><i class="bi bi-ticket-perforated-fill"></i> Sorteo</a></li>
+      <li><a href="/logs-impresion"><i class="bi bi-clock-history"></i> Logs Impresión</a></li>
+    </ul>
+    <a class="logout" href="{{ url_for('logout') }}"><i class="bi bi-box-arrow-right"></i> Cerrar sesión</a>
+  </aside>
+
+  <!-- Main -->
+  <main id="root" data-fecha="{{ fecha_actual|default('') }}">
+    <div class="top">
+      <h1 class="title">Cobro de Caja</h1>
+      <div class="user">
+        <img src="{{ url_for('static', filename='avatars/' ~ (avatar|default('avatar-male.png'))) }}" alt="Avatar"/>
+        <span>{{ username|default('Usuario') }}</span>
+        <button type="button" id="btnOpenConfig" class="btn btn-ghost"><i class="bi bi-gear-fill"></i> Configurar Día</button>
+      </div>
+    </div>
+
+    <!-- Filtros -->
+    <section class="card" style="margin-bottom:14px">
+      <div class="hd"><h3><i class="bi bi-funnel"></i> Ir al día</h3></div>
+      <div class="bd">
+        <div class="filters">
+          <div class="field" style="grid-column:span 3">
+            <label>Fecha</label>
+            <input type="date" id="f-dia" value="{{ fecha_actual|default('') }}">
+          </div>
+          <div class="field" style="grid-column:span 2;align-self:end">
+            <button class="btn btn-primary" id="btnIr" type="button"><i class="bi bi-arrow-right-circle"></i> Ir</button>
+          </div>
+          <div class="field" style="grid-column:span 7;display:flex;align-items:end;gap:8px;flex-wrap:wrap">
+            <span class="pill pill-blue"><b>Valor Boleto:</b> ${{ '%.2f' % (config.valor_boleto|default(0.0)) }}</span>
+            <span class="pill pill-blue"><b>% Comisión base:</b> {{ '%.2f' % (config.comision_vendedor|default(0.0)) }}%</span>
+            <span class="pill pill-blue"><b>% Extra meta:</b> {{ '%.2f' % (config.comision_extra_meta|default(0.0)) }}%</span>
+            <span class="pill pill-green"><b>Meta:</b> {{ config.meta_boletos|default(0) }} boletos</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Por Cobrar -->
+    <section class="card" id="section-porcobrar">
+      <div class="hd"><h3><i class="bi bi-cash-stack"></i> Por Cobrar</h3></div>
+      <div class="bd">
+        <table id="tbl-porcobrar">
+          <thead>
+          <tr>
+            <th>Vendedor</th>
+            <th>Planillas</th>
+            <th>Entregados</th>
+            <th>Devueltos</th>
+            <th>Vendidos</th>
+            <th>Total $</th>
+            <th>% Com.</th>
+            <th>Gan. Vendedor</th>
+            <th>Total a pagar Caja</th>
+            <th>Transfer.</th>
+            <th>Efectivo</th>
+            <th>Vuelto $</th>
+            <th>Acción</th>
+          </tr>
+          </thead>
+          <tbody>
+          {% for v in vendedores if not v.pagado %}
+          <tr class="row-porcobrar"
+              data-seudonimo="{{ v.seudonimo|default('') }}"
+              data-entregados="{{ v.boletos_entregados|default(0) }}">
+            <td class="vend-cell">
+              <span class="name">{{ v.nombre_completo|default(v.seudonimo) }}</span>
+              <span class="nick">{{ v.seudonimo|default('') }}</span>
+            </td>
+            <td>{{ (v.planillas|default([]))|length }}</td>
+            <td class="td-ent">{{ v.boletos_entregados|default(0) }}</td>
+            <td><input type="number" class="in-devueltos" min="0" max="{{ v.boletos_entregados|default(0) }}" value="{{ v.boletos_devueltos|default(0) }}"></td>
+            <td class="td-vendidos">0</td>
+            <td>$<span class="td-total">0.00</span></td>
+            <td class="td-pct">0.00%</td>
+            <td>$<span class="td-ganv">0.00</span></td>
+            <td>$<span class="td-gane">0.00</span></td>
+            <td><input type="number" class="in-trans" min="0" step="0.01" value="{{ v.transferencia|default(0.0) }}"></td>
+            <td><input type="number" class="in-efec" min="0" step="0.01" value="{{ v.efectivo|default(0.0) }}"></td>
+            <td>$<span class="td-vuelto">0.00</span></td>
+            <td><button type="button" class="btn btn-accent btn-mini btn-cobrar"><i class="bi bi-check2-circle"></i> Cobrar</button></td>
+          </tr>
+          {% endfor %}
+          <tr class="totals" id="row-total-pc">
+            <td>Totales</td>
+            <td id="pc-t-planillas">—</td>
+            <td id="pc-t-ent">0</td>
+            <td id="pc-t-dev">0</td>
+            <td id="pc-t-vend">0</td>
+            <td>$<span id="pc-t-total">0.00</span></td>
+            <td>—</td>
+            <td>$<span id="pc-t-ganv">0.00</span></td>
+            <td>$<span id="pc-t-gane">0.00</span></td>
+            <td colspan="4"></td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Pagados -->
+    <section class="card" style="margin-top:16px" id="section-pagados">
+      <div class="hd"><h3><i class="bi bi-check2-square"></i> Pagados</h3></div>
+      <div class="bd">
+        <table id="tbl-pagados">
+          <thead>
+          <tr>
+            <th>Vendedor</th>
+            <th>Planillas</th>
+            <th>Entregados</th>
+            <th>Devueltos</th>
+            <th>Vendidos</th>
+            <th>Total $</th>
+            <th>% Com.</th>
+            <th>Gan. Vendedor</th>
+            <th>Total a pagar Caja</th>
+            <th>Pago $</th>
+            <th>Vuelto $</th>
+            <th>Estado</th>
+          </tr>
+          </thead>
+          <tbody>
+          {% for v in vendedores if v.pagado %}
+          {% set tot   = (v.boletos_vendidos|default(0)) * (config.valor_boleto|default(0.0)) %}
+          {% set pct   = (config.comision_vendedor|default(0.0)) + ((config.comision_extra_meta|default(0.0)) if (v.boletos_vendidos|default(0)) >= (config.meta_boletos|default(0)) else 0) %}
+          {% set gv    = tot * pct/100 %}
+          {% set caja  = tot - gv %}
+          {% set pago  = (v.transferencia|default(0.0)) + (v.efectivo|default(0.0)) %}
+          <tr class="row-pagado"
+              data-transferencia="{{ '%.2f' % (v.transferencia|default(0.0)) }}"
+              data-efectivo="{{ '%.2f' % (v.efectivo|default(0.0)) }}">
+            <td class="vend-cell">
+              <span class="name">{{ v.nombre_completo|default(v.seudonimo) }}</span>
+              <span class="nick">{{ v.seudonimo|default('') }}</span>
+              {% if (v.transferencia|default(0.0)) > 0 %}
+                <span class="tag-trans" title="Transferencia">
+                  <i class="bi bi-bank"></i> T ${{ '%.2f' % (v.transferencia|default(0.0)) }}
+                </span>
+              {% endif %}
+            </td>
+            <td>{{ (v.planillas|default([]))|length }}</td>
+            <td>{{ v.boletos_entregados|default(0) }}</td>
+            <td>{{ v.boletos_devueltos|default(0) }}</td>
+            <td>{{ v.boletos_vendidos|default(0) }}</td>
+            <td>${{ '%.2f' % (tot|default(0.0)) }}</td>
+            <td>{{ '%.2f' % (pct|default(0.0)) }}%</td>
+            <td>${{ '%.2f' % (gv|default(0.0)) }}</td>
+            <td>${{ '%.2f' % (caja|default(0.0)) }}</td>
+            <td>${{ '%.2f' % (pago|default(0.0)) }}</td>
+            <td>${{ '%.2f' % (pago - caja) }}</td>
+            <td>✔️</td>
+          </tr>
+          {% endfor %}
+          <tr class="totals" id="row-total-pg">
+            <td>Totales</td>
+            <td>{{ paid_totals.planillas|default(0) }}</td>
+            <td>{{ paid_totals.entregados|default(0) }}</td>
+            <td>{{ paid_totals.devueltos|default(0) }}</td>
+            <td>{{ paid_totals.vendidos|default(0) }}</td>
+            <td>${{ '%.2f' % (paid_totals.total|default(0.0)) }}</td>
+            <td>—</td>
+            <td>${{ '%.2f' % (paid_totals.gan_vendedor|default(0.0)) }}</td>
+            <td>${{ '%.2f' % (paid_totals.a_pagar_caja|default(0.0)) }}</td>
+            <td>${{ '%.2f' % (paid_totals.pago|default(0.0)) }}</td>
+            <td>${{ '%.2f' % ((paid_totals.pago|default(0.0)) - (paid_totals.a_pagar_caja|default(0.0))) }}</td>
+            <td></td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Resumen -->
+    <section class="grid cols-3" style="margin-top:16px">
+      <div class="kpi">
+        <div class="k">Total en Caja (basado en <b>Pagados</b>)</div>
+        <div class="v" id="res-caja">${{ '%.2f' % (paid_totals.a_pagar_caja|default(0.0)) }}</div>
+      </div>
+      <div class="kpi">
+        <div class="k">Transferencias del día (Pagados)</div>
+        <div class="v" id="res-trans">$0.00</div>
+        <button class="btn btn-mini btn-ghost" id="btnDetTrans" style="margin-top:8px"><i class="bi bi-list-ul"></i> Ver detalle</button>
+      </div>
+      <div class="kpi">
+        <div class="k">Fecha activa</div>
+        <div class="v" id="res-fecha">{{ fecha_actual|default('') }}</div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- Modal Configuración del Día -->
+<div class="modal" id="modalConfig">
+  <div class="box">
+    <div class="hd">
+      <i class="bi bi-gear-fill"></i><h3 style="margin:0">Configurar Caja del Día</h3>
+      <div style="margin-left:auto"><button class="btn btn-mini btn-danger" id="cfgClose">Cerrar</button></div>
+    </div>
+    <div class="bd">
+      <form id="formConfig">
+        <div class="grid cols-3">
+          <div>
+            <label>Valor Boleto</label>
+            <input type="number" step="0.01" name="valor_boleto" value="{{ config.valor_boleto|default(0.0) }}" required>
+          </div>
+          <div>
+            <label>% Comisión Base</label>
+            <input type="number" step="0.01" name="comision_vendedor" value="{{ config.comision_vendedor|default(0.0) }}" required>
+          </div>
+          <div>
+            <label>% Comisión Extra por Meta</label>
+            <input type="number" step="0.01" name="comision_extra_meta" value="{{ config.comision_extra_meta|default(0.0) }}">
+          </div>
+          <div>
+            <label>Meta de Boletos</label>
+            <input type="number" step="1" name="meta_boletos" value="{{ config.meta_boletos|default(0) }}" required>
+          </div>
+          <div>
+            <label>Fecha (esta página)</label>
+            <input type="text" value="{{ fecha_actual|default('') }}" readonly>
+          </div>
+        </div>
+        <div style="margin-top:12px;display:flex;gap:8px;justify-content:flex-end">
+          <button type="submit" class="btn btn-primary"><i class="bi bi-save2"></i> Guardar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Confirmación de Cobro -->
+<div class="modal" id="modalConfirm">
+  <div class="box">
+    <div class="hd">
+      <i class="bi bi-shield-check"></i><h3 style="margin:0">Confirmar Cobro</h3>
+      <div style="margin-left:auto"><button class="btn btn-mini btn-danger" id="cfClose">Cancelar</button></div>
+    </div>
+    <div class="bd" id="cfBody"></div>
+    <div class="bd" style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn btn-accent" id="cfAccept"><i class="bi bi-check2-circle"></i> Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Detalle de Transferencias -->
+<div class="modal" id="modalTrans">
+  <div class="box">
+    <div class="hd">
+      <i class="bi bi-bank"></i><h3 style="margin:0">Transferencias del día</h3>
+      <div style="margin-left:auto"><button class="btn btn-mini btn-danger" id="trClose">Cerrar</button></div>
+    </div>
+    <div class="bd">
+      <table id="tbl-trans">
+        <thead>
+          <tr>
+            <th>Vendedor</th>
+            <th>Seudónimo</th>
+            <th>Transferencia</th>
+            <th>Efectivo</th>
+            <th>Pago total</th>
+          </tr>
+        </thead>
+        <tbody><!-- JS --></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+(()=>{ // IIFE
+  const $ = (q,el=document)=> el.querySelector(q);
+  const $$ = (q,el=document)=> Array.from(el.querySelectorAll(q));
+  const money = n => '$'+(Number(n||0).toFixed(2));
+
+  const root = document.getElementById('root');
+  const fechaBase = root?.dataset.fecha || '';
+  const fDia = document.getElementById('f-dia');
+  const btnIr = document.getElementById('btnIr');
+
+  // Config actual
+  const VAL  = parseFloat("{{ config.valor_boleto|default(0.0) }}")||0;
+  const BASE = parseFloat("{{ config.comision_vendedor|default(0.0) }}")||0;
+  const EXTRA= parseFloat("{{ config.comision_extra_meta|default(0.0) }}")||0;
+  const META = parseInt("{{ config.meta_boletos|default(0) }}",10)||0;
+
+  if(fDia && !fDia.value) fDia.value = fechaBase;
+  btnIr?.addEventListener('click', ()=>{
+    const d = fDia.value || new Date().toISOString().slice(0,10);
+    location.href = `/cobro?fecha=${encodeURIComponent(d)}`;
+  });
+
+  // -------- Modal Config
+  const modalCfg = $('#modalConfig');
+  $('#btnOpenConfig')?.addEventListener('click', ()=> modalCfg.style.display='flex');
+  $('#cfgClose')?.addEventListener('click', ()=> modalCfg.style.display='none');
+  window.addEventListener('click', (e)=>{ if(e.target===modalCfg) modalCfg.style.display='none'; });
+
+  $('#formConfig')?.addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    const data = Object.fromEntries(new FormData(e.currentTarget));
+    data.fecha = (new URL(location.href)).searchParams.get('fecha') || (root?.dataset.fecha) || '';
+    try{
+      const r = await fetch('/guardar_configuracion_caja', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data)});
+      const j = await r.json();
+      if(j && j.ok){ location.reload(); } else { alert('No se pudo guardar la configuración'); }
+    }catch(err){ console.error(err); alert('Error de red'); }
+  });
+
+  // -------- Por Cobrar: cálculos
+  function pctForSold(sold){ let p=BASE; if(sold>=META) p+=EXTRA; return p; }
+  function recalcRow(tr){
+    const ent = Number(tr.dataset.entregados||0);
+    const inDev = tr.querySelector('.in-devueltos');
+    const soldCell = tr.querySelector('.td-vendidos');
+    const totalCell= tr.querySelector('.td-total');
+    const pctCell  = tr.querySelector('.td-pct');
+    const gvCell   = tr.querySelector('.td-ganv');
+    const geCell   = tr.querySelector('.td-gane');
+    const inTr     = tr.querySelector('.in-trans');
+    const inEf     = tr.querySelector('.in-efec');
+    const vuCell   = tr.querySelector('.td-vuelto');
+
+    let dev = Math.max(0, Math.min(ent, Number(inDev.value||0)));
+    inDev.value = dev;
+    let sold = ent - dev;
+    let total = sold * VAL;
+    let pct = pctForSold(sold);
+    let ganV = total * pct / 100.0;
+    let ganE = total - ganV;
+    const pago = (Number(inTr.value||0) + Number(inEf.value||0));
+    const vuelto = pago - ganE;
+
+    soldCell.textContent = sold;
+    totalCell.textContent = total.toFixed(2);
+    pctCell.textContent = pct.toFixed(2)+'%';
+    gvCell.textContent = ganV.toFixed(2);
+    geCell.textContent = ganE.toFixed(2);
+    vuCell.textContent = vuelto.toFixed(2);
+
+    recalcTotalsPC();
+  }
+  function recalcTotalsPC(){
+    const rows = $$('.row-porcobrar');
+    let tEnt=0,tDev=0,tVend=0,tTot=0,tGV=0,tGE=0;
+    rows.forEach(tr=>{
+      tEnt += Number(tr.dataset.entregados||0);
+      tDev += Number(tr.querySelector('.in-devueltos').value||0);
+      tVend+= Number(tr.querySelector('.td-vendidos').textContent||0);
+      tTot += Number(tr.querySelector('.td-total').textContent||0);
+      tGV  += Number(tr.querySelector('.td-ganv').textContent||0);
+      tGE  += Number(tr.querySelector('.td-gane').textContent||0);
+    });
+    $('#pc-t-ent').textContent = tEnt;
+    $('#pc-t-dev').textContent = tDev;
+    $('#pc-t-vend').textContent= tVend;
+    $('#pc-t-total').textContent = tTot.toFixed(2);
+    $('#pc-t-ganv').textContent  = tGV.toFixed(2);
+    $('#pc-t-gane').textContent  = tGE.toFixed(2);
+  }
+  $$('.row-porcobrar').forEach(tr=>{
+    tr.querySelectorAll('.in-devueltos,.in-trans,.in-efec').forEach(i=> i.addEventListener('input', ()=> recalcRow(tr)));
+    recalcRow(tr);
+  });
+
+  // -------- Confirmación de cobro
+  const modalCf = $('#modalConfirm');
+  const cfBody  = $('#cfBody');
+  let currentTR = null;
+
+  function openConfirm(tr){
+    currentTR = tr;
+    const name = tr.querySelector('.vend-cell .name').textContent.trim();
+    const vend = tr.querySelector('.td-vendidos').textContent;
+    const dev  = tr.querySelector('.in-devueltos').value;
+    const total= tr.querySelector('.td-total').textContent;
+    const pct  = tr.querySelector('.td-pct').textContent;
+    const gv   = tr.querySelector('.td-ganv').textContent;
+    const ge   = tr.querySelector('.td-gane').textContent;
+    const trf  = tr.querySelector('.in-trans').value || 0;
+    const efc  = tr.querySelector('.in-efec').value || 0;
+    const vlt  = tr.querySelector('.td-vuelto').textContent;
+
+    cfBody.innerHTML = `
+      <div class="grid cols-3">
+        <div><b>Vendedor:</b> ${name}</div>
+        <div><b>% Comisión:</b> ${pct}</div>
+        <div><b>Total venta:</b> ${money(total)}</div>
+        <div><b>Vendidos:</b> ${vend}</div>
+        <div><b>Devueltos:</b> ${dev}</div>
+        <div><b>Vuelto:</b> ${money(vlt)}</div>
+        <div><b>Gan. Vendedor:</b> ${money(gv)}</div>
+        <div><b>A pagar Caja:</b> ${money(ge)}</div>
+        <div><b>Pago (Transf./Efect.):</b> ${money(trf)} / ${money(efc)}</div>
+      </div>`;
+    modalCf.style.display='flex';
+  }
+  $('#cfClose')?.addEventListener('click', ()=> modalCf.style.display='none');
+  window.addEventListener('click', (e)=>{ if(e.target===modalCf) modalCf.style.display='none'; });
+
+  $$('.btn-cobrar').forEach(btn=>{
+    btn.addEventListener('click', (e)=> openConfirm(e.currentTarget.closest('tr')));
+  });
+
+  async function postCobro(tr){
+    const seud = tr.dataset.seudonimo||'';
+    const payload = {
+      fecha: (new URL(location.href)).searchParams.get('fecha') || (root?.dataset.fecha) || '',
+      boletos_devueltos: Number(tr.querySelector('.in-devueltos').value||0),
+      boletos_vendidos:  Number(tr.querySelector('.td-vendidos').textContent||0),
+      total_pagar:       Number(tr.querySelector('.td-gane').textContent||0),
+      transferencia:     Number(tr.querySelector('.in-trans').value||0),
+      efectivo:          Number(tr.querySelector('.in-efec').value||0)
+    };
+    const r = await fetch(`/guardar_cobro/${encodeURIComponent(seud)}`, {
+      method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)
+    });
+    const j = await r.json().catch(()=>({ok:false}));
+    return !!(j && j.ok);
+  }
+
+  function moveToPagados(tr){
+    const tbody = $('#tbl-pagados tbody');
+    const totalsRow = $('#row-total-pg');
+
+    const name = tr.querySelector('.vend-cell .name').textContent.trim();
+    const nick = tr.querySelector('.vend-cell .nick').textContent.trim();
+    const plan = tr.cells[1].textContent.trim();
+    const entr = Number(tr.dataset.entregados||0);
+    const dev  = Number(tr.querySelector('.in-devueltos').value||0);
+    const vend = Number(tr.querySelector('.td-vendidos').textContent||0);
+    const total= Number(tr.querySelector('.td-total').textContent||0);
+    const pct  = tr.querySelector('.td-pct').textContent.trim();
+    const gv   = Number(tr.querySelector('.td-ganv').textContent||0);
+    const ge   = Number(tr.querySelector('.td-gane').textContent||0);
+    const transf = Number(tr.querySelector('.in-trans').value||0);
+    const efec   = Number(tr.querySelector('.in-efec').value||0);
+    const pago = transf + efec;
+    const vlt  = pago - ge;
+
+    const row = document.createElement('tr');
+    row.className = 'row-pagado';
+    row.dataset.transferencia = transf.toFixed(2);
+    row.dataset.efectivo = efec.toFixed(2);
+    const tag = transf>0 ? `<span class="tag-trans" title="Transferencia"><i class="bi bi-bank"></i> T ${money(transf)}</span>` : '';
+    row.innerHTML = `
+      <td class="vend-cell"><span class="name">${name}</span><span class="nick">${nick}</span>${tag}</td>
+      <td>${plan}</td><td>${entr}</td><td>${dev}</td><td>${vend}</td>
+      <td>${money(total)}</td><td>${pct}</td><td>${money(gv)}</td><td>${money(ge)}</td>
+      <td>${money(pago)}</td><td>${money(vlt)}</td><td>✔️</td>`;
+    tbody.insertBefore(row, totalsRow);
+
+    tr.remove();
+    recalcTotalsPC();
+    recalcTotalsPG();
+  }
+
+  function recalcTotalsPG(){
+    const rows = $$('.row-pagado');
+    let plan=0, ent=0, dev=0, ven=0, tot=0, gven=0, caja=0, pago=0;
+    let sumTrans=0, sumEfec=0;
+    rows.forEach(r=>{
+      const td = r.querySelectorAll('td');
+      plan += Number(td[1].textContent||0);
+      ent  += Number(td[2].textContent||0);
+      dev  += Number(td[3].textContent||0);
+      ven  += Number(td[4].textContent||0);
+      tot  += Number((td[5].textContent||'').replace(/[^0-9.-]/g,''))||0;
+      gven += Number((td[7].textContent||'').replace(/[^0-9.-]/g,''))||0;
+      caja += Number((td[8].textContent||'').replace(/[^0-9.-]/g,''))||0;
+      pago += Number((td[9].textContent||'').replace(/[^0-9.-]/g,''))||0;
+
+      // Nuevos totales por método
+      sumTrans += parseFloat(r.dataset.transferencia||'0')||0;
+      sumEfec  += parseFloat(r.dataset.efectivo||'0')||0;
+    });
+    const trT = $('#row-total-pg').querySelectorAll('td');
+    trT[1].textContent = plan;
+    trT[2].textContent = ent;
+    trT[3].textContent = dev;
+    trT[4].textContent = ven;
+    trT[5].textContent = money(tot);
+    trT[7].textContent = money(gven);
+    trT[8].textContent = money(caja);
+    trT[9].textContent = money(pago);
+    trT[10].textContent= money(pago-caja);
+
+    // KPI de transferencias
+    $('#res-caja').textContent = money(caja);
+    $('#res-trans').textContent = money(sumTrans);
+  }
+
+  // Confirmar cobro
+  $('#cfAccept')?.addEventListener('click', async ()=>{
+    if(!currentTR){ $('#modalConfirm').style.display='none'; return; }
+    try{
+      const ok = await postCobro(currentTR);
+      if(ok){ moveToPagados(currentTR); }
+      else{ alert('No se pudo guardar el cobro.'); }
+    }catch(e){ console.error(e); alert('Error de red al guardar cobro'); }
+    $('#modalConfirm').style.display='none';
+  });
+
+  // -------- Modal de transferencias
+  const modalTr = $('#modalTrans');
+  const tbodyTr = $('#tbl-trans tbody');
+  function openTransfers(){
+    tbodyTr.innerHTML = '';
+    const rows = $$('.row-pagado');
+    let hay = false;
+    rows.forEach(r=>{
+      const trAmt = parseFloat(r.dataset.transferencia||'0')||0;
+      if(trAmt<=0) return;
+      hay = true;
+      const efAmt = parseFloat(r.dataset.efectivo||'0')||0;
+      const vendCell = r.querySelector('.vend-cell');
+      const name = vendCell.querySelector('.name')?.textContent.trim() || '';
+      const nick = vendCell.querySelector('.nick')?.textContent.trim() || '';
+      const trEl = document.createElement('tr');
+      trEl.innerHTML = `
+        <td>${name}</td>
+        <td>${nick}</td>
+        <td>${money(trAmt)}</td>
+        <td>${money(efAmt)}</td>
+        <td>${money(trAmt+efAmt)}</td>`;
+      tbodyTr.appendChild(trEl);
+    });
+    if(!hay){
+      const trEl = document.createElement('tr');
+      trEl.innerHTML = `<td colspan="5" style="text-align:center;color:#7b81a6">No hay transferencias registradas en los pagados de hoy.</td>`;
+      tbodyTr.appendChild(trEl);
+    }
+    modalTr.style.display='flex';
+  }
+  $('#btnDetTrans')?.addEventListener('click', openTransfers);
+  $('#trClose')?.addEventListener('click', ()=> modalTr.style.display='none');
+  window.addEventListener('click', (e)=>{ if(e.target===modalTr) modalTr.style.display='none'; });
+
+  // Inicializa totales Pagados al cargar
+  recalcTotalsPG();
+})();
+</script>
+</body>
+</html>

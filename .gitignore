@@ -1,0 +1,34 @@
+# Byte-compiled / compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.env
+.venv/
+venv/
+ENV/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Python packaging
+build/
+dist/
+*.egg-info/
+
+# Cache
+.ipynb_checkpoints/
+
+# Local data & logs (keep XML/CSV that your app needs)
+*.log
+*.tmp
+*.bak
+
+# IDEs
+.vscode/
+.idea/
+
+# PDFs generated at runtime
+*.pdf

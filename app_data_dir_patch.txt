@@ -1,0 +1,26 @@
+\
+# ==== PASTE AL INICIO DE app.py (justo después de los imports) ====
+import os
+
+# Ruta base del proyecto (código)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# Directorio de datos persistentes. En la nube, apunta a /var/data (Render).
+DATA_DIR = os.environ.get("DATA_DIR", os.path.join(BASE_DIR, "data"))
+os.makedirs(DATA_DIR, exist_ok=True)
+
+# Helpers para construir rutas de XML dentro de DATA_DIR
+def xml_path(nombre_archivo):
+    return os.path.join(DATA_DIR, nombre_archivo)
+
+# --- EJEMPLOS (ajústalos a tus nombres reales) ---
+# USUARIOS_XML = xml_path("usuarios.xml")
+# VENTAS_XML   = xml_path("ventas.xml")
+# BINGO_XML    = xml_path("bingo.xml")
+# FIGURAS_XML  = xml_path("figuras.xml")
+
+# Si necesitas crear un XML vacío cuando no exista:
+def ensure_xml(path, root_tag):
+    if not os.path.exists(path):
+        with open(path, "w", encoding="utf-8") as f:
+            f.write(f"<{root_tag}></{root_tag}>")

@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Generar boletín – Resultados</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+  :root{--bg:#0b1324;--panel:#0f1930;--card:#121b2f;--muted:#8aa0bf;--brand:#1f58ff;--text:#e6eefc}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,Segoe UI,Roboto,Arial}
+  .shell{display:grid;grid-template-columns:1fr 360px;gap:18px;max-width:1200px;margin:28px auto;padding:0 16px}
+  .left{background:var(--card);border-radius:14px;padding:18px}
+  .right{background:var(--panel);border-radius:14px;padding:16px}
+  h1{margin:0 0 14px;font-size:20px}
+  .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  label{font-size:13px;color:var(--muted)}
+  input[type=date],input[type=text],input[type=number]{background:#0e1a33;color:#d5e4ff;border:1px solid #203252;border-radius:10px;padding:8px 10px}
+  .btn{background:#0ea5e9;color:#fff;border:0;border-radius:10px;padding:9px 12px;cursor:pointer}
+  .btn.ghost{background:#233b7a}
+  .secTitle{margin:14px 0 6px;font-weight:700}
+  .figCard{background:#0f1930;border:1px solid #1a2a4a;border-radius:12px;margin:12px 0;padding:12px}
+  .gridHead{display:grid;grid-template-columns:90px 1fr 140px 90px 36px;gap:8px;color:#9db3d9;font-size:13px;margin:4px 0}
+  .gridRow{display:grid;grid-template-columns:90px 1fr 140px 90px 36px;gap:8px;margin:6px 0}
+  .del{background:#ef4444;border:0;color:#fff;border-radius:8px;width:36px;height:36px;cursor:pointer}
+  .pill{display:inline-block;padding:3px 8px;border-radius:999px;background:#192646;color:#9ec5ff;font-size:12px}
+  .mut{color:#9db3d9}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="left">
+    <div class="row" style="justify-content:space-between">
+      <h1>Resultados del sorteo</h1>
+      <div class="row">
+        <label>Fecha</label>
+        <input id="fecha" type="date" value="{{ fecha_inicial }}">
+        <button id="guardar" class="btn">Guardar</button>
+        <a id="verpdf" class="btn ghost" target="_blank">Ver PDF</a>
+      </div>
+    </div>
+
+    <div id="contenedor"></div>
+
+    <div class="secTitle">Extras</div>
+    <div class="row" style="gap:10px">
+      <label>Comodín (boletos)</label>
+      <input id="comodin" type="text" placeholder="1981, 2109, 2864">
+    </div>
+  </div>
+
+  <div class="right">
+    <div class="row" style="justify-content:space-between">
+      <div class="pill">Figuras para mañana</div>
+      <div class="mut" id="fechaM"></div>
+    </div>
+    <div id="figsManana" style="margin-top:10px"></div>
+    <div class="secTitle">Total a jugar</div>
+    <div class="pill" id="total"></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const fecha = document.getElementById('fecha');
+  const cont  = document.getElementById('contenedor');
+  const verpdf= document.getElementById('verpdf');
+  const comodin= document.getElementById('comodin');
+
+  function pdfUrl(){ return `/boletin/pdf?fecha=${fecha.value}` }
+
+  function nuevaFila(fig){
+    const row = document.createElement('div');
+    row.className='gridRow';
+    row.innerHTML = `
+      <input placeholder="Boleto"   />
+      <input placeholder="Nombre"   />
+      <input placeholder="Vendedor" />
+      <input placeholder="Sector"   />
+      <button class="del">×</button>
+    `;
+    row.querySelector('.del').onclick = ()=> row.remove();
+    fig.querySelector('.rows').appendChild(row);
+  }
+
+  function cardFigura(nombre){
+    const card = document.createElement('div');
+    card.className='figCard';
+    card.dataset.name = nombre;
+    card.innerHTML = `
+      <div class="row" style="justify-content:space-between">
+        <div class="pill">${nombre}</div>
+        <button class="btn ghost add">+ Agregar ganador</button>
+      </div>
+      <div class="gridHead"><div>Boleto</div><div>Nombre</div><div>Vendedor</div><div>Sector</div><div></div></div>
+      <div class="rows"></div>
+    `;
+    card.querySelector('.add').onclick = ()=> nuevaFila(card);
+    return card;
+  }
+
+  async function cargarFigurasManana(){
+    const r = await fetch(`/api/figuras-manana?fecha=${fecha.value}`);
+    const js = await r.json();
+    document.getElementById('fechaM').textContent = js.fecha;
+    document.getElementById('total').textContent  = (js.total||0).toLocaleString('en-US',{style:'currency',currency:'USD'});
+    const root = document.getElementById('figsManana');
+    root.innerHTML = '';
+    (js.figuras||[]).forEach(f=>{
+      const div=document.createElement('div');
+      div.textContent = `${f.nombre} — ${(f.valor||0).toLocaleString('en-US',{style:'currency',currency:'USD'})}`;
+      root.appendChild(div);
+    });
+    return js.figuras||[];
+  }
+
+  function setPDFLink(){ verpdf.href = pdfUrl(); }
+
+  async function cargarResultados(figsOrden){
+    const r = await fetch(`/api/resultados?fecha=${fecha.value}`);
+    const js = await r.json();
+    cont.innerHTML = '';
+
+    // genera cards en el orden de las figuras de mañana (si hay), sino en el orden que vengan
+    const orden = figsOrden.length ? figsOrden.map(f=>f.nombre) : (js.items||[]).map(i=>i.figura);
+    const porNombre = new Map((js.items||[]).map(i=>[i.figura, i.ganadores||[]]));
+
+    orden.forEach(nom=>{
+      const card = cardFigura(nom);
+      cont.appendChild(card);
+      (porNombre.get(nom)||[]).forEach(g=>{
+        const row=document.createElement('div');
+        row.className='gridRow';
+        row.innerHTML = `
+          <input value="${g.boleto||''}" />
+          <input value="${g.nombre||''}" />
+          <input value="${g.vendedor||''}" />
+          <input value="${g.sector||''}" />
+          <button class="del">×</button>
+        `;
+        row.querySelector('.del').onclick = ()=> row.remove();
+        card.querySelector('.rows').appendChild(row);
+      });
+    });
+
+    // extras
+    comodin.value = (js.extras && js.extras.comodin && js.extras.comodin.boletos) ? js.extras.comodin.boletos : '';
+  }
+
+  document.getElementById('guardar').onclick = async ()=>{
+    const items = [];
+    for(const card of cont.querySelectorAll('.figCard')){
+      const fig = card.dataset.name;
+      const gan = [];
+      for(const r of card.querySelectorAll('.gridRow')){
+        const [boleto,nombre,vendedor,sector] = [...r.querySelectorAll('input')].map(i=>i.value.trim());
+        if(!boleto && !nombre && !vendedor && !sector) continue;
+        gan.push({boleto,nombre,vendedor,sector, premio:0});
+      }
+      items.push({figura:fig, ganadores:gan});
+    }
+    const extras = { comodin:{ boletos: comodin.value.trim() } };
+    await fetch('/api/resultados/save', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({fecha: fecha.value, items, extras})
+    });
+    alert('Guardado');
+  };
+
+  fecha.addEventListener('change', async ()=>{
+    setPDFLink();
+    const figs = await cargarFigurasManana();
+    await cargarResultados(figs);
+  });
+
+  // init
+  setPDFLink();
+  (async ()=>{ const figs=await cargarFigurasManana(); await cargarResultados(figs); })();
+})();
+</script>
+</body>
+</html>

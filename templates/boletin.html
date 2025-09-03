@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Boletín | GL Bingo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+  <style>
+    /* ====== PALETA ====== */
+    :root{
+      --bg:#0b1320;
+      --panel:#0e1830;
+      --surface:#0c1730;
+      --stroke:#1f2e4a;
+
+      --text:#eef3ff;
+      --muted:#a8b3c8;
+
+      --primary:#4f8cff;
+      --accent:#8b5cf6;
+      --green:#22c55e;
+      --warn:#f59e0b;
+
+      --shadow:0 8px 26px rgba(0,0,0,.35);
+      --radius:12px;
+
+      --grad-1:linear-gradient(180deg,#0d1831 0%,#0b1426 100%);
+      --head-light-1:#f8fbff;   /* header claro */
+      --head-light-2:#eef4ff;
+
+      --chip-bg:#132447;
+      --chip-brd:#2a4980;
+
+      --toolbar-bg:linear-gradient(180deg, rgba(255,255,255,.12) 0%, rgba(255,255,255,.08) 100%);
+      --toolbar-brd:rgba(255,255,255,.22);
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      background:
+        radial-gradient(800px 500px at 120% -10%, rgba(79,140,255,.12), transparent 60%),
+        radial-gradient(900px 650px at -20% 120%, rgba(139,92,246,.10), transparent 60%),
+        var(--bg);
+      color:var(--text);
+      -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+      font-size:14px;
+    }
+    .dashboard-root .main-content{background:transparent}
+
+    /* ====== LAYOUT (más ancho) ====== */
+    .wrap{max-width:1160px;margin:0 auto;padding:14px}
+    .panel{
+      background:var(--grad-1);
+      border:1px solid var(--stroke);
+      border-radius:var(--radius);
+      padding:12px;
+      box-shadow:var(--shadow);
+    }
+    .panel h1,.panel h2,.panel h3{margin:0 0 6px}
+    .muted{color:var(--muted)}
+
+    /* ====== CABECERA CLARA ====== */
+    .head{
+      display:flex;gap:10px;align-items:center;justify-content:space-between;
+      background:linear-gradient(180deg, var(--head-light-1) 0%, var(--head-light-2) 100%);
+      border:1px solid #d6e6ff;
+      border-radius:14px;
+      padding:12px 14px;
+      box-shadow:0 8px 24px rgba(28,52,99,.20);
+      color:#0b1528;
+    }
+    .head h1{color:#0b1528}
+    .head .badge{
+      background:#e9f1ff;color:#0b1528;border:1px solid #c9dcff;border-radius:999px;padding:4px 8px;font-size:12px
+    }
+    .logo{height:34px;width:auto;border-radius:8px}
+
+    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .spacer{flex:1}
+
+    .grid{
+      display:grid;
+      grid-template-columns:minmax(640px,1fr) 340px;
+      gap:14px;
+    }
+    @media (max-width:1200px){.grid{grid-template-columns:1fr}}
+
+    /* ====== CONTROLES ====== */
+    input,button{
+      background:var(--surface);
+      color:#e5e7eb;
+      border:1px solid var(--stroke);
+      border-radius:10px;
+      padding:8px 10px;
+      outline:none; transition:.2s ease;
+      font-size:13px;
+    }
+    input:focus,.btn:focus{
+      border-color:var(--primary);
+      box-shadow:0 0 0 3px rgba(79,140,255,.16);
+    }
+    .head input{ /* inputs dentro del header claro */
+      background:#ffffff;border-color:#cfe0ff;color:#0b1528;
+    }
+    .head input:focus{box-shadow:0 0 0 3px rgba(30,64,175,.18)}
+    .date{width:170px}
+
+    .btn{cursor:pointer;user-select:none}
+    .btn.primary{
+      background:linear-gradient(180deg,#5a97ff 0%,#3e7df9 100%);
+      border-color:#3167d4; color:#fff;
+      box-shadow:0 4px 18px rgba(79,140,255,.30);
+      padding:8px 12px;
+    }
+    .btn.primary:hover{filter:brightness(1.06)}
+    .btn.ghost{background:#0f203d;border-color:#314e85;color:#e5edff}
+    .btn.ghost:hover{border-color:#3e65b4;background:#12254a}
+    .btn.success{
+      background:linear-gradient(180deg,#34d399 0%,#22c55e 100%);
+      border:none;color:#052616;padding:8px 12px
+    }
+
+    .btn-mini{
+      background:#152443;border:1px solid #28406b;border-radius:9px;padding:5px 8px;cursor:pointer;
+      font-size:12px; line-height:1;
+    }
+    .btn-mini:hover{filter:brightness(1.08)}
+
+    /* ====== BARRA DE HERRAMIENTAS CLARA ====== */
+    .toolbar{
+      display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:10px 0;
+      padding:8px 10px;border-radius:10px;
+      background:var(--toolbar-bg); border:1px solid var(--toolbar-brd);
+      box-shadow:0 4px 18px rgba(0,0,0,.12);
+    }
+    .search{min-width:220px;background:#0f213f}
+
+    .kbd{
+      padding:2px 6px;border:1px solid #2e3f68;border-radius:6px;background:#0e1a33;color:#c8d7ff;font-size:12px
+    }
+
+    /* ====== BLOQUES DE FIGURAS ====== */
+    .block{
+      border:1px solid var(--stroke);
+      border-radius:12px;
+      padding:10px;
+      background:linear-gradient(180deg,#0b1424 0%,#0b1220 100%);
+      margin:10px 0; overflow:hidden;
+      transition:transform .2s ease, background .3s ease;
+    }
+    .block:hover{transform:translateY(-1px); background:linear-gradient(180deg,#0d1628 0%,#0b1324 100%)}
+    .block[data-collapsed="1"] table,.block[data-collapsed="1"] .block-tools{display:none}
+    .top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;flex-wrap:wrap}
+
+    .chip{
+      display:inline-block;background:var(--chip-bg);border:1px solid var(--chip-brd);
+      border-radius:999px;padding:3px 8px;font-size:11px;color:#c7d7ff
+    }
+    .chip.blue{background:#132a56;border-color:#294a88;color:#cfe0ff}
+    .chip.green{background:#0f3a2a;border-color:#1b6a4a;color:#c7ffe9}
+    .chip.warn{background:#4e2b05;border-color:#6b3a07;color:#ffd8a3}
+
+    table{width:100%;border-collapse:collapse;font-size:13px}
+    th,td{padding:8px;border-bottom:1px solid #18243f}
+    th{background:#0e1830;text-align:left;position:sticky;top:0;z-index:1}
+    tbody tr:nth-child(even){background:#0c1730}
+    tbody tr:hover{background:#0f1d3a}
+
+    .block-tools{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+    .caret{background:#15233f;border:1px solid #2c4c85;border-radius:9px;padding:5px 8px;cursor:pointer}
+
+    /* ====== ASIDE ====== */
+    .aside .item{
+      display:flex;align-items:center;justify-content:space-between;padding:8px 10px;
+      border:1px solid var(--stroke);border-radius:10px;background:#0d162b;margin-bottom:8px;
+      font-size:13px;
+    }
+    .aside .item:hover{background:#111d34}
+    .aside .tag{background:#0b2a1e;color:#b7ffe0;border:1px solid #114634;padding:3px 8px;border-radius:999px;font-size:11px}
+    .aside .total{display:flex;align-items:center;justify-content:space-between;margin-top:8px;font-weight:700}
+
+    /* ====== ESTADOS / VACÍO ====== */
+    .empty{
+      border:1px dashed #2d4a7c;border-radius:10px;padding:12px;text-align:center;color:#b6c1d1;background:#0b1424
+    }
+
+    /* ====== FLOTANTES ====== */
+    .floating-top{
+      position:fixed;right:14px;bottom:14px;padding:8px 10px;border-radius:999px;
+      background:#0f203b;border:1px solid #274078;cursor:pointer;box-shadow:var(--shadow);display:none
+    }
+    .toast{
+      position:fixed;left:50%;bottom:20px;transform:translateX(-50%);
+      background:#0e1c36;border:1px solid #2a4b86;padding:8px 12px;border-radius:10px;box-shadow:var(--shadow);display:none
+    }
+
+    /* ====== TOPBAR / SIDEBAR ====== */
+    .topbar{background:transparent;border:none}
+    #sidebar{background:#0b1326;border-right:1px solid #1f335a}
+    #sidebar .menu a.active{background:#10234a;border-color:#264b87}
+  </style>
+</head>
+<body>
+  <div class="dashboard-root">
+    <!-- Sidebar -->
+    <nav id="sidebar" class="sidebar">
+      <div class="logo-area">
+        <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo" class="logo">
+        <span class="sidebar-title">GL Bingo</span>
+        <button class="sidebar-toggle" id="sidebarToggle">&#9776</button>
+      </div>
+      <ul class="menu">
+        <li><a href="/dashboard">🏠 Dashboard</a></li>
+        <li><a href="/usuarios">🧑‍💼 Usuarios</a></li>
+        <li><a href="/juego">🎲 Juego</a></li>
+        <li><a href="/contabilidad">📊 Contabilidad</a></li>
+        <li><a href="/vendedores">🧾 Vendedores</a></li>
+        <li><a href="/asignar-planillas">📑 Asignar Planillas</a></li>
+        <li><a href="/impresion">🖨️ Impresión de Boletos</a></li>
+        <li><a href="/cobro">💵 Cobro de Caja</a></li>
+        <li><a href="/sorteo">🎟️ Sorteo</a></li>
+        <li><a href="/crear-figuras">🟩 Crear Figuras</a></li>
+        <li><a href="/escoger-figuras">🟦 Escoger Figuras</a></li>
+        <li><a class="active" href="/boletin">📋 Boletín</a></li>
+      </ul>
+      <a href="{{ url_for('logout') }}" class="logout-btn">Cerrar sesión</a>
+    </nav>
+
+    <!-- Contenido -->
+    <div class="main-content">
+      <!-- Topbar -->
+      <div class="topbar">
+        <div class="topbar-left"></div>
+        <div class="topbar-right">
+          <div class="user-dropdown" onclick="toggleUserMenu()">
+            <img src="{{ url_for('static', filename='avatars/' + session.get('avatar','avatar-male.png')) }}" class="avatar" alt="Avatar">
+            <span class="user-name">{{ session.get('usuario','GLSTUDIOS') }}</span>
+            <span class="dropdown-caret">&#9662;</span>
+            <div id="userMenu" class="user-menu">
+              <a href="#" onclick="event.stopPropagation();alert('Cambiar clave');">Cambiar clave</a>
+              <a href="{{ url_for('logout') }}">Cerrar sesión</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="wrap">
+        <div class="head">
+          <div class="title">
+            <h1 style="font-size:20px">Boletín</h1>
+            <span class="badge">Fecha del sorteo (HOY)</span>
+            <input id="fecha" type="date" class="date" value="{{ fecha_inicial }}">
+          </div>
+          <div class="actions">
+            <button class="btn primary" id="btnPdf">Ver PDF</button>
+            <a class="btn ghost" id="aPdfLink" target="_blank">Abrir PDF</a>
+            <a class="btn ghost" id="aDesigner" target="_blank">Diseñador</a>
+          </div>
+        </div>
+
+        <div class="toolbar">
+          <input id="search" class="search" placeholder="Buscar figura… (filtra en vivo)">
+          <button class="btn ghost" id="btnExpandAll">Expandir todo</button>
+          <button class="btn ghost" id="btnCollapseAll">Colapsar todo</button>
+          <div class="spacer"></div>
+          <button class="btn ghost" id="btnExport">Copiar resultados (JSON)</button>
+          <span class="muted">Atajos: <span class="kbd">Ctrl+S</span> guardar · <span class="kbd">Ctrl+P</span> PDF · <span class="kbd">Alt+A</span> añadir ganador</span>
+        </div>
+
+        <div class="grid">
+          <!-- RESULTADOS HOY -->
+          <section class="panel">
+            <h2 style="font-size:18px">Resultados del sorteo</h2>
+            <p class="muted" style="margin:4px 0 10px">
+              Aquí solo se listan las <b>figuras de la fecha seleccionada</b>. Escribe <b>NO VENDIDO</b> o <b>NO VENDIDA</b> para excluir del reparto.
+            </p>
+            <div id="figurasContainer" class="empty">Cargando datos…</div>
+
+            <div class="panel" style="margin-top:12px">
+              <h3 style="font-size:16px;margin-bottom:6px">Extras</h3>
+              <div class="row">
+                <div style="flex:1 1 260px">
+                  <label class="muted">Comodín (boletos / reintegro)</label>
+                  <input id="comodin_boletos" placeholder="23-44-25-1455">
+                </div>
+                <div style="flex:1 1 260px">
+                  <label class="muted">Comodín (texto) — opcional</label>
+                  <input id="comodin_texto">
+                </div>
+              </div>
+              <div class="row" style="margin-top:10px">
+                <button class="btn ghost" id="btnRecalc">Recalcular premios</button>
+                <div class="spacer"></div>
+                <button class="btn success" id="btnSave">Guardar resultados</button>
+              </div>
+            </div>
+          </section>
+
+          <!-- MAÑANA -->
+          <aside class="panel aside">
+            <h2 style="margin-bottom:8px;font-size:18px">Figuras de <span id="lblManiana">—</span></h2>
+            <div id="listaFiguras" class="empty">Cargando figuras de mañana…</div>
+            <div class="total" style="font-size:14px">
+              <span>Total a jugar</span>
+              <span id="totalJugar">$0,00</span>
+            </div>
+          </aside>
+        </div>
+
+        <footer style="text-align:center;color:var(--muted);margin:14px 0 6px;font-size:12px">
+          &copy; 2025 GL Studios Corporation. Todos los derechos reservados.
+        </footer>
+      </div>
+    </div>
+  </div>
+
+  <button id="toTop" class="floating-top" title="Volver arriba">↑</button>
+  <div id="toast" class="toast"></div>
+
+  <script>
+    // Sidebar / user menu
+    document.getElementById('sidebarToggle').onclick = () => {
+      document.getElementById('sidebar').classList.toggle('collapsed');
+    };
+    function toggleUserMenu(){ document.querySelector('.user-dropdown').classList.toggle('active'); }
+    window.addEventListener('click', (e)=>{ if(!e.target.closest('.user-dropdown')) document.querySelector('.user-dropdown')?.classList.remove('active'); });
+
+    // Helpers
+    const $ = s => document.querySelector(s);
+    const money = n => Number(n||0).toLocaleString('es-EC',{style:'currency',currency:'USD'});
+    function toast(msg, ok=true){
+      const t=$("#toast"); t.textContent=msg; t.style.display='block';
+      t.style.borderColor = ok ? '#2563eb' : '#b91c1c';
+      t.style.background = ok ? '#0e1c36' : '#220d0d';
+      setTimeout(()=>t.style.display='none', 1800);
+    }
+    function isValidWinner(name){
+      if(!name) return false;
+      const t=name.trim().toLowerCase();
+      return !(t.includes('no vendido')||t.includes('no vendida'));
+    }
+    function splitCents(totalCents, n){
+      if(n<=0) return [];
+      const base=Math.floor(totalCents/n);
+      let resto=totalCents-base*n;
+      const arr=Array.from({length:n},()=>base);
+      for(let i=0;i<resto;i++) arr[i]+=1;
+      return arr;
+    }
+
+    // Estado
+    let FECHA = $('#fecha').value;
+    let AGENDA_LIST = [];  // [{nombre, valor}] SOLO HOY
+    let AGENDA_MAP  = {};
+    let RESULTADOS = [];
+    let COMODIN = {boletos:'', texto:''};
+    let FIGS_MANIANA=[], FECHA_MANIANA='', TOTAL_MANIANA=0;
+    let ACTIVE_BLOCK = null;
+
+    async function loadAgendaHoy(){
+      const r = await fetch('/static/db/figuras_por_fecha.xml',{cache:'no-store'});
+      const xml = new DOMParser().parseFromString(await r.text(),'application/xml');
+      AGENDA_LIST=[]; AGENDA_MAP={};
+      xml.querySelectorAll(`agenda > dia[fecha="${FECHA}"] > fig`).forEach(fig=>{
+        const nombre=(fig.getAttribute('nombre')||'').trim();
+        const valor=parseFloat(fig.getAttribute('valor')||'0')||0;
+        if(nombre){ AGENDA_LIST.push({nombre,valor}); AGENDA_MAP[nombre.toLowerCase()]=valor; }
+      });
+    }
+    async function loadResultados(){
+      const r = await fetch(`/api/resultados?fecha=${encodeURIComponent(FECHA)}`);
+      const j = await r.json();
+      RESULTADOS = (j.items||[]).map(it=>({
+        figura: it.figura||'',
+        ganadores: (it.ganadores||[]).map(g=>({
+          boleto:g.boleto||'', nombre:g.nombre||'', vendedor:g.vendedor||'', sector:g.sector||'', premio:Number(g.premio||0)
+        }))
+      }));
+      COMODIN = (j.extras && j.extras.comodin) ? {boletos:j.extras.comodin.boletos||'', texto:j.extras.comodin.texto||''} : {boletos:'', texto:''};
+    }
+    async function loadFigurasManiana(){
+      const r = await fetch(`/api/figuras-manana?fecha=${encodeURIComponent(FECHA)}`);
+      const j = await r.json(); FIGS_MANIANA=j.figuras||[]; FECHA_MANIANA=j.fecha||FECHA; TOTAL_MANIANA=Number(j.total||0);
+    }
+
+    function ganadorRowHTML(g={}){
+      return `<tr>
+        <td><input type="text"  value="${g.boleto||''}" placeholder="Boleto"></td>
+        <td><input type="text"  value="${g.nombre||''}" placeholder="Nombre"></td>
+        <td><input type="text"  value="${g.vendedor||''}" placeholder="Vendedor"></td>
+        <td><input type="text"  value="${g.sector||''}" placeholder="Sector"></td>
+        <td style="width:120px"><input type="number" step="0.01" value="${Number(g.premio||0).toFixed(2)}"></td>
+        <td style="width:120px;display:flex;gap:6px">
+          <button class="btn-mini" data-act="dup" title="Duplicar fila">⎘</button>
+          <button class="btn-mini" data-act="del" title="Eliminar">—</button>
+        </td>
+      </tr>`;
+    }
+
+    function recalcBlock(block){
+      const key = (block.dataset.fig||'').trim().toLowerCase();
+      const valor = AGENDA_MAP[key] || 0;
+      const rows  = Array.from(block.querySelectorAll('.rows tr'));
+
+      const validRows = rows.filter(tr=>{
+        const nom = tr.querySelectorAll('input')[1]?.value || '';
+        return isValidWinner(nom);
+      });
+
+      const parts = splitCents(Math.round(valor*100), validRows.length);
+      let i=0;
+      rows.forEach(tr=>{
+        const inputs = tr.querySelectorAll('input');
+        const nom    = inputs[1]?.value || '';
+        const out    = inputs[4];
+        if(isValidWinner(nom)){ out.value = ((parts[i++]||0)/100).toFixed(2); }
+        else{ out.value = (0).toFixed(2); }
+      });
+
+      const cu = validRows.length? (parts[0]||0)/100 : 0;
+      block.querySelector('.g-validos').textContent = String(validRows.length);
+      block.querySelector('.g-cu').textContent = money(cu);
+    }
+
+    function blockToolsHTML(){
+      return `
+        <div class="block-tools">
+          <button class="btn-mini caret" data-act="toggle">▾/▸</button>
+          <button class="btn-mini" data-act="add">+ Ganador</button>
+          <button class="btn-mini" data-act="dupLast" title="Duplicar última fila">⎘ Última</button>
+          <button class="btn-mini" data-act="clear" title="Limpiar ganadores">Limpiar</button>
+        </div>
+      `;
+    }
+
+    function renderMain(){
+      const cont = $('#figurasContainer');
+      if(AGENDA_LIST.length===0){
+        cont.className='empty'; cont.textContent='No hay figuras programadas para la fecha seleccionada.';
+        $('#comodin_boletos').value=COMODIN.boletos||''; $('#comodin_texto').value=COMODIN.texto||''; return;
+      }
+      cont.className=''; cont.innerHTML='';
+
+      const resMap={}; RESULTADOS.forEach(x=>{resMap[(x.figura||'').trim().toLowerCase()]=x.ganadores||[]});
+
+      AGENDA_LIST.forEach(({nombre,valor})=>{
+        const key=nombre.toLowerCase(); const ganadores=(resMap[key]||[]).slice();
+        const block=document.createElement('div'); block.className='block'; block.dataset.fig=nombre;
+
+        const validosIni=ganadores.filter(g=>isValidWinner(g.nombre)).length;
+        const cuIni = validosIni? (Math.floor((valor*100)/validosIni)/100) : 0;
+
+        block.innerHTML = `
+          <div class="top">
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+              <span class="chip blue">${money(valor)}</span>
+              <h3 style="margin:0;font-size:16px">${nombre}</h3>
+            </div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+              <span class="chip">Total: ${money(valor)}</span>
+              <span class="chip green">Válidos: <b class="g-validos">${validosIni}</b></span>
+              <span class="chip warn">c/u: <b class="g-cu">${money(cuIni)}</b></span>
+              ${blockToolsHTML()}
+            </div>
+          </div>
+          <table>
+            <thead><tr><th style="width:110px">Boleto</th><th>Nombre</th><th style="width:150px">Vendedor</th><th style="width:150px">Sector</th><th style="width:120px">Premio</th><th style="width:120px"></th></tr></thead>
+            <tbody class="rows">${ganadores.map(g=>ganadorRowHTML(g)).join('')}</tbody>
+          </table>
+        `;
+
+        const tbody=block.querySelector('.rows');
+
+        // eventos de filas
+        tbody.addEventListener('click',e=>{
+          const b=e.target.closest('button[data-act]'); if(!b) return;
+          if(b.dataset.act==='del'){ b.closest('tr').remove(); recalcBlock(block); }
+          if(b.dataset.act==='dup'){
+            const tr=b.closest('tr'); const vals=[...tr.querySelectorAll('input')].map(i=>i.value);
+            tbody.insertAdjacentHTML('beforeend',ganadorRowHTML({boleto:vals[0],nombre:vals[1],vendedor:vals[2],sector:vals[3],premio:vals[4]}));
+            recalcBlock(block);
+          }
+        });
+        tbody.addEventListener('input',()=>recalcBlock(block));
+
+        // herramientas del bloque
+        const tools=block.querySelector('.block-tools');
+        tools.addEventListener('click',e=>{
+          const a=e.target.closest('button[data-act]'); if(!a) return;
+          if(a.dataset.act==='add'){ tbody.insertAdjacentHTML('beforeend',ganadorRowHTML({})); recalcBlock(block); }
+          if(a.dataset.act==='dupLast'){
+            const last=tbody.querySelector('tr:last-child'); if(!last){ tbody.insertAdjacentHTML('beforeend',ganadorRowHTML({})); recalcBlock(block); return;}
+            const vals=[...last.querySelectorAll('input')].map(i=>i.value);
+            tbody.insertAdjacentHTML('beforeend',ganadorRowHTML({boleto:vals[0],nombre:vals[1],vendedor:vals[2],sector:vals[3],premio:vals[4]}));
+            recalcBlock(block);
+          }
+          if(a.dataset.act==='clear'){ if(confirm('¿Limpiar todos los ganadores de esta figura?')){ tbody.innerHTML=''; recalcBlock(block); } }
+          if(a.dataset.act==='toggle'){
+            const col = block.getAttribute('data-collapsed') === '1' ? '0' : '1';
+            block.setAttribute('data-collapsed', col);
+          }
+        });
+
+        // foco para Alt+A
+        block.addEventListener('focusin', ()=>{ ACTIVE_BLOCK = block; }, true);
+
+        cont.appendChild(block);
+        recalcBlock(block);
+      });
+
+      $('#comodin_boletos').value=COMODIN.boletos||'';
+      $('#comodin_texto').value=COMODIN.texto||'';
+      filterBlocks($('#search').value||''); // aplica filtro si ya hay texto
+    }
+
+    function renderAside(){
+      const d=new Date((FECHA_MANIANA||FECHA)+'T00:00:00');
+      $('#lblManiana').textContent=d.toLocaleDateString('es-ES',{year:'numeric',month:'long',day:'numeric'});
+      const list=$('#listaFiguras');
+      if(FIGS_MANIANA.length===0){list.className='empty'; list.textContent='No hay figuras programadas para mañana.';}
+      else{
+        list.className=''; list.innerHTML='';
+        FIGS_MANIANA.forEach(f=>{
+          const el=document.createElement('div'); el.className='item';
+          el.innerHTML=`<span>${f.nombre}</span><span class="tag">${money(f.valor||0)}</span>`;
+          list.appendChild(el);
+        });
+      }
+      $('#totalJugar').textContent=money(TOTAL_MANIANA);
+    }
+
+    function collectResultados(){
+      const items = Array.from(document.querySelectorAll('.block')).map(bl=>{
+        const figura = bl.dataset.fig || '';
+        the
+        const ganadores = Array.from(bl.querySelectorAll('.rows tr')).map(tr=>{
+          const ins=tr.querySelectorAll('input');
+          return {boleto:(ins[0]?.value||'').trim(), nombre:(ins[1]?.value||'').trim(), vendedor:(ins[2]?.value||'').trim(), sector:(ins[3]?.value||'').trim(), premio:Number(ins[4]?.value||0)}
+        });
+        return {figura, ganadores};
+      });
+      const extras = { comodin: { boletos: $('#comodin_boletos').value.trim(), texto: $('#comodin_texto').value.trim() } };
+      return {items, extras};
+    }
+
+    async function guardar(){
+      const fd=new FormData(); fd.append('fecha', FECHA);
+      const {items, extras}=collectResultados(); fd.append('resultados', JSON.stringify(items)); fd.append('extras', JSON.stringify(extras));
+      const r=await fetch('/boletin/guardar',{method:'POST',body:fd}); const j=await r.json().catch(()=>({ok:false}));
+      toast(j.ok?'Resultados guardados. ✅':'Error al guardar ❌', j.ok);
+    }
+
+    function setLinks(){
+      $('#btnPdf').onclick=()=>window.open(`/boletin/pdf?fecha=${encodeURIComponent(FECHA)}`,'_blank');
+      $('#aPdfLink').href = `/boletin/pdf?fecha=${encodeURIComponent(FECHA)}`;
+      $('#aDesigner').href = `/disenador-boletin?fecha=${encodeURIComponent(FECHA)}`;
+    }
+
+    async function cargarTodo(){
+      FECHA=$('#fecha').value; setLinks();
+      await Promise.all([loadAgendaHoy(), loadResultados(), loadFigurasManiana()]);
+      renderMain(); renderAside();
+    }
+
+    // Filtro rápido por figura
+    function filterBlocks(q){
+      q = (q||'').trim().toLowerCase();
+      document.querySelectorAll('.block').forEach(bl=>{
+        const match = (bl.dataset.fig||'').toLowerCase().includes(q);
+        bl.style.display = match ? '' : 'none';
+      });
+    }
+
+    // Exportar/copy JSON
+    function exportJSON(){
+      const data = collectResultados();
+      const txt = JSON.stringify(data, null, 2);
+      navigator.clipboard.writeText(txt).then(()=>toast('Resultados copiados al portapapeles 📋'));
+    }
+
+    // Barra / eventos
+    $('#fecha').addEventListener('change', cargarTodo);
+    $('#btnRecalc').addEventListener('click', ()=>document.querySelectorAll('.block').forEach(recalcBlock));
+    $('#btnSave').addEventListener('click', guardar);
+    $('#btnExport').addEventListener('click', exportJSON);
+    $('#search').addEventListener('input', e=>filterBlocks(e.target.value));
+    $('#btnExpandAll').addEventListener('click', ()=>document.querySelectorAll('.block').forEach(b=>b.setAttribute('data-collapsed','0')));
+    $('#btnCollapseAll').addEventListener('click', ()=>document.querySelectorAll('.block').forEach(b=>b.setAttribute('data-collapsed','1')));
+
+    // Atajos
+    document.addEventListener('keydown', (e)=>{
+      if(e.ctrlKey && e.key.toLowerCase()==='s'){ e.preventDefault(); guardar(); }
+      if(e.ctrlKey && e.key.toLowerCase()==='p'){ e.preventDefault(); window.open(`/boletin/pdf?fecha=${encodeURIComponent(FECHA)}`,'_blank'); }
+      if(e.altKey  && (e.key.toLowerCase()==='a')){ e.preventDefault();
+        const bl = ACTIVE_BLOCK || document.querySelector('.block'); if(!bl) return;
+        bl.querySelector('.rows').insertAdjacentHTML('beforeend',ganadorRowHTML({})); recalcBlock(bl);
+      }
+    });
+
+    // Scroll Top
+    const toTop = $('#toTop');
+    window.addEventListener('scroll', ()=>{ toTop.style.display = (window.scrollY>300)?'block':'none'; });
+    toTop.addEventListener('click', ()=>window.scrollTo({top:0,behavior:'smooth'}));
+
+    document.addEventListener('DOMContentLoaded', cargarTodo);
+  </script>
+</body>
+</html>

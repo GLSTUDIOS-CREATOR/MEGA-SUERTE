@@ -1,0 +1,372 @@
+body {
+    margin: 0;
+    font-family: 'Poppins', Arial, sans-serif;
+    background: #f4f7fb;
+    color: #212529;
+}
+
+.dashboard-root {
+    display: flex;
+    min-height: 100vh;
+}
+
+.sidebar {
+    width: 235px;
+    background: #212943;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    z-index: 10;
+    box-shadow: 2px 0 10px rgba(40,60,90,0.05);
+    transition: width 0.3s;
+}
+.sidebar.collapsed { width: 64px; }
+
+.logo-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 26px 0 18px 0;
+    border-bottom: 1px solid #27304c;
+    position: relative;
+}
+.logo {
+    width: 58px; height: 58px;
+    border-radius: 13px;
+    background: #fff;
+    margin-bottom: 8px;
+    object-fit: contain;
+    box-shadow: 0 2px 8px rgba(20,40,90,0.09);
+}
+.sidebar-title {
+    font-weight: 700;
+    font-size: 1.13em;
+    margin-bottom: 6px;
+    letter-spacing: 1.5px;
+    text-align: center;
+}
+.sidebar-toggle {
+    display: none;
+    position: absolute;
+    top: 8px; right: 16px;
+    background: none;
+    border: none;
+    font-size: 2em;
+    color: #fff;
+    cursor: pointer;
+    z-index: 11;
+}
+
+.menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+.menu li a {
+    display: flex;
+    align-items: center;
+    padding: 13px 22px;
+    color: #fff;
+    text-decoration: none;
+    font-size: 15.2px;
+    gap: 11px;
+    border-left: 4px solid transparent;
+    font-weight: 600;
+    border-radius: 0 20px 20px 0;
+    margin: 2px 0;
+    transition: background 0.14s, color 0.16s, border 0.17s;
+}
+.menu li a span { font-size: 18px; margin-right: 7px;}
+.menu li a:hover, .menu li a.active {
+    background: #2a3957;
+    color: #1fc59c;
+    border-left: 4px solid #1fc59c;
+}
+
+.logout-btn {
+    display: block;
+    padding: 11px;
+    margin: 18px 10px 24px 10px;
+    background: #e84c4c;
+    border-radius: 9px;
+    text-align: center;
+    color: #fff;
+    font-weight: bold;
+    text-decoration: none;
+    font-size: 14.2px;
+    transition: background 0.18s;
+}
+.logout-btn:hover { background: #a82828; }
+
+/* ====== CONTENIDO PRINCIPAL ====== */
+.main-content {
+    flex: 1;
+    padding: 0 0 0 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: #f4f7fb;
+}
+.topbar {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    padding: 30px 42px 10px 42px;
+    background: #fff;
+    border-bottom: 1.5px solid #f1f1f4;
+}
+.user-dropdown {
+    position: relative;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    gap: 7px;
+    user-select: none;
+}
+.user-name {
+    font-weight: 600;
+    color: #212943;
+}
+.dropdown-caret {
+    font-size: 13px;
+    color: #888;
+    margin-left: 2px;
+}
+.user-menu {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 44px;
+    min-width: 165px;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 6px 24px rgba(30,60,100,0.11);
+    z-index: 12;
+    flex-direction: column;
+    align-items: stretch;
+}
+.user-menu button,
+.user-menu a {
+    border: none;
+    background: none;
+    color: #212943;
+    padding: 12px 20px;
+    text-align: left;
+    width: 100%;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    border-bottom: 1px solid #f1f1f1;
+    transition: background 0.13s;
+}
+.user-menu button:hover,
+.user-menu a:hover {
+    background: #f2faff;
+    color: #1fc59c;
+}
+.user-menu a:last-child, .user-menu button:last-child {
+    border-bottom: none;
+}
+.user-dropdown.active .user-menu { display: flex; }
+
+.avatar {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    border: 2px solid #1fc59c;
+    background: #fff;
+    object-fit: cover;
+}
+
+.cards-col {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    min-width: 185px;
+    flex: 1 1 200px;
+    max-width: 320px;
+}
+.card {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 2px 10px rgba(30,80,130,0.08);
+    padding: 20px 30px;
+    min-width: 140px;
+    text-align: left;
+}
+.card h4 {
+    margin: 0 0 5px 0;
+    color: #1fc59c;
+    font-weight: 700;
+    font-size: 1.07em;
+}
+.card-value {
+    font-size: 1.7em;
+    color: #212943;
+    font-weight: bold;
+    margin-top: 0;
+    letter-spacing: 1px;
+}
+
+.charts-col {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    flex: 2 1 700px;
+    min-width: 300px;
+    max-width: 800px;
+}
+.chart-card {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 2px 10px rgba(20,80,130,0.07);
+    padding: 25px 28px 18px 28px;
+    min-width: 250px;
+    min-height: 260px;
+    max-width: 760px;
+    margin-bottom: 0;
+    margin-right: auto;
+    margin-left: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+.chart-card h4 {
+    margin-bottom: 14px;
+    font-weight: 700;
+    color: #212943;
+}
+.chart-card canvas {
+    max-width: 650px !important;
+    max-height: 230px !important;
+    width: 100% !important;
+    height: auto !important;
+}
+
+.dashboard-flex {
+    display: flex;
+    gap: 48px;
+    flex-wrap: wrap;
+    margin: 24px 0 0 0;
+    padding: 0 42px 0 42px;
+    min-height: 400px;
+}
+footer {
+    margin-top: 28px;
+    padding: 10px 0 0 0;
+    text-align: center;
+    font-size: 14.5px;
+    color: #999;
+    background: transparent;
+}
+
+/* MODAL */
+.modal { 
+    position:fixed; 
+    top:0;left:0;width:100vw;height:100vh;
+    background:rgba(30,30,60,0.21);
+    z-index:100;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+.modal-content {
+    background:#fff; 
+    padding:28px; 
+    border-radius:18px; 
+    min-width:270px;
+    box-shadow: 0 8px 40px rgba(20,80,130,0.10);
+}
+.modal-content h3 { margin-top:0; color: #212943;}
+.save-btn,.cancel-btn {
+    margin: 0 6px; 
+    padding: 8px 24px; 
+    border-radius:10px; 
+    border:none; 
+    font-weight:700;
+    font-size:15px;
+}
+.save-btn {background:#1fc59c; color:#fff;}
+.save-btn:hover {background:#212943; color:#fff;}
+.cancel-btn {background:#e84c4c; color:#fff;}
+.cancel-btn:hover {background:#a82828; color:#fff;}
+.modal label {display:block; margin:10px 0 4px 0; font-weight:600;}
+.modal input, .modal select {
+    width:100%;
+    padding:7px 10px;
+    border-radius:7px;
+    border:1px solid #e1e1e1;
+    font-size:15px;
+}
+
+/* ====== RESPONSIVE ====== */
+@media (max-width: 1100px) {
+    .dashboard-flex { flex-direction: column; gap:22px;}
+    .charts-col, .cards-col { max-width: 100%; }
+    .chart-card, .card { min-width: 80vw; }
+}
+@media (max-width: 900px) {
+    .dashboard-flex { padding: 0 14px;}
+    .topbar { padding: 20px 12px 10px 12px;}
+    .charts-col { max-width: 99vw;}
+    .chart-card canvas { max-width: 99vw !important; }
+}
+@media (max-width: 700px) {
+    .sidebar { 
+        width: 100vw; 
+        flex-direction: row; 
+        position: fixed; 
+        height: 60px; 
+        z-index: 99; 
+        min-width: 0;
+        padding: 0;
+    }
+    .sidebar.collapsed { width: 100vw;}
+    .logo-area { 
+        flex-direction: row; 
+        align-items: center; 
+        padding: 9px 10px 9px 10px;
+        width: auto;
+    }
+    .sidebar-title { font-size: 1em; margin-bottom: 0; margin-left: 8px;}
+    .sidebar-toggle { 
+        display: block; 
+        position: absolute; 
+        left: 8px; 
+        top: 13px;
+    }
+    .menu { 
+        flex-direction: row; 
+        gap: 0; 
+        padding: 0 0; 
+        margin: 0 0 0 18px;
+        height: 60px;
+        overflow-x: auto;
+    }
+    .menu li a { 
+        font-size: 13px; 
+        padding: 7px 7px; 
+        border-left: none; 
+        border-bottom: 2px solid transparent;
+        white-space: nowrap;
+    }
+    .menu li a:hover, .menu li a.active { 
+        background: #e4ecfa; 
+        color: #1fc59c; 
+        border-bottom: 2px solid #1fc59c;
+    }
+    .logout-btn { margin: 6px; font-size: 12px; }
+    .main-content { padding: 68px 2vw 2vw 2vw;}
+    .topbar { flex-direction: column; align-items: flex-end; padding: 7vw 0 2vw 0;}
+    .card, .chart-card { min-width: 80vw; }
+}
+@media (max-width: 500px) {
+    .main-content { padding: 72px 2vw 2vw 2vw; }
+    .modal-content { min-width: 96vw;}
+    .logo { width: 41px; height: 41px;}
+}

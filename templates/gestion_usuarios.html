@@ -1,0 +1,109 @@
+ 
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestión de Usuarios | GLBINGO</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/gestion_usuarios.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+    <!-- Fondo animado de círculos -->
+    <div class="animated-bg">
+        <div class="circle circle1"></div>
+        <div class="circle circle2"></div>
+        <div class="circle circle3"></div>
+    </div>
+    <div class="container">
+        <!-- LOGO -->
+        <img src="{{ url_for('static', filename='img/logo.png') }}" alt="GL Studios Logo" class="logo">
+        
+        <h1>Gestión de Usuarios</h1>
+        <button class="dashboard-btn" onclick="location.href='{{ url_for('dashboard') }}'">← Volver al Dashboard</button>
+
+        <div class="usuarios-panel">
+            <div class="usuarios-header">
+                <span>Usuario</span>
+                <span>Rol</span>
+                <span>Estado</span>
+                <span>Acciones</span>
+            </div>
+            <!-- Aquí se mostrarán los usuarios con Jinja2 -->
+            {% for usuario in usuarios %}
+            <div class="usuario-row">
+                <span>{{ usuario.nombre }}</span>
+                <span>{{ usuario.rol }}</span>
+                <span>{{ "Activo" if usuario.estado == "activo" else "Inactivo" }}</span>
+                <span>
+                    <button class="edit-btn" onclick="editarUsuario('{{ usuario.nombre }}')">Editar</button>
+                    <button class="delete-btn" onclick="eliminarUsuario('{{ usuario.nombre }}')">Eliminar</button>
+                </span>
+            </div>
+            {% endfor %}
+        </div>
+
+        <button class="add-user-btn" onclick="mostrarFormulario()">+ Agregar Usuario</button>
+
+        <!-- Formulario modal para agregar/editar usuario -->
+        <div id="modal-form" class="modal">
+            <form class="modal-content" method="POST" action="{{ url_for('agregar_usuario') }}">
+                <h2>Agregar/Editar Usuario</h2>
+                <label>Usuario:</label>
+                <input type="text" name="nombre" required>
+
+                <label>Contraseña:</label>
+                <div class="password-wrapper">
+                    <input type="password" name="clave" id="clave" required>
+                    <span class="toggle-password" onclick="togglePassword()">👁️</span>
+                </div>
+
+                <label>Rol:</label>
+                <select name="rol" required>
+                    <option value="">Seleccione un rol</option>
+                    <option value="superadmin">Super Administrador</option>
+                    <option value="admin">Administrador</option>
+                    <option value="socio">Socio</option>
+                    <option value="cobrador">Cobrador</option>
+                    <option value="jugador">Jugador</option>
+                    <option value="impresion">Impresión</option>
+                </select>
+
+                <label>Estado:</label>
+                <select name="estado" required>
+                    <option value="activo">Activo</option>
+                    <option value="inactivo">Inactivo</option>
+                </select>
+
+                <div class="modal-actions">
+                    <button type="submit" class="save-btn">Guardar</button>
+                    <button type="button" class="cancel-btn" onclick="cerrarFormulario()">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <footer>
+        <p>&copy; {{ year }} GL Studios Corporation. Todos los derechos reservados.</p>
+    </footer>
+    <script>
+        // Mostrar/ocultar modal
+        function mostrarFormulario() {
+            document.getElementById('modal-form').style.display = 'block';
+        }
+        function cerrarFormulario() {
+            document.getElementById('modal-form').style.display = 'none';
+        }
+        // Mostrar/ocultar contraseña
+        function togglePassword() {
+            var clave = document.getElementById('clave');
+            if (clave.type === "password") {
+                clave.type = "text";
+            } else {
+                clave.type = "password";
+            }
+        }
+        // Lógica para editar/eliminar usuario (se implementa luego)
+        function editarUsuario(nombre) { alert('Función para editar: ' + nombre); }
+        function eliminarUsuario(nombre) { alert('Función para eliminar: ' + nombre); }
+    </script>
+</body>
+</html>

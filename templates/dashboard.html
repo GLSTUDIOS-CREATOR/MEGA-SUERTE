@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Dashboard | GLBINGO</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1"></script>
+  <style>
+    :root{
+      --bg:#f7f9fc; --card:#ffffff; --ink:#15233b; --muted:#6b7a99;
+      --brand:#4460ff; --ok:#27c498; --warn:#ffb020; --bad:#ef4b4b;
+      --ring: rgba(68,96,255,.15);
+    }
+    *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial}
+    .layout{display:grid;grid-template-columns:260px 1fr;min-height:100vh}
+    nav{background:#fff;border-right:1px solid #eef1f6}
+    nav .brand{display:flex;align-items:center;gap:10px;padding:16px 18px;border-bottom:1px solid #eef1f6}
+    nav .brand img{width:34px;height:34px;border-radius:8px}
+    nav .brand .t{font-weight:800}
+    nav ul{list-style:none;margin:0;padding:8px}
+    nav li a{display:flex;align-items:center;gap:10px;padding:10px 16px;margin:4px 10px;border-radius:10px;color:var(--ink);text-decoration:none}
+    nav li a:hover{background:#f0f3ff}
+    .logout{display:block;margin:12px 10px 18px;padding:10px 14px;border-radius:10px;background:#fff3f3;color:#b22727;text-decoration:none;border:1px solid #ffe0e0}
+    header{display:flex;align-items:center;justify-content:space-between;padding:18px 22px}
+    .hdr-left{display:flex;align-items:center;gap:10px}
+    .chip{font-size:13px;background:#eef2ff;color:#2b3e8f;border-radius:999px;padding:6px 10px}
+    .datebar{display:flex;gap:8px;align-items:center}
+    .datebar input{background:#fff;border:1px solid #e6ebf3;border-radius:10px;padding:10px 12px;color:var(--ink)}
+    .btn{border:0;background:var(--brand);color:#fff;border-radius:10px;padding:10px 14px;font-weight:600;cursor:pointer}
+    .btn.ghost{background:#eef2ff;color:#2b3e8f}
+    .who{display:flex;align-items:center;gap:10px}
+    .who img{width:34px;height:34px;border-radius:999px}
+    .wrap{padding:0 22px 28px}
+    .cards{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:14px}
+    .card{background:var(--card);border:1px solid #eef1f6;border-radius:16px;padding:12px 14px;box-shadow:0 6px 16px -10px var(--ring)}
+    .card h5{margin:0 0 6px;color:var(--muted);font-size:13px;font-weight:800;letter-spacing:.2px}
+    .card .v{font-size:22px;font-weight:900}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+    .panel{background:var(--card);border:1px solid #eef1f6;border-radius:16px;padding:14px;box-shadow:0 6px 16px -10px var(--ring)}
+    .panel h4{margin:0 0 8px}
+    @media (max-width:1200px){.cards{grid-template-columns:repeat(3,1fr)} .grid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <nav>
+      <div class="brand">
+        <img src="{{ url_for('static', filename='img/logo.png') }}" alt="">
+        <div class="t">GL Bingo</div>
+      </div>
+      <ul>
+        <li><a href="/dashboard">🏠 Dashboard</a></li>
+        <li><a href="/usuarios">🧑‍💼 Usuarios</a></li>
+        <li><a href="/juego">🎲 Juego</a></li>
+        <li><a href="/contabilidad">📊 Contabilidad</a></li>
+        <li><a href="/vendedores">🧾 Vendedores</a></li>
+        <li><a href="/asignar-planillas">📑 Asignar Planillas</a></li>
+        <li><a href="/impresion">🖨️ Impresión de Boletos</a></li>
+        <li><a href="/cobro">💵 Cobro de Caja</a></li>
+        <li><a href="/pago-premios">🏅 Pago de Premios</a></li>
+        <li><a href="/sorteo">🎟️ Sorteo</a></li>
+        <li><a href="/crear-figuras">🟩 Crear Figuras</a></li>
+        <li><a href="/escoger-figuras">🟦 Escoger Figuras</a></li>
+        <li><a href="/boletin">📋 Boletín</a></li>
+      </ul>
+      <a class="logout" href="{{ url_for('logout') }}">⏻ Cerrar sesión</a>
+    </nav>
+
+    <main>
+      <header>
+        <div class="hdr-left">
+          <h2 style="margin:0">Dashboard</h2>
+          <span class="chip" id="chipValor">Valor boleto: —</span>
+          <span class="chip" id="chipComision">Comisión base: —</span>
+          <span class="chip" id="chipMeta">Meta: —</span>
+        </div>
+        <div class="who">
+          <div class="datebar">
+            <input type="date" id="fechaPick">
+            <button class="btn ghost" id="prevBtn">◀ -1 día</button>
+            <button class="btn ghost" id="todayBtn">☀ Hoy</button>
+            <button class="btn ghost" id="nextBtn">+1 día ▶</button>
+            <button class="btn" id="refreshBtn">⟳ Actualizar</button>
+            <label style="color:#6b7a99;font-size:13px"><input type="checkbox" id="autoRefresh"> Auto-refresh (60s)</label>
+          </div>
+          <img src="{{ url_for('static', filename='avatars/' + avatar) }}" alt="">
+          <div style="font-weight:700">{{ usuario }}</div>
+        </div>
+      </header>
+
+      <div class="wrap">
+        <!-- TARJETAS -->
+        <section class="cards">
+          <div class="card"><h5>💰 Total recaudado</h5><div class="v" id="vRecaudado">$0.00</div></div>
+          <div class="card"><h5>🏢 Ganancia empresa</h5><div class="v" id="vGanEmp">$0.00</div></div>
+          <div class="card"><h5>🤝 Ganancia vendedores</h5><div class="v" id="vGanVend">$0.00</div></div>
+          <div class="card"><h5>💵 Efectivo</h5><div class="v" id="vEfectivo">$0.00</div></div>
+          <div class="card"><h5>🏦 Transferencia</h5><div class="v" id="vTransfer">$0.00</div></div>
+          <div class="card"><h5>🖨️ Boletos impresos</h5><div class="v" id="vImp">0</div></div>
+
+          <div class="card"><h5>🟩 Boletos vendidos</h5><div class="v" id="vVend">0</div></div>
+          <div class="card"><h5>🟥 Boletos devueltos</h5><div class="v" id="vDev">0</div></div>
+
+          <div class="card"><h5>🧾 Planillas impresas</h5><div class="v" id="vPlImp">0</div></div>
+          <div class="card"><h5>📦 Planillas asignadas</h5><div class="v" id="vPlAsig">0</div></div>
+          <div class="card"><h5>↩ Planillas devueltas</h5><div class="v" id="vPlDev">0</div></div>
+          <div class="card"><h5>🕳 Planillas en blanco</h5><div class="v" id="vPlBlanco">0</div></div>
+        </section>
+
+        <!-- GRÁFICAS -->
+        <section class="grid">
+          <div class="panel">
+            <h4>Contabilidad del día <small style="color:var(--muted)">Recaudado, Ganancias, Medios de pago</small></h4>
+            <canvas id="chartContabilidad" height="140"></canvas>
+          </div>
+          <div class="panel">
+            <h4>Boletos del día <small style="color:var(--muted)">Impresos / Vendidos / Devueltos</small></h4>
+            <canvas id="chartBoletos" height="140"></canvas>
+          </div>
+          <div class="panel">
+            <h4>Vendedores (curva)</h4>
+            <canvas id="chartVendedores" height="160"></canvas>
+          </div>
+          <div class="panel">
+            <h4>Planillas del día</h4>
+            <canvas id="chartPlanillas" height="140"></canvas>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const fmtMoney = n => new Intl.NumberFormat('es-EC',{style:'currency',currency:'USD'}).format(Number(n||0));
+    let cContab, cBoletos, cVend, cPlan;
+
+    function kill(c){ if(c){ c.destroy(); } }
+
+    function setChips(cfg){
+      document.getElementById('chipValor').textContent   = `Valor boleto: ${fmtMoney(cfg.valor_boleto||0)}`;
+      document.getElementById('chipComision').textContent= `Comisión base: ${(cfg.comision_vendedor||0)}%`;
+      document.getElementById('chipMeta').textContent    = `Meta: ${cfg.meta_boletos||0} (+${cfg.comision_extra_meta||0}% extra)`;
+    }
+
+    function setCards(d){
+      vRecaudado.textContent = fmtMoney(d.ingresos_brutos);
+      vGanEmp.textContent    = fmtMoney(d.ganancia_empresa);
+      vGanVend.textContent   = fmtMoney(d.ganancia_vendedores);
+      vEfectivo.textContent  = fmtMoney(d.efectivo);
+      vTransfer.textContent  = fmtMoney(d.transferencia);
+      vImp.textContent       = d.boletos_impresos;
+      vVend.textContent      = d.vendidos_total;
+      vDev.textContent       = d.devueltos_total;
+      vPlImp.textContent     = d.planillas_impresas;
+      vPlAsig.textContent    = d.planillas_asignadas;
+      vPlDev.textContent     = d.planillas_devueltas;
+      vPlBlanco.textContent  = d.planillas_blanco;
+    }
+
+    function setCharts(d){
+      kill(cContab); kill(cBoletos); kill(cVend); kill(cPlan);
+
+      cContab = new Chart(chartContabilidad, {
+        type:'bar',
+        data:{labels:['Recaudado','Gan. Empresa','Gan. Vendedores','Efectivo','Transferencia'],
+          datasets:[{data:[d.ingresos_brutos,d.ganancia_empresa,d.ganancia_vendedores,d.efectivo,d.transferencia],
+            backgroundColor:'#dfe6ff', borderColor:'#4460ff', borderWidth:1}]},
+        options:{responsive:true, scales:{y:{beginAtZero:true}}}
+      });
+
+      cBoletos = new Chart(chartBoletos, {
+        type:'bar',
+        data:{labels:['Impresos','Vendidos','Devueltos'],
+          datasets:[{data:[d.boletos_impresos,d.vendidos_total,d.devueltos_total],
+            backgroundColor:['#edf2ff','#d7f7ee','#ffe3e3'],
+            borderColor:['#4460ff','#27c498','#ef4b4b'], borderWidth:1}]},
+        options:{responsive:true, scales:{y:{beginAtZero:true}}}
+      });
+
+      const names = d.vendedores.map(x=>x.vendedor);
+      cVend = new Chart(chartVendedores, {
+        type:'line',
+        data:{labels:names, datasets:[
+          {label:'Vendidos', data:d.vendedores.map(x=>x.vendidos),  borderColor:'#27c498', fill:false, tension:.3},
+          {label:'Devueltos',data:d.vendedores.map(x=>x.devueltos), borderColor:'#ef4b4b', fill:false, tension:.3}
+        ]},
+        options:{responsive:true, scales:{y:{beginAtZero:true}}}
+      });
+
+      cPlan = new Chart(chartPlanillas, {
+        type:'bar',
+        data:{labels:['Impresas','Asignadas','Devueltas','En blanco'],
+          datasets:[{data:[d.planillas_impresas,d.planillas_asignadas,d.planillas_devueltas,d.planillas_blanco],
+            backgroundColor:['#edf2ff','#e7f5ed','#ffe8cc','#f2f4f7'],
+            borderColor:['#4460ff','#27c498','#ffb020','#6b7a99'], borderWidth:1}]},
+        options:{responsive:true, scales:{y:{beginAtZero:true}}}
+      });
+    }
+
+    async function load(iso){
+      const r = await fetch(`/api/dashboard/hoy?fecha=${iso}`);
+      const j = await r.json();
+      if(!j.ok) return;
+      setChips(j.config||{});
+      setCards(j);
+      setCharts(j);
+    }
+
+    // ===== Navegación por fecha y auto-refresh =====
+    const pick = document.getElementById('fechaPick');
+    const prev = document.getElementById('prevBtn');
+    const next = document.getElementById('nextBtn');
+    const today= document.getElementById('todayBtn');
+    const btnR = document.getElementById('refreshBtn');
+    const chkA = document.getElementById('autoRefresh');
+    let timer = null;
+
+    function iso(d){ return d.toISOString().slice(0,10); }
+    function toDate(s){ const [y,m,dd]=s.split('-').map(Number); return new Date(y,m-1,dd); }
+    function startAuto(){ stopAuto(); if(chkA.checked){ timer=setInterval(()=>load(pick.value),60000); } }
+    function stopAuto(){ if(timer){ clearInterval(timer); timer=null; } }
+
+    document.addEventListener('DOMContentLoaded', ()=>{
+      pick.value = new Date().toISOString().slice(0,10);
+      load(pick.value);
+      startAuto();
+    });
+    pick.addEventListener('change', ()=>load(pick.value));
+    btnR.addEventListener('click', ()=>load(pick.value));
+    prev.addEventListener('click', ()=>{ const d=toDate(pick.value); d.setDate(d.getDate()-1); pick.value=iso(d); load(pick.value); });
+    next.addEventListener('click', ()=>{ const d=toDate(pick.value); d.setDate(d.getDate()+1); pick.value=iso(d); load(pick.value); });
+    today.addEventListener('click', ()=>{ pick.value=new Date().toISOString().slice(0,10); load(pick.value); });
+    chkA.addEventListener('change', startAuto);
+  </script>
+</body>
+</html>

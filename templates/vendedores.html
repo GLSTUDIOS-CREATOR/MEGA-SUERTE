@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Registro de Vendedores | GL Studios</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Tipografías y estilos base -->
+  <link href="https://fonts.googleapis.com/css?family=Montserrat:700,600,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+
+  <!-- Estilos propios de la página (conservando los tuyos) -->
+  <style>
+    /* Contenedor de la tarjeta central (se mantiene tu diseño) */
+    .container-vendedores {
+      max-width: 1000px;
+      margin: 42px auto;
+      background: #fff;
+      border-radius: 26px;
+      box-shadow: 0 8px 36px #1e93ce18;
+      padding: 36px 38px 28px 38px;
+      position: relative;
+    }
+    .logo-center { text-align: center; margin-bottom: 10px; }
+    .logo-center img{
+      height: 58px; border-radius: 10px; background:#fff; box-shadow:0 2px 12px #50b4e722;
+    }
+    h1.titulo-main{
+      font-size: 2.5rem; font-weight: 700; color:#232f4a; text-align:center; margin-bottom:24px;
+    }
+    .form-row{ display:flex; gap:18px; margin-bottom:20px; justify-content:center; flex-wrap:wrap; }
+    .form-row input[type="text"]{
+      flex:1 1 180px; min-width:130px; max-width:220px; padding:10px;
+      border:1.4px solid #c5d1e6; border-radius:8px; font-size:1rem; background:#f7f8fa;
+    }
+    .form-row button{
+      padding:10px 32px; background:linear-gradient(90deg,#2167b8 60%, #2dc2d9 100%);
+      color:#fff; font-weight:700; font-size:1.07rem; border-radius:10px; border:none; cursor:pointer;
+      transition:background .18s;
+    }
+    .form-row button:hover{ background:linear-gradient(90deg,#165fa4 10%, #19a6b8 100%); }
+    .alert-success{
+      background:#eafaf1; color:#2a885d; border-radius:9px; padding:10px 0; font-weight:600;
+      text-align:center; margin-bottom:18px; border:1px solid #b7eac6;
+    }
+
+    /* Tabla */
+    table{ width:100%; border-collapse:separate; border-spacing:0; margin-bottom:18px; background:#fff; border-radius:12px; overflow:hidden; }
+    thead tr{ background:#e6eaf2; }
+    thead th{ font-weight:700; padding:13px 6px; color:#25315d; text-align:left; border-bottom:2px solid #dae1ef; font-size:1.1em; }
+    tbody td{ padding:13px 6px; font-size:1.04em; }
+    tbody tr:nth-child(even){ background:#f7f8fa; }
+    tbody tr:nth-child(odd){ background:#fff; }
+
+    .acciones-btns{ display:flex; gap:4px; align-items:center; }
+    .btn-accion{ border:none; background:none; padding:5px 9px; font-size:1.2em; border-radius:6px; cursor:pointer; margin-right:2px; transition:background .15s; }
+    .btn-accion.editar{ color:#2679da; } .btn-accion.editar:hover{ background:#e8f3ff; }
+    .btn-accion.eliminar{ color:#d44545; } .btn-accion.eliminar:hover{ background:#fff0f0; }
+    .btn-accion.guardar{ color:#27b26a; } .btn-accion.cancelar{ color:#888; }
+    .input-editar-tabla{
+      width:96%; max-width:120px; padding:6px 7px; border:1.3px solid #b5c3df; border-radius:6px;
+      font-size:1rem; background:#fff; margin:0; box-sizing:border-box; font-family:'Montserrat', Arial, sans-serif;
+    }
+
+    /* Ajustes de layout para integrarlo al dashboard */
+    body{ background:#f3f4f8; }
+    .dashboard-root{ min-height:100vh; display:flex; }
+    .main-content{ flex:1; display:flex; flex-direction:column; min-width:0; }
+    .page-actions{ display:flex; gap:10px; justify-content:flex-end; margin:20px 20px 0; }
+    .page-actions .btn{ border-radius:12px; font-weight:800; padding:.6rem 1rem; }
+    .btn-prim{ background:#1fc59c; color:#06221f; border:none; }
+    .btn-prim:hover{ filter:brightness(.95); }
+    .btn-sec{ background:#fff; border:1px solid #d1d5db; }
+    .btn-sec:hover{ background:#f3f4f6; }
+
+    @media (max-width: 750px){
+      .container-vendedores{ padding:14px 4px; }
+      h1.titulo-main{ font-size:1.35rem; }
+      table, thead, tbody, th, td, tr{ font-size:.98em; }
+      .page-actions{ margin:14px 14px 0; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="dashboard-root">
+    <!-- ================= Sidebar (igual al dashboard) ================= -->
+    <nav id="sidebar" class="sidebar">
+      <div class="logo-area">
+        <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo" class="logo">
+        <span class="sidebar-title">GL Bingo</span>
+        <button class="sidebar-toggle" id="sidebarToggle">&#9776;</button>
+      </div>
+      <ul class="menu">
+        <li><a href="/dashboard"><span>🏠</span> Dashboard</a></li>
+        <li><a href="/usuarios"><span>🧑‍💼</span> Usuarios</a></li>
+        <li><a href="/juego"><span>🎲</span> Juego</a></li>
+        <li><a href="/contabilidad"><span>📊</span> Contabilidad</a></li>
+        <li><a class="active" href="/vendedores"><span>🧾</span> Vendedores</a></li>
+        <li><a href="/asignar-planillas"><span>📑</span> Asignar Planillas</a></li>
+        <li><a href="/impresion"><span>🖨️</span> Impresión de Boletos</a></li>
+        <li><a href="/cobro"><span>💵</span> Cobro de Caja</a></li>
+        <li><a href="/pago-premios"><span>🏅</span> Pago de Premios</a></li>
+        <li><a href="/sorteo"><span>🎟️</span> Sorteo</a></li>
+        <li><a href="/crear-figuras"><span>🟩</span> Crear Figuras</a></li>
+        <li><a href="/escoger-figuras"><span>🟦</span> Escoger Figuras</a></li>
+        <li><a href="/boletin"><span>📋</span> Boletín</a></li>
+      </ul>
+      <a href="{{ url_for('logout') }}" class="logout-btn">Cerrar sesión</a>
+    </nav>
+
+    <!-- ================= Contenido principal ================= -->
+    <div class="main-content">
+      <!-- Topbar (avatar + usuario como en las capturas) -->
+      <div class="topbar">
+        <div class="topbar-left"></div>
+        <div class="topbar-right">
+          <div class="user-dropdown" onclick="toggleUserMenu()">
+            <img src="{{ url_for('static', filename='avatars/' + (avatar or 'avatar-male.png')) }}" alt="Avatar" class="avatar">
+            <span class="user-name">{{ usuario or 'GLSTUDIOS' }}</span>
+            <span class="dropdown-caret">&#9662;</span>
+            <div id="userMenu" class="user-menu">
+              <a href="{{ url_for('logout') }}">Cerrar sesión</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Botones del dashboard (arriba a la derecha) -->
+      <div class="page-actions">
+        <a href="/pago-premios" class="btn btn-sec">🏅 Pago de Premios</a>
+        <button id="btnConfigurarCaja" class="btn btn-prim">⚙️ Configurar Caja del Día</button>
+      </div>
+
+      <!-- ======== Aquí se conserva intacto tu código de Vendedores ======== -->
+      <div class="container-vendedores">
+        <div class="logo-center">
+          <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo GL Studios">
+        </div>
+        <h1 class="titulo-main">Registro de Vendedores</h1>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="alert-success">{{ message }}</div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <!-- FORMULARIO DE ALTA -->
+        <form method="POST" class="form-row" style="margin-bottom:18px;">
+          <input type="text" name="nombre" placeholder="Nombre" required>
+          <input type="text" name="apellido" placeholder="Apellido" required>
+          <input type="text" name="seudonimo" placeholder="Seudónimo" required>
+          <button type="submit">Agregar</button>
+        </form>
+
+        <!-- TABLA DE VENDEDORES -->
+        <table>
+          <thead>
+            <tr>
+              <th style="width:38px;">#</th>
+              <th>Nombre</th>
+              <th>Apellido</th>
+              <th>Seudónimo</th>
+              <th style="width:110px;">Acción</th>
+            </tr>
+          </thead>
+          <tbody>
+          {% for v in vendedores %}
+            <tr id="fila-{{ loop.index }}">
+              {% if request.args.get('edit') == loop.index0|string %}
+                <!-- MODO EDICIÓN -->
+                <form method="POST" style="display:contents;">
+                  <td>{{ loop.index }}</td>
+                  <td><input type="text" name="nombre" class="input-editar-tabla" required value="{{ v.nombre }}"></td>
+                  <td><input type="text" name="apellido" class="input-editar-tabla" required value="{{ v.apellido }}"></td>
+                  <td><input type="text" name="seudonimo" class="input-editar-tabla" required value="{{ v.seudonimo }}"></td>
+                  <td>
+                    <input type="hidden" name="id" value="{{ loop.index0 }}">
+                    <button type="submit" name="editar" class="btn-accion guardar" title="Guardar">💾</button>
+                    <a href="{{ url_for('vendedores') }}" class="btn-accion cancelar" title="Cancelar" style="text-decoration:none;">✖️</a>
+                  </td>
+                </form>
+              {% else %}
+                <!-- NORMAL -->
+                <td>{{ loop.index }}</td>
+                <td>{{ v.nombre }}</td>
+                <td>{{ v.apellido }}</td>
+                <td>{{ v.seudonimo }}</td>
+                <td>
+                  <div class="acciones-btns">
+                    <a href="{{ url_for('vendedores', edit=loop.index0) }}" class="btn-accion editar" title="Editar">✏️</a>
+                    <form method="POST" style="display:inline;">
+                      <input type="hidden" name="id" value="{{ loop.index0 }}">
+                      <button type="submit" name="eliminar" class="btn-accion eliminar" title="Eliminar" onclick="return confirm('¿Seguro de eliminar este vendedor?');">🗑️</button>
+                    </form>
+                  </div>
+                </td>
+              {% endif %}
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+
+        <a href="{{ url_for('dashboard') }}" style="color:#2471d4;text-decoration:none;font-weight:500;display:inline-block;margin-top:14px;font-size:1.06em;">
+          &larr; Volver al Dashboard
+        </a>
+      </div>
+      <!-- ======== /fin del bloque conservado ======== -->
+
+    </div>
+  </div>
+
+  <!-- JS mínimo para interacción del layout -->
+  <script>
+    // Toggle sidebar (móvil / colapsar)
+    document.getElementById('sidebarToggle')?.addEventListener('click', ()=>{
+      document.getElementById('sidebar').classList.toggle('collapsed');
+    });
+
+    // Dropdown usuario
+    function toggleUserMenu(){
+      document.querySelector('.user-dropdown')?.classList.toggle('active');
+    }
+    window.addEventListener('click', (e)=>{
+      if(!e.target.closest('.user-dropdown')){
+        document.querySelector('.user-dropdown')?.classList.remove('active');
+      }
+    });
+
+    // Botón "Configurar Caja del Día" → llévalo al dashboard (o cambia la ruta si ya tienes una)
+    document.getElementById('btnConfigurarCaja')?.addEventListener('click', ()=>{
+      window.location.href = '/dashboard';
+    });
+  </script>
+</body>
+</html>
