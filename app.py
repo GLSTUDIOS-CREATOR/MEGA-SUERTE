@@ -651,7 +651,7 @@ OFFSET_Y = 5
 
 # ── RUTAS y CONSTANTES ──
 BASE_DIR       = os.path.dirname(os.path.abspath(__file__))
-DATA_DIR       = os.path.join(BASE_DIR, "data")
+DATA_DIR       = os.path.join(BASE_DIR, "DATA")
 REINTEGROS_DIR = os.path.join(DATA_DIR, "REINTEGROS")
 STATIC_DIR     = os.path.join(BASE_DIR, "static")
 LOGS_DIR       = os.path.join(STATIC_DIR, "LOGS")
