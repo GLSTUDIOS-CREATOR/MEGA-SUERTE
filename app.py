@@ -1,5 +1,5 @@
 # ====== PARCHE DE ARRANQUE (PÉGALO AL INICIO DE app.py) ======
-# Evita NameError en 'mm' incluso si el import real aparece más abajo
+# Evita NameError en 'mm' aunque el import real no esté disponible
 try:
     from reportlab.lib.units import mm  # import real si está disponible
 except Exception:
@@ -32,10 +32,38 @@ from reportlab.lib.pagesizes import A4, landscape
 from reportlab.lib.utils import ImageReader
 from reportlab.platypus import Table, TableStyle
 from reportlab.lib import colors
-from reportlab.lib.units import mm, cm, inch
+
+# Unidades seguras: evita reimportar mm (ya con fallback) y crea cm/inch si falta reportlab
+try:
+    from reportlab.lib.units import cm as _cm, inch as _inch
+    cm, inch = _cm, _inch
+except Exception:
+    cm, inch = 10 * mm, 25.4 * mm
 
 app = Flask(__name__)
 app.secret_key = 'super_secreto_bingo_2025'
+
+# ===== DEBUG PROVISORIO: muestra tracebacks y estado de persistencia =====
+import traceback, json
+
+@app.route("/debug_persist")
+def debug_persist():
+    try:
+        info = {
+            "DATA_DIR_env": os.environ.get("DATA_DIR"),
+            "USUARIOS_XML": USUARIOS_XML if 'USUARIOS_XML' in globals() else None,
+            "usuarios_exists": os.path.exists(USUARIOS_XML) if 'USUARIOS_XML' in globals() else None,
+            "cwd": os.getcwd(),
+        }
+        return "<pre>" + json.dumps(info, indent=2) + "</pre>"
+    except Exception:
+        return "<pre>debug_persist error:\n" + traceback.format_exc() + "</pre>", 500
+
+@app.errorhandler(Exception)
+def all_errors(e):
+    # (Temporal) Muestra el traceback completo en el navegador
+    return "<pre>" + traceback.format_exc() + "</pre>", 500
+# ===== FIN DEBUG PROVISORIO =====
 
 from functools import wraps
 from flask import session, redirect, url_for
@@ -101,7 +129,7 @@ CONTAB_GASTOS_XML       = _persist('static', 'CONTABILIDAD', 'gastos.xml')
 CONTAB_SUELDOS_XML      = _persist('static', 'CONTABILIDAD', 'sueldos.xml')
 CONTAB_VENTAS_XML       = _persist('static', 'CONTABILIDAD', 'ventas.xml')
 
-# ➕ Aliases que usa tu app
+# ➕ Aliases comunes
 VENDEDORES_XML  = _persist('static', 'db', 'vendedores.xml')
 IMPRESIONES_XML = LOGS_IMPRESIONES_XML
 
