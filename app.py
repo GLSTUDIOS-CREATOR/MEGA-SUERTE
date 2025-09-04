@@ -17,7 +17,6 @@ except Exception:
         return f
 # ====== FIN PARCHE DE ARRANQUE ======
 
-
 import os
 import shutil
 import random
@@ -43,7 +42,7 @@ except Exception:
 app = Flask(__name__)
 app.secret_key = 'super_secreto_bingo_2025'
 
-# ===== DEBUG PROVISORIO: muestra tracebacks y estado de persistencia =====
+# ===== DEBUG PROVISORIO (puedes borrarlo cuando termine la depuración) =====
 import traceback, json
 
 @app.route("/debug_persist")
@@ -61,7 +60,6 @@ def debug_persist():
 
 @app.errorhandler(Exception)
 def all_errors(e):
-    # (Temporal) Muestra el traceback completo en el navegador
     return "<pre>" + traceback.format_exc() + "</pre>", 500
 # ===== FIN DEBUG PROVISORIO =====
 
@@ -72,10 +70,10 @@ def require_session(f):
     @wraps(f)
     def wrapper(*args, **kwargs):
         if 'usuario' not in session:
-            return redirect(url_for('login'))
+            # ⚠️ tu endpoint real de login se llama _login_demo (según el error)
+            return redirect(url_for('_login_demo'))
         return f(*args, **kwargs)
     return wrapper
-
 
 # ─── ARCHIVOS Y DIRECTORIOS ────────────────
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -83,33 +81,22 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 AVATAR_DIR = os.path.join('static', 'avatars')
 
 # ==== PERSISTENCIA (Render / Local) ====
-# 1) DATA_DIR = /data en Render; si no existe, ./DATA local
 DATA_DIR = os.environ.get("DATA_DIR", os.path.join(BASE_DIR, "DATA"))
 os.makedirs(DATA_DIR, exist_ok=True)
-
-# Carpetas dependientes de DATA_DIR
 REINTEGROS_DIR = os.path.join(DATA_DIR, "REINTEGROS")
 os.makedirs(REINTEGROS_DIR, exist_ok=True)
 
-# Helpers
 def _persist(*rel):
-    """Ruta dentro de DATA_DIR (crea la carpeta si no existe)."""
     path = os.path.join(DATA_DIR, *rel)
     os.makedirs(os.path.dirname(path), exist_ok=True)
     return path
 
 def _seed(src_rel, dst_abs):
-    """
-    Copia archivo inicial del repo → persistente, solo si NO existe.
-    Ej.: _seed('static/db/caja.xml', CAJA_XML)
-    """
     src_abs = os.path.join(BASE_DIR, src_rel)
     if not os.path.exists(dst_abs) and os.path.exists(src_abs):
         shutil.copy2(src_abs, dst_abs)
 
-# 2) Rutas persistentes para TODOS los XML
 USUARIOS_XML            = _persist('usuarios', 'usuarios.xml')
-
 CAJA_XML                = _persist('static', 'db', 'caja.xml')
 ASIGNACIONES_XML        = _persist('static', 'db', 'asignaciones.xml')
 PAGOS_PREMIOS_XML       = _persist('static', 'db', 'pagos_premios.xml')
@@ -120,20 +107,16 @@ VMIX_REINTEGRO_XML      = _persist('static', 'db', 'vmix_reintegro.xml')
 VMIX_SPINNERS_XML       = _persist('static', 'db', 'vmix_spinners.xml')
 VMIX_VENDEDORES_XML     = _persist('static', 'db', 'vmix_vendedores.xml')
 VMIX_VENTAS_XML         = _persist('static', 'db', 'vmix_ventas.xml')
-
 LOGS_CAJA_XML           = _persist('static', 'LOGS', 'caja.xml')
 LOGS_IMPRESIONES_XML    = _persist('static', 'LOGS', 'impresiones.xml')
-
 CONTAB_BANCOS_XML       = _persist('static', 'CONTABILIDAD', 'bancos.xml')
 CONTAB_GASTOS_XML       = _persist('static', 'CONTABILIDAD', 'gastos.xml')
 CONTAB_SUELDOS_XML      = _persist('static', 'CONTABILIDAD', 'sueldos.xml')
 CONTAB_VENTAS_XML       = _persist('static', 'CONTABILIDAD', 'ventas.xml')
 
-# ➕ Aliases comunes
 VENDEDORES_XML  = _persist('static', 'db', 'vendedores.xml')
 IMPRESIONES_XML = LOGS_IMPRESIONES_XML
 
-# 3) Sembrar contenido inicial (solo primera vez)
 for src, dst in [
     ('usuarios/usuarios.xml',               USUARIOS_XML),
     ('static/db/caja.xml',                  CAJA_XML),
@@ -155,14 +138,11 @@ for src, dst in [
 ]:
     _seed(src, dst)
 
-# (Opcional) Escritura atómica (más seguro ante cortes)
 def write_text_atomic(path, text):
     tmp = f"{path}.tmp"
     with open(tmp, "w", encoding="utf-8") as f:
         f.write(text)
     os.replace(tmp, path)
-# ==== FIN PERSISTENCIA ====
-
 
 ROLES = [
     ('superadmin', 'Super Administrador'),
@@ -173,14 +153,9 @@ ROLES = [
     ('impresion', 'Impresión'),
 ]
 
-# ─── UTILIDADES XML (USUARIOS, PERSISTENTE) ────────────────────────
+# ─── UTILIDADES XML (USUARIOS) ─────────────────────────────
 def leer_usuarios():
-    """
-    Lee usuarios desde USUARIOS_XML (apunta a DATA_DIR, p.ej. /data/usuarios/usuarios.xml).
-    Si no existe, intenta sembrar desde el repo; si tampoco existe, crea uno vacío.
-    """
     try:
-        # Si no existe el archivo persistente, sembrar o crear vacío
         if not os.path.exists(USUARIOS_XML):
             seed_src = os.path.join(BASE_DIR, 'usuarios', 'usuarios.xml')
             os.makedirs(os.path.dirname(USUARIOS_XML), exist_ok=True)
@@ -190,7 +165,6 @@ def leer_usuarios():
                 root = ET.Element('usuarios')
                 ET.ElementTree(root).write(USUARIOS_XML, encoding='utf-8', xml_declaration=True)
                 return []
-
         tree = ET.parse(USUARIOS_XML)
         root = tree.getroot()
         usuarios = []
@@ -209,10 +183,6 @@ def leer_usuarios():
         return []
 
 def guardar_usuarios(lista):
-    """
-    Guarda 'lista' de dicts de usuarios en USUARIOS_XML **de forma atómica**
-    para evitar corrupción en reinicios o cortes.
-    """
     try:
         root = ET.Element('usuarios')
         for u in lista:
@@ -223,7 +193,6 @@ def guardar_usuarios(lista):
             ET.SubElement(e, 'email') .text = u.get('email',  '')
             ET.SubElement(e, 'estado').text = u.get('estado', 'activo')
             ET.SubElement(e, 'avatar').text = u.get('avatar', 'avatar-male.png')
-
         xml_bytes = ET.tostring(root, encoding='utf-8', xml_declaration=True)
         os.makedirs(os.path.dirname(USUARIOS_XML), exist_ok=True)
         tmp = f"{USUARIOS_XML}.tmp"
@@ -234,7 +203,6 @@ def guardar_usuarios(lista):
     except Exception as e:
         print("ERROR guardar_usuarios:", e)
         return False
-
 
 
 
