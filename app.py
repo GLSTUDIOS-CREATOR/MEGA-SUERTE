@@ -25,7 +25,10 @@ import qrcode
 import xml.etree.ElementTree as ET
 from datetime import date, datetime
 from io import BytesIO
-from flask import Flask, request, render_template, send_file, redirect, url_for as _flask_url_for, flash, session
+from flask import (
+    Flask, request, render_template, send_file, redirect,
+    url_for as _flask_url_for, flash, session
+)
 from werkzeug.routing import BuildError
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4, landscape
@@ -56,7 +59,6 @@ def url_for(endpoint, **values):
             try:
                 return _flask_url_for('_login_demo', **values)
             except BuildError:
-                # Último recurso: URL literal
                 return '/_login_demo'
         raise
 
@@ -66,7 +68,7 @@ def require_session(f):
     @wraps(f)
     def wrapper(*args, **kwargs):
         if 'usuario' not in session:
-            # envia al login correcto (login o _login_demo)
+            # Enviamos al login (alias o real)
             try:
                 return redirect(url_for('login'))
             except Exception:
@@ -74,12 +76,18 @@ def require_session(f):
         return f(*args, **kwargs)
     return wrapper
 
-# ─── ARCHIVOS Y DIRECTORIOS ────────────────
+# ====== ALIAS DE RUTA /login -> _login_demo (ELIMINA EL BUILDERROR) ======
+@app.route("/login")
+def _login_alias():
+    return redirect(url_for('_login_demo'))
+# ========================================================================
+
+
+# ─── ARCHIVOS Y DIRECTORIOS (PERSISTENCIA) ─────────────────────────────
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-# ❗️NO definas USUARIOS_XML aquí fuera de la persistencia.
+# ⚠️ NO definas USUARIOS_XML aquí fuera de la persistencia.
 AVATAR_DIR = os.path.join('static', 'avatars')
 
-# ==== PERSISTENCIA (Render / Local) ====
 # 1) DATA_DIR = /data en Render; si no existe, ./DATA local
 DATA_DIR = os.environ.get("DATA_DIR", os.path.join(BASE_DIR, "DATA"))
 os.makedirs(DATA_DIR, exist_ok=True)
@@ -88,7 +96,7 @@ os.makedirs(DATA_DIR, exist_ok=True)
 REINTEGROS_DIR = os.path.join(DATA_DIR, "REINTEGROS")
 os.makedirs(REINTEGROS_DIR, exist_ok=True)
 
-# Helpers
+# Helpers de persistencia
 def _persist(*rel):
     """Ruta dentro de DATA_DIR (crea la carpeta si no existe)."""
     path = os.path.join(DATA_DIR, *rel)
@@ -104,7 +112,7 @@ def _seed(src_rel, dst_abs):
     if not os.path.exists(dst_abs) and os.path.exists(src_abs):
         shutil.copy2(src_abs, dst_abs)
 
-# 2) Rutas persistentes para TODOS los XML (¡estos son los que cambian en runtime!)
+# 2) Rutas persistentes para TODOS los XML (los que cambian en runtime)
 USUARIOS_XML            = _persist('usuarios', 'usuarios.xml')
 
 CAJA_XML                = _persist('static', 'db', 'caja.xml')
@@ -126,7 +134,7 @@ CONTAB_GASTOS_XML       = _persist('static', 'CONTABILIDAD', 'gastos.xml')
 CONTAB_SUELDOS_XML      = _persist('static', 'CONTABILIDAD', 'sueldos.xml')
 CONTAB_VENTAS_XML       = _persist('static', 'CONTABILIDAD', 'ventas.xml')
 
-# Aliases auxiliares usados en tu app
+# Aliases auxiliares que usa tu app
 VENDEDORES_XML  = _persist('static', 'db', 'vendedores.xml')
 IMPRESIONES_XML = LOGS_IMPRESIONES_XML
 
@@ -227,6 +235,8 @@ def guardar_usuarios(lista):
     except Exception as e:
         print("ERROR guardar_usuarios:", e)
         return False
+# ==================== FIN DEL BLOQUE ====================
+
 # ==================== FIN DEL BLOQUE ====================
 
 
