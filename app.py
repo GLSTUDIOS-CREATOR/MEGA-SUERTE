@@ -12,9 +12,14 @@ try:
 except Exception:
     def login_required(f): return f
 
-# 3) url_for seguro: si piden 'login' pero no existe, usa '_login_demo'
+# 3) url_for SEGURO + monkey-patch global
 from flask import url_for as _flask_url_for, redirect, session
 from werkzeug.routing import BuildError
+import flask as _flask
+try:
+    from flask import helpers as _flask_helpers
+except Exception:
+    _flask_helpers = None
 
 def _login_url(**values):
     """Devuelve la URL del login correcto (login o _login_demo)."""
@@ -24,23 +29,27 @@ def _login_url(**values):
         try:
             return _flask_url_for('_login_demo', **values)
         except BuildError:
-            # Último recurso: ruta literal (ajusta si tu login real es otro)
+            # Último recurso si el endpoint se llama distinto
             return '/_login_demo'
 
 def url_for(endpoint, **values):
     """
     Wrapper global de url_for:
-    - Si piden 'login' y el endpoint no existe, usa '_login_demo'.
+    - Si falla 'login', usa '_login_demo'.
+    - Re-lanza cualquier otro BuildError.
     """
-    if endpoint == 'login':
-        return _login_url(**values)
-    return _flask_url_for(endpoint, **values)
+    try:
+        return _flask_url_for(endpoint, **values)
+    except BuildError:
+        if endpoint == 'login':
+            return _login_url(**values)
+        raise
 
-# 👉 Parche fuerte: sustituimos flask.helpers.url_for para que
-#    futuros "from flask import url_for" importen NUESTRO wrapper.
+# 👉 Monkey-patch: todos los futuros "from flask import url_for" reciben ESTE wrapper
 try:
-    from flask import helpers as _flask_helpers
-    _flask_helpers.url_for = url_for
+    if _flask_helpers is not None:
+        _flask_helpers.url_for = url_for     # flask.helpers.url_for
+    _flask.url_for = url_for                 # flask.url_for (nivel top)
 except Exception:
     pass
 
@@ -165,6 +174,7 @@ def guardar_usuarios(lista):
         print('ERROR guardar_usuarios:', ex)
         return False
 # ====== FIN PARCHE DE ARRANQUE ======
+
 
 
 
