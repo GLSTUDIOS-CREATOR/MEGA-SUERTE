@@ -1,120 +1,66 @@
-# ====== PARCHE DE ARRANQUE (PÉGALO AL INICIO DE app.py) ======
-# Evita NameError en 'mm' aunque el import real no esté disponible
+# ====== PARCHE DE ARRANQUE (LOGIN + PERSISTENCIA) ======
+# 1) Import seguro de unidades (evita NameError si falta reportlab)
 try:
-    from reportlab.lib.units import mm  # import real si está disponible
+    from reportlab.lib.units import mm  # real
 except Exception:
-    # Fallback: 1 mm en puntos (ReportLab trabaja en puntos)
-    mm = 2.834645669291339
+    mm = 2.834645669291339  # 1 mm en puntos
 
-# Evita NameError en @login_required si Flask-Login no está instalado
+# 2) Fallback para @login_required si no está Flask-Login
 try:
     from flask_login import login_required as _login_required
-    def login_required(f):
-        return _login_required(f)
+    def login_required(f): return _login_required(f)
 except Exception:
-    # Fallback 'no-op': deja pasar la vista sin exigir login
-    def login_required(f):
-        return f
-# ====== FIN PARCHE DE ARRANQUE ======
+    def login_required(f): return f
 
-import os
-import shutil
-import random
-import pandas as pd
-import qrcode
-import xml.etree.ElementTree as ET
-from datetime import date, datetime
-from io import BytesIO
-from flask import (
-    Flask, request, render_template, send_file, redirect,
-    url_for as _flask_url_for, flash, session
-)
+# 3) url_for seguro: si piden 'login' pero no existe, usa '_login_demo'
+from flask import url_for as _flask_url_for, redirect, session
 from werkzeug.routing import BuildError
-from reportlab.pdfgen import canvas
-from reportlab.lib.pagesizes import A4, landscape
-from reportlab.lib.utils import ImageReader
-from reportlab.platypus import Table, TableStyle
-from reportlab.lib import colors
 
-# Unidades seguras: evita reimportar mm (ya con fallback) y crea cm/inch si falta reportlab
-try:
-    from reportlab.lib.units import cm as _cm, inch as _inch
-    cm, inch = _cm, _inch
-except Exception:
-    cm, inch = 10 * mm, 25.4 * mm
-
-app = Flask(__name__)
-app.secret_key = 'super_secreto_bingo_2025'
-
-# -------- url_for seguro (corrige el endpoint 'login' inexistente) --------
-def url_for(endpoint, **values):
-    """
-    Wrapper de url_for:
-    - Si piden 'login' y no existe, intenta '_login_demo'.
-    """
+def _login_url(**values):
+    """Devuelve la URL del login correcto (login o _login_demo)."""
     try:
-        return _flask_url_for(endpoint, **values)
+        return _flask_url_for('login', **values)
     except BuildError:
-        if endpoint == 'login':
-            try:
-                return _flask_url_for('_login_demo', **values)
-            except BuildError:
-                return '/_login_demo'
-        raise
+        try:
+            return _flask_url_for('_login_demo', **values)
+        except BuildError:
+            # último recurso: ruta literal (ajusta si tu login real es otro)
+            return '/_login_demo'
 
-# -------- Decorador de sesión que envía al login correcto --------
+def url_for(endpoint, **values):
+    """Wrapper global de url_for (solo corrige el endpoint 'login')."""
+    if endpoint == 'login':
+        return _login_url(**values)
+    return _flask_url_for(endpoint, **values)
+
+# 4) Decorador que exige sesión y envía siempre al login correcto
 from functools import wraps
 def require_session(f):
     @wraps(f)
     def wrapper(*args, **kwargs):
         if 'usuario' not in session:
-            # Enviamos al login (alias o real)
-            try:
-                return redirect(url_for('login'))
-            except Exception:
-                return redirect(url_for('_login_demo'))
+            return redirect(_login_url())
         return f(*args, **kwargs)
     return wrapper
 
-# ====== ALIAS DE RUTA /login -> _login_demo (ELIMINA EL BUILDERROR) ======
-@app.route("/login")
-def _login_alias():
-    return redirect(url_for('_login_demo'))
-# ========================================================================
-
-
-# ─── ARCHIVOS Y DIRECTORIOS (PERSISTENCIA) ─────────────────────────────
+# 5) PERSISTENCIA: usa /data en Render (si existe) o ./DATA en local
+import os, shutil, xml.etree.ElementTree as ET
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-# ⚠️ NO definas USUARIOS_XML aquí fuera de la persistencia.
-AVATAR_DIR = os.path.join('static', 'avatars')
-
-# 1) DATA_DIR = /data en Render; si no existe, ./DATA local
 DATA_DIR = os.environ.get("DATA_DIR", os.path.join(BASE_DIR, "DATA"))
 os.makedirs(DATA_DIR, exist_ok=True)
 
-# Carpetas dependientes de DATA_DIR
-REINTEGROS_DIR = os.path.join(DATA_DIR, "REINTEGROS")
-os.makedirs(REINTEGROS_DIR, exist_ok=True)
-
-# Helpers de persistencia
 def _persist(*rel):
-    """Ruta dentro de DATA_DIR (crea la carpeta si no existe)."""
-    path = os.path.join(DATA_DIR, *rel)
-    os.makedirs(os.path.dirname(path), exist_ok=True)
-    return path
+    p = os.path.join(DATA_DIR, *rel)
+    os.makedirs(os.path.dirname(p), exist_ok=True)
+    return p
 
 def _seed(src_rel, dst_abs):
-    """
-    Copia archivo inicial del repo → persistente, solo si NO existe.
-    Ej.: _seed('static/db/caja.xml', CAJA_XML)
-    """
     src_abs = os.path.join(BASE_DIR, src_rel)
     if not os.path.exists(dst_abs) and os.path.exists(src_abs):
         shutil.copy2(src_abs, dst_abs)
 
-# 2) Rutas persistentes para TODOS los XML (los que cambian en runtime)
+# Rutas persistentes (ajusta o añade si te falta alguna)
 USUARIOS_XML            = _persist('usuarios', 'usuarios.xml')
-
 CAJA_XML                = _persist('static', 'db', 'caja.xml')
 ASIGNACIONES_XML        = _persist('static', 'db', 'asignaciones.xml')
 PAGOS_PREMIOS_XML       = _persist('static', 'db', 'pagos_premios.xml')
@@ -125,20 +71,14 @@ VMIX_REINTEGRO_XML      = _persist('static', 'db', 'vmix_reintegro.xml')
 VMIX_SPINNERS_XML       = _persist('static', 'db', 'vmix_spinners.xml')
 VMIX_VENDEDORES_XML     = _persist('static', 'db', 'vmix_vendedores.xml')
 VMIX_VENTAS_XML         = _persist('static', 'db', 'vmix_ventas.xml')
-
 LOGS_CAJA_XML           = _persist('static', 'LOGS', 'caja.xml')
 LOGS_IMPRESIONES_XML    = _persist('static', 'LOGS', 'impresiones.xml')
-
 CONTAB_BANCOS_XML       = _persist('static', 'CONTABILIDAD', 'bancos.xml')
 CONTAB_GASTOS_XML       = _persist('static', 'CONTABILIDAD', 'gastos.xml')
 CONTAB_SUELDOS_XML      = _persist('static', 'CONTABILIDAD', 'sueldos.xml')
 CONTAB_VENTAS_XML       = _persist('static', 'CONTABILIDAD', 'ventas.xml')
 
-# Aliases auxiliares que usa tu app
-VENDEDORES_XML  = _persist('static', 'db', 'vendedores.xml')
-IMPRESIONES_XML = LOGS_IMPRESIONES_XML
-
-# 3) Sembrar contenido inicial (solo primera vez)
+# Si es la primera vez, sembrar los archivos desde el repo
 for src, dst in [
     ('usuarios/usuarios.xml',               USUARIOS_XML),
     ('static/db/caja.xml',                  CAJA_XML),
@@ -160,60 +100,40 @@ for src, dst in [
 ]:
     _seed(src, dst)
 
-# Escritura atómica (más seguro ante cortes/reinicios)
+# Escritura atómica (útil para XML)
 def write_text_atomic(path, text):
     tmp = f"{path}.tmp"
     with open(tmp, "w", encoding="utf-8") as f:
         f.write(text)
     os.replace(tmp, path)
 
-ROLES = [
-    ('superadmin', 'Super Administrador'),
-    ('admin', 'Administrador'),
-    ('socio', 'Socio'),
-    ('cobrador', 'Cobrador'),
-    ('jugador', 'Jugador'),
-    ('impresion', 'Impresión'),
-]
-
-# ─── UTILIDADES XML (USUARIOS, PERSISTENTE) ────────────────────────
+# Utilidades de usuarios (persistente)
 def leer_usuarios():
-    """
-    Lee usuarios desde USUARIOS_XML (apunta a DATA_DIR, p.ej. /data/usuarios/usuarios.xml).
-    Si no existe, intenta sembrar desde el repo; si tampoco existe, crea uno vacío.
-    """
     try:
         if not os.path.exists(USUARIOS_XML):
-            seed_src = os.path.join(BASE_DIR, 'usuarios', 'usuarios.xml')
-            os.makedirs(os.path.dirname(USUARIOS_XML), exist_ok=True)
-            if os.path.exists(seed_src):
-                shutil.copy2(seed_src, USUARIOS_XML)
-            else:
+            _seed('usuarios/usuarios.xml', USUARIOS_XML)
+            if not os.path.exists(USUARIOS_XML):
                 root = ET.Element('usuarios')
                 ET.ElementTree(root).write(USUARIOS_XML, encoding='utf-8', xml_declaration=True)
                 return []
         tree = ET.parse(USUARIOS_XML)
         root = tree.getroot()
-        usuarios = []
-        for elem in root.findall('usuario'):
-            usuarios.append({
-                'nombre': elem.findtext('nombre', default=''),
-                'clave':  elem.findtext('clave',  default=''),
-                'rol':    elem.findtext('rol',    default='jugador'),
-                'email':  elem.findtext('email',  default=''),
-                'estado': elem.findtext('estado', default='activo'),
-                'avatar': elem.findtext('avatar', default='avatar-male.png'),
+        out = []
+        for e in root.findall('usuario'):
+            out.append({
+                'nombre': e.findtext('nombre', ''),
+                'clave':  e.findtext('clave',  ''),
+                'rol':    e.findtext('rol',    'jugador'),
+                'email':  e.findtext('email',  ''),
+                'estado': e.findtext('estado', 'activo'),
+                'avatar': e.findtext('avatar', 'avatar-male.png'),
             })
-        return usuarios
-    except Exception as e:
-        print("ERROR leer_usuarios:", e)
+        return out
+    except Exception as ex:
+        print('ERROR leer_usuarios:', ex)
         return []
 
 def guardar_usuarios(lista):
-    """
-    Guarda 'lista' de dicts de usuarios en USUARIOS_XML **de forma atómica**
-    para evitar corrupción en reinicios o cortes.
-    """
     try:
         root = ET.Element('usuarios')
         for u in lista:
@@ -224,20 +144,17 @@ def guardar_usuarios(lista):
             ET.SubElement(e, 'email') .text = u.get('email',  '')
             ET.SubElement(e, 'estado').text = u.get('estado', 'activo')
             ET.SubElement(e, 'avatar').text = u.get('avatar', 'avatar-male.png')
-
-        xml_bytes = ET.tostring(root, encoding='utf-8', xml_declaration=True)
+        xml = ET.tostring(root, encoding='utf-8', xml_declaration=True)
         os.makedirs(os.path.dirname(USUARIOS_XML), exist_ok=True)
         tmp = f"{USUARIOS_XML}.tmp"
-        with open(tmp, 'wb') as f:
-            f.write(xml_bytes)
+        with open(tmp, 'wb') as f: f.write(xml)
         os.replace(tmp, USUARIOS_XML)
         return True
-    except Exception as e:
-        print("ERROR guardar_usuarios:", e)
+    except Exception as ex:
+        print('ERROR guardar_usuarios:', ex)
         return False
-# ==================== FIN DEL BLOQUE ====================
+# ====== FIN PARCHE DE ARRANQUE ======
 
-# ==================== FIN DEL BLOQUE ====================
 
 
 
