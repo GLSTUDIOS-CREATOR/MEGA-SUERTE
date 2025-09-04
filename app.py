@@ -192,64 +192,71 @@ ROLES = [
 ]
 
 # ─── UTILIDADES XML ────────────────────────
+# ─── UTILIDADES XML (USUARIOS, PERSISTENTE) ────────────────────────
 def leer_usuarios():
-    if not os.path.exists(USUARIOS_XML):
+    """
+    Lee usuarios desde USUARIOS_XML (apunta a DATA_DIR, p.ej. /data/usuarios/usuarios.xml).
+    Si no existe, intenta sembrar desde el repo; si tampoco existe, crea uno vacío.
+    """
+    try:
+        # Si no existe el archivo persistente, sembrar o crear vacío
+        if not os.path.exists(USUARIOS_XML):
+            seed_src = os.path.join(BASE_DIR, 'usuarios', 'usuarios.xml')
+            os.makedirs(os.path.dirname(USUARIOS_XML), exist_ok=True)
+            if os.path.exists(seed_src):
+                shutil.copy2(seed_src, USUARIOS_XML)
+            else:
+                # crear un XML vacío
+                root = ET.Element('usuarios')
+                ET.ElementTree(root).write(USUARIOS_XML, encoding='utf-8', xml_declaration=True)
+                return []
+
+        tree = ET.parse(USUARIOS_XML)
+        root = tree.getroot()
+        usuarios = []
+        for elem in root.findall('usuario'):
+            usuarios.append({
+                'nombre': elem.findtext('nombre', default=''),
+                'clave': elem.findtext('clave', default=''),
+                'rol': elem.findtext('rol', default='jugador'),
+                'email': elem.findtext('email', default=''),
+                'estado': elem.findtext('estado', default='activo'),
+                'avatar': elem.findtext('avatar', default='avatar-male.png'),
+            })
+        return usuarios
+    except Exception as e:
+        # Si algo falla, no rompas la app: devuelve lista vacía y loguea
+        print("ERROR leer_usuarios:", e)
         return []
-    tree = ET.parse(USUARIOS_XML)
-    root = tree.getroot()
-    usuarios = []
-    for elem in root.findall('usuario'):
-        usuarios.append({
-            'nombre': elem.find('nombre').text,
-            'clave': elem.find('clave').text,
-            'rol': elem.find('rol').text,
-            'email': elem.find('email').text if elem.find('email') is not None else '',
-            'estado': elem.find('estado').text,
-            'avatar': elem.find('avatar').text if elem.find('avatar') is not None else 'avatar-male.png'
-        })
-    return usuarios
 
-def guardar_usuarios(usuarios):
-    root = ET.Element('usuarios')
-    for u in usuarios:
-        user_elem = ET.SubElement(root, 'usuario')
-        ET.SubElement(user_elem, 'nombre').text = u['nombre']
-        ET.SubElement(user_elem, 'clave').text = u['clave']
-        ET.SubElement(user_elem, 'rol').text = u['rol']
-        ET.SubElement(user_elem, 'email').text = u.get('email', '')
-        ET.SubElement(user_elem, 'estado').text = u['estado']
-        ET.SubElement(user_elem, 'avatar').text = u.get('avatar', 'avatar-male.png')
-    tree = ET.ElementTree(root)
-    tree.write(USUARIOS_XML, encoding='utf-8', xml_declaration=True)
+def guardar_usuarios(lista):
+    """
+    Guarda 'lista' de dicts de usuarios en USUARIOS_XML **de forma atómica**
+    para evitar corrupción en reinicios o cortes.
+    """
+    try:
+        root = ET.Element('usuarios')
+        for u in lista:
+            e = ET.SubElement(root, 'usuario')
+            ET.SubElement(e, 'nombre').text = u.get('nombre', '')
+            ET.SubElement(e, 'clave').text = u.get('clave', '')
+            ET.SubElement(e, 'rol').text = u.get('rol', 'jugador')
+            ET.SubElement(e, 'email').text = u.get('email', '')
+            ET.SubElement(e, 'estado').text = u.get('estado', 'activo')
+            ET.SubElement(e, 'avatar').text = u.get('avatar', 'avatar-male.png')
 
-def obtener_usuario(nombre):
-    usuarios = leer_usuarios()
-    for u in usuarios:
-        if u['nombre'] == nombre:
-            return u
-    return None
+        # escritura atómica
+        xml_bytes = ET.tostring(root, encoding='utf-8', xml_declaration=True)
+        os.makedirs(os.path.dirname(USUARIOS_XML), exist_ok=True)
+        tmp = f"{USUARIOS_XML}.tmp"
+        with open(tmp, 'wb') as f:
+            f.write(xml_bytes)
+        os.replace(tmp, USUARIOS_XML)
+        return True
+    except Exception as e:
+        print("ERROR guardar_usuarios:", e)
+        return False
 
-def eliminar_usuario(nombre):
-    usuarios = leer_usuarios()
-    usuarios = [u for u in usuarios if u['nombre'] != nombre]
-    guardar_usuarios(usuarios)
-
-# ─── LOGIN Y DASHBOARD ─────────────────────
-@app.route('/', methods=['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-        usuario = request.form['usuario']
-        clave = request.form['clave']
-        usuarios = leer_usuarios()
-        user = next((u for u in usuarios if u['nombre'] == usuario and u['clave'] == clave and u['estado'] == 'activo'), None)
-        if user:
-            session['usuario'] = user['nombre']
-            session['rol'] = user['rol']
-            session['avatar'] = user.get('avatar', 'avatar-male.png')
-            return redirect(url_for('dashboard'))
-        else:
-            flash('Usuario o clave incorrectos o usuario inactivo', 'error')
-    return render_template('login.html')
 
 
 
