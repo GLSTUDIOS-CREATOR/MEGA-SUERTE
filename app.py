@@ -18,8 +18,8 @@ except Exception:
 # ====== FIN PARCHE DE ARRANQUE ======
 
 
-
 import os
+import shutil
 import random
 import pandas as pd
 import qrcode
@@ -51,18 +51,16 @@ def require_session(f):
     return wrapper
 
 
-
 # ─── ARCHIVOS Y DIRECTORIOS ────────────────
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-USUARIOS_XML = os.path.join(BASE_DIR, 'usuarios', 'usuarios.xml')
+# ❗️IMPORTANTE: NO definir USUARIOS_XML aquí (se define en el bloque de persistencia)
 AVATAR_DIR = os.path.join('static', 'avatars')
 DATA_DIR = os.path.join(BASE_DIR, "DATA")
 REINTEGROS_DIR = os.path.join(DATA_DIR, "REINTEGROS")
 os.makedirs(DATA_DIR, exist_ok=True)
 os.makedirs(REINTEGROS_DIR, exist_ok=True)
-# ==== PERSISTENCIA (Render / Local) ====
-import os, shutil
 
+# ==== PERSISTENCIA (Render / Local) ====
 # 1) Usar DATA_DIR de entorno si existe; si no, ./DATA local
 DATA_DIR = os.environ.get("DATA_DIR", os.path.join(BASE_DIR, "DATA"))
 os.makedirs(DATA_DIR, exist_ok=True)
@@ -106,6 +104,10 @@ CONTAB_GASTOS_XML       = _persist('static', 'CONTABILIDAD', 'gastos.xml')
 CONTAB_SUELDOS_XML      = _persist('static', 'CONTABILIDAD', 'sueldos.xml')
 CONTAB_VENTAS_XML       = _persist('static', 'CONTABILIDAD', 'ventas.xml')
 
+# ➕ Rutas adicionales usadas por tu app
+VENDEDORES_XML  = _persist('static', 'db', 'vendedores.xml')
+IMPRESIONES_XML = LOGS_IMPRESIONES_XML
+
 # 3) Sembrar contenido inicial (solo primera vez)
 for src, dst in [
     ('usuarios/usuarios.xml',               USUARIOS_XML),
@@ -136,9 +138,8 @@ def write_text_atomic(path, text):
     os.replace(tmp, path)
 # ==== FIN PERSISTENCIA ====
 
-# ==== ENLAZAR CARPETAS DEL REPO -> DISCO PERSISTENTE (/data) ====
-import os, shutil
 
+# ==== ENLAZAR CARPETAS DEL REPO -> DISCO PERSISTENTE (/data) ====
 PERSIST_ROOT = os.environ.get(
     "DATA_DIR",
     "/data" if os.path.isdir("/data") else os.path.join(BASE_DIR, "DATA")
@@ -191,7 +192,6 @@ ROLES = [
     ('impresion', 'Impresión'),
 ]
 
-# ─── UTILIDADES XML ────────────────────────
 # ─── UTILIDADES XML (USUARIOS, PERSISTENTE) ────────────────────────
 def leer_usuarios():
     """
@@ -256,6 +256,7 @@ def guardar_usuarios(lista):
     except Exception as e:
         print("ERROR guardar_usuarios:", e)
         return False
+
 
 
 
