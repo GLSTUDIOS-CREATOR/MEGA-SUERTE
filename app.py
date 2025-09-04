@@ -136,6 +136,51 @@ def write_text_atomic(path, text):
     os.replace(tmp, path)
 # ==== FIN PERSISTENCIA ====
 
+# ==== ENLAZAR CARPETAS DEL REPO -> DISCO PERSISTENTE (/data) ====
+import os, shutil
+
+PERSIST_ROOT = os.environ.get(
+    "DATA_DIR",
+    "/data" if os.path.isdir("/data") else os.path.join(BASE_DIR, "DATA")
+)
+os.makedirs(PERSIST_ROOT, exist_ok=True)
+
+def _bind_dir(repo_rel):
+    repo_abs    = os.path.join(BASE_DIR, repo_rel)
+    persist_abs = os.path.join(PERSIST_ROOT, repo_rel)
+    os.makedirs(persist_abs, exist_ok=True)
+
+    # Sembrar archivos del repo -> persistente (solo si está vacío)
+    try:
+        if os.path.isdir(repo_abs) and not os.listdir(persist_abs):
+            for name in os.listdir(repo_abs):
+                src = os.path.join(repo_abs, name)
+                dst = os.path.join(persist_abs, name)
+                if os.path.isdir(src):
+                    shutil.copytree(src, dst, dirs_exist_ok=True)
+                elif os.path.isfile(src) and not os.path.exists(dst):
+                    shutil.copy2(src, dst)
+    except Exception as e:
+        print("Seed warning:", repo_rel, e)
+
+    # Reemplazar carpeta del repo por un enlace simbólico -> persistente
+    try:
+        if not os.path.islink(repo_abs):
+            if os.path.isdir(repo_abs):
+                shutil.rmtree(repo_abs)
+            elif os.path.exists(repo_abs):
+                os.remove(repo_abs)
+            os.symlink(persist_abs, repo_abs, target_is_directory=True)
+    except Exception as e:
+        print("Bind warning:", repo_rel, e)
+
+# Enlazar carpetas que CAMBIAN en runtime
+_bind_dir("usuarios")
+_bind_dir(os.path.join("static", "db"))
+_bind_dir(os.path.join("static", "LOGS"))
+_bind_dir(os.path.join("static", "CONTABILIDAD"))
+# ==== FIN ENLACE PERSISTENTE ====
+
 
 ROLES = [
     ('superadmin', 'Super Administrador'),
