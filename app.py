@@ -25,14 +25,15 @@ import qrcode
 import xml.etree.ElementTree as ET
 from datetime import date, datetime
 from io import BytesIO
-from flask import Flask, request, render_template, send_file, redirect, url_for, flash, session
+from flask import Flask, request, render_template, send_file, redirect, url_for as _flask_url_for, flash, session
+from werkzeug.routing import BuildError
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4, landscape
 from reportlab.lib.utils import ImageReader
 from reportlab.platypus import Table, TableStyle
 from reportlab.lib import colors
 
-# Unidades seguras si reportlab no está completo
+# Unidades seguras: evita reimportar mm (ya con fallback) y crea cm/inch si falta reportlab
 try:
     from reportlab.lib.units import cm as _cm, inch as _inch
     cm, inch = _cm, _inch
@@ -42,28 +43,40 @@ except Exception:
 app = Flask(__name__)
 app.secret_key = 'super_secreto_bingo_2025'
 
-# ---------- Wrapper de sesión (NO TOCAR EL NOMBRE 'login') ----------
-from functools import wraps
-from flask import session, redirect, url_for
-from werkzeug.routing import BuildError
+# -------- url_for seguro (corrige el endpoint 'login' inexistente) --------
+def url_for(endpoint, **values):
+    """
+    Wrapper de url_for:
+    - Si piden 'login' y no existe, intenta '_login_demo'.
+    """
+    try:
+        return _flask_url_for(endpoint, **values)
+    except BuildError:
+        if endpoint == 'login':
+            try:
+                return _flask_url_for('_login_demo', **values)
+            except BuildError:
+                # Último recurso: URL literal
+                return '/_login_demo'
+        raise
 
+# -------- Decorador de sesión que envía al login correcto --------
+from functools import wraps
 def require_session(f):
     @wraps(f)
     def wrapper(*args, **kwargs):
         if 'usuario' not in session:
-            # Siempre intentamos ir al endpoint 'login'
+            # envia al login correcto (login o _login_demo)
             try:
                 return redirect(url_for('login'))
-            except BuildError:
-                # Fallback directo por si aún no existe el alias
-                return redirect('/_login')
+            except Exception:
+                return redirect(url_for('_login_demo'))
         return f(*args, **kwargs)
     return wrapper
-# -------------------------------------------------------------------
 
 # ─── ARCHIVOS Y DIRECTORIOS ────────────────
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-# ❗️NO definas USUARIOS_XML aquí. Se define más abajo en “Persistencia”.
+# ❗️NO definas USUARIOS_XML aquí fuera de la persistencia.
 AVATAR_DIR = os.path.join('static', 'avatars')
 
 # ==== PERSISTENCIA (Render / Local) ====
@@ -75,7 +88,7 @@ os.makedirs(DATA_DIR, exist_ok=True)
 REINTEGROS_DIR = os.path.join(DATA_DIR, "REINTEGROS")
 os.makedirs(REINTEGROS_DIR, exist_ok=True)
 
-# Helpers de persistencia
+# Helpers
 def _persist(*rel):
     """Ruta dentro de DATA_DIR (crea la carpeta si no existe)."""
     path = os.path.join(DATA_DIR, *rel)
@@ -91,7 +104,7 @@ def _seed(src_rel, dst_abs):
     if not os.path.exists(dst_abs) and os.path.exists(src_abs):
         shutil.copy2(src_abs, dst_abs)
 
-# 2) Rutas persistentes para TODOS los XML
+# 2) Rutas persistentes para TODOS los XML (¡estos son los que cambian en runtime!)
 USUARIOS_XML            = _persist('usuarios', 'usuarios.xml')
 
 CAJA_XML                = _persist('static', 'db', 'caja.xml')
@@ -113,7 +126,7 @@ CONTAB_GASTOS_XML       = _persist('static', 'CONTABILIDAD', 'gastos.xml')
 CONTAB_SUELDOS_XML      = _persist('static', 'CONTABILIDAD', 'sueldos.xml')
 CONTAB_VENTAS_XML       = _persist('static', 'CONTABILIDAD', 'ventas.xml')
 
-# ➕ Aliases que usa tu app
+# Aliases auxiliares usados en tu app
 VENDEDORES_XML  = _persist('static', 'db', 'vendedores.xml')
 IMPRESIONES_XML = LOGS_IMPRESIONES_XML
 
@@ -139,40 +152,12 @@ for src, dst in [
 ]:
     _seed(src, dst)
 
-# Escritura atómica (más seguro ante cortes)
+# Escritura atómica (más seguro ante cortes/reinicios)
 def write_text_atomic(path, text):
     tmp = f"{path}.tmp"
     with open(tmp, "w", encoding="utf-8") as f:
         f.write(text)
     os.replace(tmp, path)
-
-# ---------- ALIAS AUTOMÁTICO PARA 'login' ----------
-# Creamos un endpoint 'login' que apunte a tu vista real (p.ej. _login_demo)
-def _login_proxy():
-    """Se ejecuta cuando alguien va a 'login' si no hay otra vista registrada.
-    Intenta redirigir a la vista real de login (_login_demo)."""
-    try:
-        return redirect(url_for('_login_demo'))
-    except BuildError:
-        return "Login no disponible (no existe _login_demo).", 500
-
-@app.before_first_request
-def _ensure_login_alias():
-    # Si ya existe un endpoint 'login', no hacemos nada.
-    if 'login' in app.view_functions:
-        return
-    # Si existe _login_demo, creamos un alias 'login' en /_login
-    target = app.view_functions.get('_login_demo')
-    try:
-        if target:
-            app.add_url_rule('/_login', endpoint='login', view_func=target, methods=['GET', 'POST'])
-        else:
-            # como fallback, registramos el proxy
-            app.add_url_rule('/_login', endpoint='login', view_func=_login_proxy, methods=['GET', 'POST'])
-    except Exception:
-        # si por alguna razón ya está creada, lo ignoramos
-        pass
-# ---------------------------------------------------
 
 ROLES = [
     ('superadmin', 'Super Administrador'),
@@ -183,10 +168,10 @@ ROLES = [
     ('impresion', 'Impresión'),
 ]
 
-# ─── UTILIDADES XML (USUARIOS) ────────────────────────
+# ─── UTILIDADES XML (USUARIOS, PERSISTENTE) ────────────────────────
 def leer_usuarios():
     """
-    Lee usuarios desde USUARIOS_XML (apunta a DATA_DIR).
+    Lee usuarios desde USUARIOS_XML (apunta a DATA_DIR, p.ej. /data/usuarios/usuarios.xml).
     Si no existe, intenta sembrar desde el repo; si tampoco existe, crea uno vacío.
     """
     try:
@@ -242,8 +227,7 @@ def guardar_usuarios(lista):
     except Exception as e:
         print("ERROR guardar_usuarios:", e)
         return False
-# ====== FIN DEL BLOQUE DE INICIO ======
-
+# ==================== FIN DEL BLOQUE ====================
 
 
 
