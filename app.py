@@ -24,14 +24,25 @@ def _login_url(**values):
         try:
             return _flask_url_for('_login_demo', **values)
         except BuildError:
-            # último recurso: ruta literal (ajusta si tu login real es otro)
+            # Último recurso: ruta literal (ajusta si tu login real es otro)
             return '/_login_demo'
 
 def url_for(endpoint, **values):
-    """Wrapper global de url_for (solo corrige el endpoint 'login')."""
+    """
+    Wrapper global de url_for:
+    - Si piden 'login' y el endpoint no existe, usa '_login_demo'.
+    """
     if endpoint == 'login':
         return _login_url(**values)
     return _flask_url_for(endpoint, **values)
+
+# 👉 Parche fuerte: sustituimos flask.helpers.url_for para que
+#    futuros "from flask import url_for" importen NUESTRO wrapper.
+try:
+    from flask import helpers as _flask_helpers
+    _flask_helpers.url_for = url_for
+except Exception:
+    pass
 
 # 4) Decorador que exige sesión y envía siempre al login correcto
 from functools import wraps
@@ -154,6 +165,7 @@ def guardar_usuarios(lista):
         print('ERROR guardar_usuarios:', ex)
         return False
 # ====== FIN PARCHE DE ARRANQUE ======
+
 
 
 
