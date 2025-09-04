@@ -34,10 +34,8 @@ from reportlab.platypus import Table, TableStyle
 from reportlab.lib import colors
 from reportlab.lib.units import mm, cm, inch
 
-
 app = Flask(__name__)
 app.secret_key = 'super_secreto_bingo_2025'
-
 
 from functools import wraps
 from flask import session, redirect, url_for
@@ -53,17 +51,17 @@ def require_session(f):
 
 # ─── ARCHIVOS Y DIRECTORIOS ────────────────
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-# ❗️IMPORTANTE: NO definir USUARIOS_XML aquí (se define en el bloque de persistencia)
+# ❗️NO definas USUARIOS_XML aquí. Se define más abajo en “Persistencia”.
 AVATAR_DIR = os.path.join('static', 'avatars')
-DATA_DIR = os.path.join(BASE_DIR, "DATA")
-REINTEGROS_DIR = os.path.join(DATA_DIR, "REINTEGROS")
-os.makedirs(DATA_DIR, exist_ok=True)
-os.makedirs(REINTEGROS_DIR, exist_ok=True)
 
 # ==== PERSISTENCIA (Render / Local) ====
-# 1) Usar DATA_DIR de entorno si existe; si no, ./DATA local
+# 1) DATA_DIR = /data en Render; si no existe, ./DATA local
 DATA_DIR = os.environ.get("DATA_DIR", os.path.join(BASE_DIR, "DATA"))
 os.makedirs(DATA_DIR, exist_ok=True)
+
+# Carpetas dependientes de DATA_DIR
+REINTEGROS_DIR = os.path.join(DATA_DIR, "REINTEGROS")
+os.makedirs(REINTEGROS_DIR, exist_ok=True)
 
 # Helpers
 def _persist(*rel):
@@ -81,8 +79,7 @@ def _seed(src_rel, dst_abs):
     if not os.path.exists(dst_abs) and os.path.exists(src_abs):
         shutil.copy2(src_abs, dst_abs)
 
-# 2) Reasignar rutas de XML “vivos” a DATA_DIR (persistente)
-#    Usamos los mismos nombres de variables que usa tu app.
+# 2) Rutas persistentes para TODOS los XML
 USUARIOS_XML            = _persist('usuarios', 'usuarios.xml')
 
 CAJA_XML                = _persist('static', 'db', 'caja.xml')
@@ -104,7 +101,7 @@ CONTAB_GASTOS_XML       = _persist('static', 'CONTABILIDAD', 'gastos.xml')
 CONTAB_SUELDOS_XML      = _persist('static', 'CONTABILIDAD', 'sueldos.xml')
 CONTAB_VENTAS_XML       = _persist('static', 'CONTABILIDAD', 'ventas.xml')
 
-# ➕ Rutas adicionales usadas por tu app
+# ➕ Aliases que usa tu app
 VENDEDORES_XML  = _persist('static', 'db', 'vendedores.xml')
 IMPRESIONES_XML = LOGS_IMPRESIONES_XML
 
@@ -139,50 +136,6 @@ def write_text_atomic(path, text):
 # ==== FIN PERSISTENCIA ====
 
 
-# ==== ENLAZAR CARPETAS DEL REPO -> DISCO PERSISTENTE (/data) ====
-PERSIST_ROOT = os.environ.get(
-    "DATA_DIR",
-    "/data" if os.path.isdir("/data") else os.path.join(BASE_DIR, "DATA")
-)
-os.makedirs(PERSIST_ROOT, exist_ok=True)
-
-def _bind_dir(repo_rel):
-    repo_abs    = os.path.join(BASE_DIR, repo_rel)
-    persist_abs = os.path.join(PERSIST_ROOT, repo_rel)
-    os.makedirs(persist_abs, exist_ok=True)
-
-    # Sembrar archivos del repo -> persistente (solo si está vacío)
-    try:
-        if os.path.isdir(repo_abs) and not os.listdir(persist_abs):
-            for name in os.listdir(repo_abs):
-                src = os.path.join(repo_abs, name)
-                dst = os.path.join(persist_abs, name)
-                if os.path.isdir(src):
-                    shutil.copytree(src, dst, dirs_exist_ok=True)
-                elif os.path.isfile(src) and not os.path.exists(dst):
-                    shutil.copy2(src, dst)
-    except Exception as e:
-        print("Seed warning:", repo_rel, e)
-
-    # Reemplazar carpeta del repo por un enlace simbólico -> persistente
-    try:
-        if not os.path.islink(repo_abs):
-            if os.path.isdir(repo_abs):
-                shutil.rmtree(repo_abs)
-            elif os.path.exists(repo_abs):
-                os.remove(repo_abs)
-            os.symlink(persist_abs, repo_abs, target_is_directory=True)
-    except Exception as e:
-        print("Bind warning:", repo_rel, e)
-
-# Enlazar carpetas que CAMBIAN en runtime
-_bind_dir("usuarios")
-_bind_dir(os.path.join("static", "db"))
-_bind_dir(os.path.join("static", "LOGS"))
-_bind_dir(os.path.join("static", "CONTABILIDAD"))
-# ==== FIN ENLACE PERSISTENTE ====
-
-
 ROLES = [
     ('superadmin', 'Super Administrador'),
     ('admin', 'Administrador'),
@@ -206,7 +159,6 @@ def leer_usuarios():
             if os.path.exists(seed_src):
                 shutil.copy2(seed_src, USUARIOS_XML)
             else:
-                # crear un XML vacío
                 root = ET.Element('usuarios')
                 ET.ElementTree(root).write(USUARIOS_XML, encoding='utf-8', xml_declaration=True)
                 return []
@@ -217,15 +169,14 @@ def leer_usuarios():
         for elem in root.findall('usuario'):
             usuarios.append({
                 'nombre': elem.findtext('nombre', default=''),
-                'clave': elem.findtext('clave', default=''),
-                'rol': elem.findtext('rol', default='jugador'),
-                'email': elem.findtext('email', default=''),
+                'clave':  elem.findtext('clave',  default=''),
+                'rol':    elem.findtext('rol',    default='jugador'),
+                'email':  elem.findtext('email',  default=''),
                 'estado': elem.findtext('estado', default='activo'),
                 'avatar': elem.findtext('avatar', default='avatar-male.png'),
             })
         return usuarios
     except Exception as e:
-        # Si algo falla, no rompas la app: devuelve lista vacía y loguea
         print("ERROR leer_usuarios:", e)
         return []
 
@@ -239,13 +190,12 @@ def guardar_usuarios(lista):
         for u in lista:
             e = ET.SubElement(root, 'usuario')
             ET.SubElement(e, 'nombre').text = u.get('nombre', '')
-            ET.SubElement(e, 'clave').text = u.get('clave', '')
-            ET.SubElement(e, 'rol').text = u.get('rol', 'jugador')
-            ET.SubElement(e, 'email').text = u.get('email', '')
+            ET.SubElement(e, 'clave') .text = u.get('clave',  '')
+            ET.SubElement(e, 'rol')   .text = u.get('rol',    'jugador')
+            ET.SubElement(e, 'email') .text = u.get('email',  '')
             ET.SubElement(e, 'estado').text = u.get('estado', 'activo')
             ET.SubElement(e, 'avatar').text = u.get('avatar', 'avatar-male.png')
 
-        # escritura atómica
         xml_bytes = ET.tostring(root, encoding='utf-8', xml_declaration=True)
         os.makedirs(os.path.dirname(USUARIOS_XML), exist_ok=True)
         tmp = f"{USUARIOS_XML}.tmp"
@@ -256,6 +206,7 @@ def guardar_usuarios(lista):
     except Exception as e:
         print("ERROR guardar_usuarios:", e)
         return False
+
 
 
 
