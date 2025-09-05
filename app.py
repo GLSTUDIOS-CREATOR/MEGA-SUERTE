@@ -1,35 +1,61 @@
-# =================== app.py (corregido) ===================
-# ====== PARCHE DE ARRANQUE (LOGIN + PERSISTENCIA) ======
-# 1) Import seguro de unidades (evita NameError si falta reportlab)
+# ====== PARCHE DE ARRANQUE (PÉGALO AL INICIO DE app.py) ======
+# Evita NameError en 'mm' incluso si el import real aparece más abajo
 try:
-    from reportlab.lib.units import mm  # real
+    from reportlab.lib.units import mm  # import real si está disponible
 except Exception:
-    mm = 2.834645669291339  # 1 mm en puntos
+    # Fallback: 1 mm en puntos (ReportLab trabaja en puntos)
+    mm = 2.834645669291339
 
-# 2) Fallback para @login_required si no está Flask-Login
+# Evita NameError en @login_required si Flask-Login no está instalado
 try:
     from flask_login import login_required as _login_required
-    def login_required(f): return _login_required(f)
+    def login_required(f):
+        return _login_required(f)
 except Exception:
-    def login_required(f): return f
+    # Fallback 'no-op': deja pasar la vista sin exigir login
+    def login_required(f):
+        return f
+# ====== FIN PARCHE DE ARRANQUE ======
 
-# 3) url_for SEGURO (si el endpoint 'login' no existe, usar '_login_demo')
-from flask import url_for as _flask_url_for, redirect, session, Flask, render_template, request, flash, jsonify, current_app
-from werkzeug.routing import BuildError
+
+
+import os
+import random
+import pandas as pd
+import qrcode
+import xml.etree.ElementTree as ET
+from datetime import date, datetime
+from io import BytesIO
+from flask import Flask, request, render_template, send_file, redirect, url_for, flash, session
+# ---- Safe login URL helper (avoids BuildError for missing 'login' endpoint) ----
+from flask import url_for as _flask_url_for
+from werkzeug.routing import BuildError as _BuildError
 
 def _login_url(**values):
-    """Devuelve la URL del login correcto (login o _login_demo)."""
     try:
         return _flask_url_for('login', **values)
-    except BuildError:
+    except Exception:
         try:
             return _flask_url_for('_login_demo', **values)
-        except BuildError:
-            # Último recurso si el endpoint se llama distinto
+        except Exception:
             return '/_login_demo'
+# -------------------------------------------------------------------------------
 
-# 4) Decorador que exige sesión y manda siempre al login correcto
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import A4, landscape
+from reportlab.lib.utils import ImageReader
+from reportlab.platypus import Table, TableStyle
+from reportlab.lib import colors
+from reportlab.lib.units import mm, cm, inch
+
+
+app = Flask(__name__)
+app.secret_key = 'super_secreto_bingo_2025'
+
+
 from functools import wraps
+from flask import session, redirect, url_for
+
 def require_session(f):
     @wraps(f)
     def wrapper(*args, **kwargs):
@@ -38,24 +64,43 @@ def require_session(f):
         return f(*args, **kwargs)
     return wrapper
 
-# 5) PERSISTENCIA: usa /data en Render (si existe) o ./DATA en local
-import os, shutil, xml.etree.ElementTree as ET
+
+
+# ─── ARCHIVOS Y DIRECTORIOS ────────────────
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+USUARIOS_XML = os.path.join(BASE_DIR, 'usuarios', 'usuarios.xml')
+AVATAR_DIR = os.path.join('static', 'avatars')
+DATA_DIR = os.path.join(BASE_DIR, "DATA")
+REINTEGROS_DIR = os.path.join(DATA_DIR, "REINTEGROS")
+os.makedirs(DATA_DIR, exist_ok=True)
+os.makedirs(REINTEGROS_DIR, exist_ok=True)
+# ==== PERSISTENCIA (Render / Local) ====
+import os, shutil
+
+# 1) Usar DATA_DIR de entorno si existe; si no, ./DATA local
 DATA_DIR = os.environ.get("DATA_DIR", os.path.join(BASE_DIR, "DATA"))
 os.makedirs(DATA_DIR, exist_ok=True)
 
+# Helpers
 def _persist(*rel):
-    p = os.path.join(DATA_DIR, *rel)
-    os.makedirs(os.path.dirname(p), exist_ok=True)
-    return p
+    """Ruta dentro de DATA_DIR (crea la carpeta si no existe)."""
+    path = os.path.join(DATA_DIR, *rel)
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    return path
 
 def _seed(src_rel, dst_abs):
+    """
+    Copia archivo inicial del repo → persistente, solo si NO existe.
+    Ej.: _seed('static/db/caja.xml', CAJA_XML)
+    """
     src_abs = os.path.join(BASE_DIR, src_rel)
     if not os.path.exists(dst_abs) and os.path.exists(src_abs):
         shutil.copy2(src_abs, dst_abs)
 
-# Archivos persistentes
+# 2) Reasignar rutas de XML “vivos” a DATA_DIR (persistente)
+#    Usamos los mismos nombres de variables que usa tu app.
 USUARIOS_XML            = _persist('usuarios', 'usuarios.xml')
+
 CAJA_XML                = _persist('static', 'db', 'caja.xml')
 ASIGNACIONES_XML        = _persist('static', 'db', 'asignaciones.xml')
 PAGOS_PREMIOS_XML       = _persist('static', 'db', 'pagos_premios.xml')
@@ -66,14 +111,16 @@ VMIX_REINTEGRO_XML      = _persist('static', 'db', 'vmix_reintegro.xml')
 VMIX_SPINNERS_XML       = _persist('static', 'db', 'vmix_spinners.xml')
 VMIX_VENDEDORES_XML     = _persist('static', 'db', 'vmix_vendedores.xml')
 VMIX_VENTAS_XML         = _persist('static', 'db', 'vmix_ventas.xml')
+
 LOGS_CAJA_XML           = _persist('static', 'LOGS', 'caja.xml')
 LOGS_IMPRESIONES_XML    = _persist('static', 'LOGS', 'impresiones.xml')
+
 CONTAB_BANCOS_XML       = _persist('static', 'CONTABILIDAD', 'bancos.xml')
 CONTAB_GASTOS_XML       = _persist('static', 'CONTABILIDAD', 'gastos.xml')
 CONTAB_SUELDOS_XML      = _persist('static', 'CONTABILIDAD', 'sueldos.xml')
 CONTAB_VENTAS_XML       = _persist('static', 'CONTABILIDAD', 'ventas.xml')
 
-# Sembrar primera vez
+# 3) Sembrar contenido inicial (solo primera vez)
 for src, dst in [
     ('usuarios/usuarios.xml',               USUARIOS_XML),
     ('static/db/caja.xml',                  CAJA_XML),
@@ -95,203 +142,180 @@ for src, dst in [
 ]:
     _seed(src, dst)
 
+# (Opcional) Escritura atómica (más seguro ante cortes)
 def write_text_atomic(path, text):
     tmp = f"{path}.tmp"
     with open(tmp, "w", encoding="utf-8") as f:
         f.write(text)
     os.replace(tmp, path)
+# ==== FIN PERSISTENCIA ====
 
-# ====== APP ======
-app = Flask(__name__)
-app.secret_key = 'super_secreto_bingo_2025'
+# ==== ENLAZAR CARPETAS DEL REPO -> DISCO PERSISTENTE (/data) ====
+import os, shutil
 
-# ====== UTILIDADES: usuarios.xml ======
+PERSIST_ROOT = os.environ.get(
+    "DATA_DIR",
+    "/data" if os.path.isdir("/data") else os.path.join(BASE_DIR, "DATA")
+)
+os.makedirs(PERSIST_ROOT, exist_ok=True)
+
+def _bind_dir(repo_rel):
+    repo_abs    = os.path.join(BASE_DIR, repo_rel)
+    persist_abs = os.path.join(PERSIST_ROOT, repo_rel)
+    os.makedirs(persist_abs, exist_ok=True)
+
+    # Sembrar archivos del repo -> persistente (solo si está vacío)
+    try:
+        if os.path.isdir(repo_abs) and not os.listdir(persist_abs):
+            for name in os.listdir(repo_abs):
+                src = os.path.join(repo_abs, name)
+                dst = os.path.join(persist_abs, name)
+                if os.path.isdir(src):
+                    shutil.copytree(src, dst, dirs_exist_ok=True)
+                elif os.path.isfile(src) and not os.path.exists(dst):
+                    shutil.copy2(src, dst)
+    except Exception as e:
+        print("Seed warning:", repo_rel, e)
+
+    # Reemplazar carpeta del repo por un enlace simbólico -> persistente
+    try:
+        if not os.path.islink(repo_abs):
+            if os.path.isdir(repo_abs):
+                shutil.rmtree(repo_abs)
+            elif os.path.exists(repo_abs):
+                os.remove(repo_abs)
+            os.symlink(persist_abs, repo_abs, target_is_directory=True)
+    except Exception as e:
+        print("Bind warning:", repo_rel, e)
+
+# Enlazar carpetas que CAMBIAN en runtime
+_bind_dir("usuarios")
+_bind_dir(os.path.join("static", "db"))
+_bind_dir(os.path.join("static", "LOGS"))
+_bind_dir(os.path.join("static", "CONTABILIDAD"))
+# ==== FIN ENLACE PERSISTENTE ====
+
+
+ROLES = [
+    ('superadmin', 'Super Administrador'),
+    ('admin', 'Administrador'),
+    ('socio', 'Socio'),
+    ('cobrador', 'Cobrador'),
+    ('jugador', 'Jugador'),
+    ('impresion', 'Impresión'),
+]
+
+# ─── UTILIDADES XML ────────────────────────
 def leer_usuarios():
-    try:
-        if not os.path.exists(USUARIOS_XML):
-            _seed('usuarios/usuarios.xml', USUARIOS_XML)
-            if not os.path.exists(USUARIOS_XML):
-                root = ET.Element('usuarios')
-                ET.ElementTree(root).write(USUARIOS_XML, encoding='utf-8', xml_declaration=True)
-                return []
-        tree = ET.parse(USUARIOS_XML)
-        root = tree.getroot()
-        out = []
-        for e in root.findall('usuario'):
-            out.append({
-                'nombre': e.findtext('nombre', ''),
-                'clave':  e.findtext('clave',  ''),
-                'rol':    e.findtext('rol',    'jugador'),
-                'email':  e.findtext('email',  ''),
-                'estado': e.findtext('estado', 'activo'),
-                'avatar': e.findtext('avatar', 'avatar-male.png'),
-            })
-        return out
-    except Exception as ex:
-        print('ERROR leer_usuarios:', ex)
+    if not os.path.exists(USUARIOS_XML):
         return []
+    tree = ET.parse(USUARIOS_XML)
+    root = tree.getroot()
+    usuarios = []
+    for elem in root.findall('usuario'):
+        usuarios.append({
+            'nombre': elem.find('nombre').text,
+            'clave': elem.find('clave').text,
+            'rol': elem.find('rol').text,
+            'email': elem.find('email').text if elem.find('email') is not None else '',
+            'estado': elem.find('estado').text,
+            'avatar': elem.find('avatar').text if elem.find('avatar') is not None else 'avatar-male.png'
+        })
+    return usuarios
 
-def guardar_usuarios(lista):
-    try:
-        root = ET.Element('usuarios')
-        for u in lista:
-            e = ET.SubElement(root, 'usuario')
-            ET.SubElement(e, 'nombre').text = u.get('nombre', '')
-            ET.SubElement(e, 'clave') .text = u.get('clave',  '')
-            ET.SubElement(e, 'rol')   .text = u.get('rol',    'jugador')
-            ET.SubElement(e, 'email') .text = u.get('email',  '')
-            ET.SubElement(e, 'estado').text = u.get('estado', 'activo')
-            ET.SubElement(e, 'avatar').text = u.get('avatar', 'avatar-male.png')
-        xml = ET.tostring(root, encoding='utf-8', xml_declaration=True)
-        os.makedirs(os.path.dirname(USUARIOS_XML), exist_ok=True)
-        tmp = f"{USUARIOS_XML}.tmp"
-        with open(tmp, 'wb') as f: f.write(xml)
-        os.replace(tmp, USUARIOS_XML)
-        return True
-    except Exception as ex:
-        print('ERROR guardar_usuarios:', ex)
-        return False
+def guardar_usuarios(usuarios):
+    root = ET.Element('usuarios')
+    for u in usuarios:
+        user_elem = ET.SubElement(root, 'usuario')
+        ET.SubElement(user_elem, 'nombre').text = u['nombre']
+        ET.SubElement(user_elem, 'clave').text = u['clave']
+        ET.SubElement(user_elem, 'rol').text = u['rol']
+        ET.SubElement(user_elem, 'email').text = u.get('email', '')
+        ET.SubElement(user_elem, 'estado').text = u['estado']
+        ET.SubElement(user_elem, 'avatar').text = u.get('avatar', 'avatar-male.png')
+    tree = ET.ElementTree(root)
+    tree.write(USUARIOS_XML, encoding='utf-8', xml_declaration=True)
 
 def obtener_usuario(nombre):
-    for u in leer_usuarios():
+    usuarios = leer_usuarios()
+    for u in usuarios:
         if u['nombre'] == nombre:
             return u
     return None
 
-# ====== LOGIN ======
-@app.route('/_login_demo', methods=['GET', 'POST'])
-def _login_demo():
+def eliminar_usuario(nombre):
+    usuarios = leer_usuarios()
+    usuarios = [u for u in usuarios if u['nombre'] != nombre]
+    guardar_usuarios(usuarios)
+
+# ─── LOGIN Y DASHBOARD ─────────────────────
+@app.route('/', methods=['GET', 'POST'])
+def login():
     if request.method == 'POST':
-        user = request.form.get('username', '').strip()
-        pwd  = request.form.get('password', '').strip()
-        for u in leer_usuarios():
-            if u['nombre'] == user and u['clave'] == pwd and u.get('estado','activo') == 'activo':
-                session['usuario'] = u['nombre']
-                session['rol']     = u.get('rol','jugador')
-                session['avatar']  = u.get('avatar','avatar-male.png')
-                flash('Bienvenido', 'success')
-                return redirect('/dashboard')
-        flash('Usuario o contraseña inválidos', 'danger')
+        usuario = request.form['usuario']
+        clave = request.form['clave']
+        usuarios = leer_usuarios()
+        user = next((u for u in usuarios if u['nombre'] == usuario and u['clave'] == clave and u['estado'] == 'activo'), None)
+        if user:
+            session['usuario'] = user['nombre']
+            session['rol'] = user['rol']
+            session['avatar'] = user.get('avatar', 'avatar-male.png')
+            return redirect(url_for('dashboard'))
+        else:
+            flash('Usuario o clave incorrectos o usuario inactivo', 'error')
     return render_template('login.html')
 
-# Alias /login si no existe ya ese endpoint
-if 'login' not in app.view_functions:
-    app.add_url_rule('/login', endpoint='login', view_func=_login_demo, methods=['GET','POST'])
 
-@app.route('/logout')
-def logout():
-    session.clear()
-    return redirect(_login_url())   # <— evita BuildError si no hay 'login'
-# ==========================================================
 
-# ------------------- DASHBOARD ----------------------------
+# ===================== DASHBOARD (HOY) =====================
+# Bloque auto-contenido. Si tu app ya define constantes o helpers
+# (p.ej. CAJA_XML, get_configuracion_dia, _iter_impresiones) se usan tal cual.
+# No rompe nada existente.
+
+import os
+import xml.etree.ElementTree as ET
 from datetime import date, datetime
+from flask import render_template, jsonify, request, session, redirect, url_for
 
-@app.route('/dashboard')
-def dashboard():
-    if 'usuario' not in session:
-        return redirect(_login_url())   # <— corregido
-    return render_template(
-        'dashboard.html',
-        usuario=session.get('usuario',''),
-        rol=session.get('rol',''),
-        avatar=session.get('avatar','avatar-male.png')
-    )
+# --- Rutas/archivos (respetamos existentes si ya están definidos) -------------
+CAJA_XML              = globals().get('CAJA_XML',              os.path.join('static', 'CAJA', 'caja.xml'))
+VENDEDORES_XML        = globals().get('VENDEDORES_XML',        os.path.join('static', 'db', 'vendedores.xml'))
+ASIGNACIONES_XML      = globals().get('ASIGNACIONES_XML',      os.path.join('static', 'db', 'asignaciones.xml'))
+IMPRESION_LOG         = globals().get('IMPRESION_LOG',         os.path.join('static', 'IMPRESION', 'log.xml'))
+BOLETOS_POR_PLANILLA  = int(globals().get('BOLETOS_POR_PLANILLA', 20))
 
-@app.get('/api/dashboard/hoy')
-def api_dashboard_hoy():
-    f = (request.args.get('fecha') or date.today().isoformat()).strip()
+# --- Helpers seguros -----------------------------------------------------------
+def _parse_or_none(path):
     try:
-        datetime.fromisoformat(f)
-    except Exception:
-        f = date.today().isoformat()
-    # TODO: reusa tu función real para el dashboard
-    data = {"fecha": f}
-    return jsonify({"ok": True, **data})
+        if not os.path.exists(path):
+            return None, None
+        t = ET.parse(path)
+        return t, t.getroot()
+    except ET.ParseError:
+        return None, None
 
-# ------------------- USUARIOS -----------------------------
-ROLES = [
-    ('superadmin', 'Super Administrador'),
-    ('admin',      'Administrador'),
-    ('socio',      'Socio'),
-    ('cobrador',   'Cobrador'),
-    ('jugador',    'Jugador'),
-    ('impresion',  'Impresión'),
-]
+def _leer_xml_seguro(path, root_tag='root'):
+    """Crea el XML vacío si no existe para evitar errores en primeras ejecuciones."""
+    if not os.path.exists(path):
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        ET.ElementTree(ET.Element(root_tag)).write(path, encoding='utf-8', xml_declaration=True)
+    t = ET.parse(path)
+    return t, t.getroot()
 
-@app.route('/usuarios')
-def usuarios():
-    if 'usuario' not in session:
-        return redirect(_login_url())   # <— corregido
-    lista_usuarios = leer_usuarios()
-    roles = [r[1] for r in ROLES]
-    return render_template(
-        'usuarios.html',
-        usuarios=lista_usuarios,
-        roles=roles,
-        usuario=session['usuario'],
-        rol=session['rol'],
-        avatar=session.get('avatar', 'avatar-male.png')
-    )
-
-@app.route('/usuarios/guardar', methods=['POST'])
-def guardar_usuario():
-    nombre = request.form['username']
-    clave  = request.form['password']
-    rol    = request.form['rol']
-    email  = request.form.get('email', '')
-    avatar_filename = request.form.get('avatar_select', 'avatar-male.png')
-    estado = 'activo'
-
-    usuarios = leer_usuarios()
-    existe = False
-    for u in usuarios:
-        if u['nombre'] == nombre:
-            u['clave']  = clave
-            u['rol']    = rol
-            u['email']  = email
-            u['avatar'] = avatar_filename
-            u['estado'] = estado
-            existe = True
-    if not existe:
-        usuarios.append({
-            'nombre': nombre,
-            'clave':  clave,
-            'rol':    rol,
-            'email':  email,
-            'avatar': avatar_filename,
-            'estado': estado
-        })
-    guardar_usuarios(usuarios)
-    flash('Usuario guardado correctamente', 'success')
-    return redirect('/usuarios')
-
-@app.route('/usuarios/editar/<nombre>', methods=['GET', 'POST'])
-def editar_usuario(nombre):
-    if 'usuario' not in session:
-        return redirect(_login_url())   # <— corregido
-    user = obtener_usuario(nombre)
-    if not user:
-        flash(f'Usuario "{nombre}" no encontrado', 'error')
-        return redirect('/usuarios')
-    if request.method == 'POST':
-        user['clave']  = request.form['password']
-        user['rol']    = request.form['rol']
-        user['email']  = request.form.get('email', '')
-        user['avatar'] = request.form.get('avatar_select', user['avatar'])
-        usuarios = leer_usuarios()
-        for u in usuarios:
-            if u['nombre'] == nombre:
-                u.update(user)
-        guardar_usuarios(usuarios)
-        flash('Usuario editado correctamente', 'success')
-        return redirect('/usuarios')
-    return render_template('usuarios_editar.html', user=user, roles=[r[1] for r in ROLES],
-                           usuario=session['usuario'], rol=session['rol'],
-                           avatar=session.get('avatar','avatar-male.png'))
-
-
-
+def _vendor_map():
+    """Devuelve {seudonimo: 'Nombre Apellido (Seud)'} para etiquetas lindas."""
+    out = {}
+    t, r = _parse_or_none(VENDEDORES_XML)
+    if r is None:
+        return out
+    for v in r.findall('vendedor'):
+        nom  = (v.findtext('nombre') or '').strip()
+        ape  = (v.findtext('apellido') or '').strip()
+        seud = (v.findtext('seudonimo') or '').strip()
+        if seud:
+            etiqueta = (nom + ' ' + ape).strip() or seud
+            out[seud] = f"{etiqueta} ({seud})"
+    return out
 
 # ---------------- IMPRESOS / PLANILLAS IMPRESAS (tolerante al formato) --------
 def _impresos_y_planillas_del_dia(fecha_iso):
@@ -577,7 +601,7 @@ def _dashboard_data(fecha_iso):
 @app.route('/dashboard')
 def dashboard():
     if 'usuario' not in session:
-        return redirect(url_for('login'))
+        return redirect(_login_url())
     return render_template(
         'dashboard.html',
         usuario=session.get('usuario',''),
@@ -600,13 +624,13 @@ def api_dashboard_hoy():
 @app.route('/logout')
 def logout():
     session.clear()
-    return redirect(url_for('login'))
+    return redirect(_login_url())
 
 # ─── SECCIÓN DE USUARIOS ──────────────────
 @app.route('/usuarios')
 def usuarios():
     if 'usuario' not in session:
-        return redirect(url_for('login'))
+        return redirect(_login_url())
     lista_usuarios = leer_usuarios()
     roles = [r[1] for r in ROLES]
     return render_template(
@@ -653,7 +677,7 @@ def guardar_usuario():
 @app.route('/usuarios/editar/<nombre>', methods=['GET', 'POST'])
 def editar_usuario(nombre):
     if 'usuario' not in session:
-        return redirect(url_for('login'))
+        return redirect(_login_url())
     user = obtener_usuario(nombre)
     if not user:
         flash(f'Usuario "{nombre}" no encontrado', 'error')
@@ -1584,7 +1608,7 @@ def descargar_zip():
 @app.route('/usuarios/eliminar/<nombre>', methods=['POST'])
 def eliminar_usuario_route(nombre):
     if 'usuario' not in session:
-        return redirect(url_for('login'))
+        return redirect(_login_url())
     eliminar_usuario(nombre)   # función existente en tu app
     flash('Usuario eliminado correctamente', 'success')
     return redirect(url_for('usuarios'))
@@ -1852,7 +1876,7 @@ def _contar_asignadas_serie(root, fecha, serie_archivo):
 def asignar_planillas():
     # (opcional) proteger por sesión
     if 'usuario' not in session:
-        return redirect(url_for('login'))
+        return redirect(_login_url())
 
     vendedores = cargar_vendedores()
     tree, root = leer_asignaciones()
@@ -2696,7 +2720,7 @@ def cargar_todas_figuras():
 def figuras_crear():
     # Protege si hay login en tu app
     if 'usuario' not in session and 'login' in current_app.view_functions:
-        return redirect(url_for('login'))
+        return redirect(_login_url())
 
     figura_cargada = None
     nombre_cargar = (request.args.get("nombre") or "").strip()
@@ -2741,13 +2765,13 @@ def crear_figuras_alias():
 @app.route("/escoger-figuras", methods=["GET"])
 def escoger_figuras():
     if 'usuario' not in session and 'login' in current_app.view_functions:
-        return redirect(url_for('login'))
+        return redirect(_login_url())
     return render_template("escoger_figuras.html")
 
 @app.route("/figuras/seleccion", methods=["POST"])
 def figuras_seleccion():
     if 'usuario' not in session and 'login' in current_app.view_functions:
-        return redirect(url_for('login'))
+        return redirect(_login_url())
     raw = request.form.get("seleccion","")
     seleccion = []
     if raw:
@@ -2885,7 +2909,7 @@ def cargar_figuras_de_fecha(fecha_iso: str):
 @app.route("/escoger-figuras", methods=["GET"])
 def escoger_figuras_view():
     if 'usuario' not in session and 'login' in current_app.view_functions:
-        return redirect(url_for('login'))
+        return redirect(_login_url())
     fecha_q = (request.args.get("fecha") or "").strip()
     preseleccion = cargar_figuras_de_fecha(fecha_q) if fecha_q else []
     return render_template("escoger_figuras.html",
@@ -2896,7 +2920,7 @@ def escoger_figuras_view():
 @app.route("/escoger-figuras/guardar", methods=["POST"])
 def escoger_figuras_guardar():
     if 'usuario' not in session and 'login' in current_app.view_functions:
-        return redirect(url_for('login'))
+        return redirect(_login_url())
 
     fecha = (request.form.get("fecha") or "").strip()
     raw   = (request.form.get("seleccion") or "").strip()
@@ -5023,7 +5047,7 @@ def _premios_pagados_detalle(desde_iso, hasta_iso):
 @app.route("/contabilidad")
 def contabilidad():
     if 'usuario' not in session:
-        return redirect(url_for('login'))
+        return redirect(_login_url())
     rol = session.get('rol', '')
     if rol not in ('Super Administrador', 'Administrador'):
         flash('Acceso restringido a Contabilidad', 'error')
