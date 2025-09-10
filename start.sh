@@ -3,21 +3,39 @@ set -euo pipefail
 
 echo "==> Preparando DISCO persistente y enlaces…"
 
+# ------------------------------------------------------------------------------------
+# RUTAS
+# ------------------------------------------------------------------------------------
 BASE="/opt/render/project/src"
+DATA_ROOT="/data"                 # <- DISCO PERSISTENTE DE RENDER
 cd "$BASE"
 
-DATA_ROOT="/data"   # <-- DISCO de Render (persistente)
+# Asegura el esqueleto en el disco
+mkdir -p \
+  "$DATA_ROOT/logs" \
+  "$DATA_ROOT/usuarios" \
+  "$DATA_ROOT/CAJA" \
+  "$DATA_ROOT/REINTEGROS" \
+  "$DATA_ROOT/DB"
 
-# 1) Carpetas persistentes en el DISCO
-mkdir -p "$DATA_ROOT/logs" "$DATA_ROOT/usuarios" "$DATA_ROOT/CAJA" "$DATA_ROOT/REINTEGROS" "$DATA_ROOT/DB"
-
-# 2) LOGS persistentes
+# ------------------------------------------------------------------------------------
+# LOGS persistentes
+# ------------------------------------------------------------------------------------
 mkdir -p instance/gl_bingo
 rm -rf instance/gl_bingo/logs || true
-ln -s "$DATA_ROOT/logs" instance/gl_bingo/logs
-[ -f "$DATA_ROOT/logs/impresiones.xml" ] || echo "<impresiones/>" > "$DATA_ROOT/logs/impresiones.xml"
+ln -sfn "$DATA_ROOT/logs" instance/gl_bingo/logs
 
-# 3) usuarios.xml (persistente)
+# Crea impresiones.xml si no existe o está vacío
+if [ ! -s "$DATA_ROOT/logs/impresiones.xml" ]; then
+  cat > "$DATA_ROOT/logs/impresiones.xml" <<'XML'
+<?xml version="1.0" encoding="utf-8"?>
+<impresiones></impresiones>
+XML
+fi
+
+# ------------------------------------------------------------------------------------
+# usuarios.xml (persistente)
+# ------------------------------------------------------------------------------------
 if [ ! -f "$DATA_ROOT/usuarios/usuarios.xml" ]; then
   if [ -f static/db/usuarios.xml ]; then
     echo "Sembrando usuarios.xml desde el repo → /data/usuarios/usuarios.xml"
@@ -40,7 +58,9 @@ EOF
   fi
 fi
 
-# 4) caja.xml (persistente)
+# ------------------------------------------------------------------------------------
+# caja.xml (persistente)
+# ------------------------------------------------------------------------------------
 if [ ! -f "$DATA_ROOT/CAJA/caja.xml" ]; then
   echo "Creando /data/CAJA/caja.xml"
   cat > "$DATA_ROOT/CAJA/caja.xml" <<EOF
@@ -58,37 +78,65 @@ if [ ! -f "$DATA_ROOT/CAJA/caja.xml" ]; then
 EOF
 fi
 
-# 5) Sembrar los XML de DB en el DISCO la primera vez
+# ------------------------------------------------------------------------------------
+# Sembrar XMLs de DB al DISCO (SOLO primera vez)
+# (Se excluyen usuarios.xml y caja.xml que ya tienen su propia ruta)
+# ------------------------------------------------------------------------------------
 if [ -z "$(ls -A "$DATA_ROOT/DB" 2>/dev/null)" ]; then
   echo "Sembrando DB XMLs en /data/DB (una sola vez)…"
-  cp -a static/db/*.xml "$DATA_ROOT/DB" 2>/dev/null || true
+  shopt -s nullglob
+  for f in static/db/*.xml; do
+    bn="$(basename "$f")"
+    if [ "$bn" != "usuarios.xml" ] && [ "$bn" != "caja.xml" ]; then
+      cp -a "$f" "$DATA_ROOT/DB/$bn" || true
+    fi
+  done
+  shopt -u nullglob
 fi
 
-# 6) Enlaces para que la app vea todo donde espera:
+# ------------------------------------------------------------------------------------
+# Enlaces para que la app vea TODO donde espera
+# ------------------------------------------------------------------------------------
 
-#    a) static/db como carpeta REAL y dentro symlinks a los XML del DISCO
+# a) static/db como carpeta REAL con symlinks a los XML del DISCO
 rm -rf static/db || true
 mkdir -p static/db
-for f in "$DATA_ROOT/DB"/*.xml; do
-  [ -e "$f" ] || continue
-  bn="$(basename "$f")"
-  ln -sf "$DATA_ROOT/DB/$bn" "static/db/$bn"
-done
-#    Usuarios y Caja apuntan a sus rutas persistentes
-ln -sf "$DATA_ROOT/usuarios/usuarios.xml" static/db/usuarios.xml
-ln -sf "$DATA_ROOT/CAJA/caja.xml"      static/db/caja.xml
 
-#    b) Mantener compatibilidad con rutas DATA/… usadas por tu código
+#    Usuarios y Caja (siempre a persistente)
+ln -sfn "$DATA_ROOT/usuarios/usuarios.xml" static/db/usuarios.xml
+ln -sfn "$DATA_ROOT/CAJA/caja.xml"       static/db/caja.xml
+
+#    Resto de XMLs (DB)
+shopt -s nullglob
+for f in "$DATA_ROOT/DB"/*.xml; do
+  bn="$(basename "$f")"
+  ln -sfn "$DATA_ROOT/DB/$bn" "static/db/$bn"
+done
+shopt -u nullglob
+
+# b) Compatibilidad con rutas DATA/... usadas por el código
+mkdir -p DATA
 for d in usuarios CAJA REINTEGROS; do
   rm -rf "DATA/$d" || true
-  ln -s "$DATA_ROOT/$d" "DATA/$d"
+  ln -sfn "$DATA_ROOT/$d" "DATA/$d"
 done
 
+# ------------------------------------------------------------------------------------
+# Resumen útil en logs
+# ------------------------------------------------------------------------------------
 echo "==> Resumen:"
 ls -ld instance/gl_bingo/logs DATA/usuarios DATA/CAJA DATA/REINTEGROS static/db | cat
 echo "Log persistente en: $DATA_ROOT/logs/impresiones.xml"
 
+# ------------------------------------------------------------------------------------
+# ARRANCAR GUNICORN con timeout amplio (Planillas puede pesar)
+# ------------------------------------------------------------------------------------
 echo "==> Iniciando Gunicorn…"
-# Usa el PORT que le da Render; si no está, 10000
-exec gunicorn app:app --bind 0.0.0.0:${PORT:-10000} --workers 2 --timeout 120
+exec gunicorn app:app \
+  --bind 0.0.0.0:${PORT:-10000} \
+  --workers 1 \
+  --timeout 600 \
+  --access-logfile - \
+  --error-logfile -
+
 
