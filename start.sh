@@ -1,23 +1,30 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-echo "==> Boot hook: preparando disco persistente y enlaces…"
+echo "==> Preparando DISCO persistente y enlaces…"
 
 BASE="/opt/render/project/src"
 cd "$BASE"
 
-# 1) carpetas persistentes
-mkdir -p DATA/CAJA DATA/usuarios DATA/REINTEGROS DATA/DB/xml
-mkdir -p static/db
+DATA_ROOT="/data"   # <-- DISCO de Render (persistente)
 
-# 2) usuarios.xml: si ya existe en DATA lo respetamos. Si no:
-if [ ! -f DATA/usuarios/usuarios.xml ]; then
+# 1) Carpetas persistentes en el DISCO
+mkdir -p "$DATA_ROOT/logs" "$DATA_ROOT/usuarios" "$DATA_ROOT/CAJA" "$DATA_ROOT/REINTEGROS" "$DATA_ROOT/DB"
+
+# 2) LOGS persistentes
+mkdir -p instance/gl_bingo
+rm -rf instance/gl_bingo/logs || true
+ln -s "$DATA_ROOT/logs" instance/gl_bingo/logs
+[ -f "$DATA_ROOT/logs/impresiones.xml" ] || echo "<impresiones/>" > "$DATA_ROOT/logs/impresiones.xml"
+
+# 3) usuarios.xml (persistente)
+if [ ! -f "$DATA_ROOT/usuarios/usuarios.xml" ]; then
   if [ -f static/db/usuarios.xml ]; then
-    echo "Copiando usuarios.xml del repo -> DATA/usuarios/usuarios.xml"
-    cp static/db/usuarios.xml DATA/usuarios/usuarios.xml
+    echo "Sembrando usuarios.xml desde el repo → /data/usuarios/usuarios.xml"
+    cp static/db/usuarios.xml "$DATA_ROOT/usuarios/usuarios.xml"
   else
-    echo "Creando usuarios.xml mínimo en DATA/usuarios/usuarios.xml"
-    cat > DATA/usuarios/usuarios.xml <<'EOF'
+    echo "Creando usuarios.xml mínimo"
+    cat > "$DATA_ROOT/usuarios/usuarios.xml" <<'EOF'
 <?xml version="1.0" encoding="utf-8"?>
 <usuarios>
   <usuario>
@@ -33,10 +40,10 @@ EOF
   fi
 fi
 
-# 3) caja.xml: si falta, inicializar con configuración por defecto
-if [ ! -f DATA/CAJA/caja.xml ]; then
-  echo "Creando DATA/CAJA/caja.xml"
-  cat > DATA/CAJA/caja.xml <<EOF
+# 4) caja.xml (persistente)
+if [ ! -f "$DATA_ROOT/CAJA/caja.xml" ]; then
+  echo "Creando /data/CAJA/caja.xml"
+  cat > "$DATA_ROOT/CAJA/caja.xml" <<EOF
 <?xml version="1.0" encoding="utf-8"?>
 <caja>
   <dia fecha="$(date +%Y-%m-%d)">
@@ -51,35 +58,37 @@ if [ ! -f DATA/CAJA/caja.xml ]; then
 EOF
 fi
 
-# 4) Migrar XML del repo a DATA/DB/xml (solo primera vez)
-#    (ignoramos caja.xml y usuarios.xml que ya tienen sus sitios)
-shopt -s nullglob
-for f in static/db/*.xml; do
+# 5) Sembrar los XML de DB en el DISCO la primera vez
+if [ -z "$(ls -A "$DATA_ROOT/DB" 2>/dev/null)" ]; then
+  echo "Sembrando DB XMLs en /data/DB (una sola vez)…"
+  cp -a static/db/*.xml "$DATA_ROOT/DB" 2>/dev/null || true
+fi
+
+# 6) Enlaces para que la app vea todo donde espera:
+
+#    a) static/db como carpeta REAL y dentro symlinks a los XML del DISCO
+rm -rf static/db || true
+mkdir -p static/db
+for f in "$DATA_ROOT/DB"/*.xml; do
+  [ -e "$f" ] || continue
   bn="$(basename "$f")"
-  if [ "$bn" != "caja.xml" ] && [ "$bn" != "usuarios.xml" ]; then
-    if [ ! -f "DATA/DB/xml/$bn" ]; then
-      echo "Moviendo $f -> DATA/DB/xml/$bn"
-      cp "$f" "DATA/DB/xml/$bn"
-    fi
-  fi
+  ln -sf "$DATA_ROOT/DB/$bn" "static/db/$bn"
 done
-shopt -u nullglob
+#    Usuarios y Caja apuntan a sus rutas persistentes
+ln -sf "$DATA_ROOT/usuarios/usuarios.xml" static/db/usuarios.xml
+ln -sf "$DATA_ROOT/CAJA/caja.xml"      static/db/caja.xml
 
-# 5) Symlinks para que la app siga usando rutas 'static/db/...'
-ln -sf ../../DATA/usuarios/usuarios.xml static/db/usuarios.xml
-ln -sf ../../DATA/CAJA/caja.xml      static/db/caja.xml
-
-for f in DATA/DB/xml/*.xml; do
-  bn="$(basename "$f")"
-  ln -sf ../../"$f" "static/db/$bn"
+#    b) Mantener compatibilidad con rutas DATA/… usadas por tu código
+for d in usuarios CAJA REINTEGROS; do
+  rm -rf "DATA/$d" || true
+  ln -s "$DATA_ROOT/$d" "DATA/$d"
 done
 
 echo "==> Resumen:"
-echo "   - DATA       : $(ls -la DATA | wc -l) entradas"
-echo "   - static/db  : $(ls -la static/db | wc -l) entradas"
-echo "   - Caja       : DATA/CAJA/caja.xml -> $(wc -c < DATA/CAJA/caja.xml) bytes"
-echo "   - Usuarios   : DATA/usuarios/usuarios.xml -> $(wc -c < DATA/usuarios/usuarios.xml) bytes"
+ls -ld instance/gl_bingo/logs DATA/usuarios DATA/CAJA DATA/REINTEGROS static/db | cat
+echo "Log persistente en: $DATA_ROOT/logs/impresiones.xml"
 
 echo "==> Iniciando Gunicorn…"
-# Arranca la app (ajusta workers/timeouts si lo necesitas)
+# Usa el PORT que le da Render; si no está, 10000
 exec gunicorn app:app --bind 0.0.0.0:${PORT:-10000} --workers 2 --timeout 120
+
