@@ -78,10 +78,8 @@
     .pill-red{background:var(--danger-weak);color:#b01922}
     .pill-lock{background:#f2f4ff;color:#2b3aa6;border:1px solid #dfe2ff}
 
-    /* Readonly (bloquea interacción, pero SÍ envía en el submit) */
     .readonly{pointer-events:none;background:#f2f4ff!important;color:#6a73a6!important}
 
-    /* Modals y galería */
     .modal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:50}
     .modal .box{background:#fff;border-radius:14px;box-shadow:0 30px 60px rgba(0,0,0,.2);max-width:980px;width:92%}
     .modal .box .hd{border-bottom:1px solid var(--ring)}
@@ -93,11 +91,13 @@
 
     .bar{position:sticky;bottom:0;left:0;right:0;background:#0f1733;color:#cdd7ff;padding:10px 14px;display:flex;gap:18px;align-items:center;font-weight:800}
     .bar small{opacity:.9}
+
+    .only-super[disabled]{opacity:.5;cursor:not-allowed}
     @media (max-width:1100px){ .cols{grid-template-columns:1fr} }
     @media (max-width:900px){ .app{grid-template-columns:1fr} .sidebar{display:none} main{padding:12px} }
   </style>
 </head>
-<body>
+<body data-role="{{ (rol|default('')|lower) }}">
 <div class="app">
   <!-- Sidebar -->
   <aside class="sidebar">
@@ -112,10 +112,13 @@
       <li><a href="/contabilidad"><i class="bi bi-bar-chart-fill"></i> Contabilidad</a></li>
       <li><a href="/vendedores"><i class="bi bi-person-badge-fill"></i> Vendedores</a></li>
       <li><a href="/asignar-planillas"><i class="bi bi-journal-text"></i> Asignar Planillas</a></li>
-      <li><a class="active" href="/impresion"><i class="bi bi-printer-fill"></i> Impresión</a></li>
+      <li><a class="active" href="/impresion"><i class="bi bi-printer-fill"></i> Impresión de Boletos</a></li>
       <li><a href="/cobro"><i class="bi bi-cash-coin"></i> Cobro de Caja</a></li>
       <li><a href="/pago-premios"><i class="bi bi-trophy-fill"></i> Pago de Premios</a></li>
       <li><a href="/sorteo"><i class="bi bi-ticket-perforated"></i> Sorteo</a></li>
+      <li><a href="/crear-figuras"><i class="bi bi-shapes"></i> Crear Figuras</a></li>
+      <li><a href="/escoger-figuras"><i class="bi bi-grid-3x3-gap-fill"></i> Escoger Figuras</a></li>
+      <li><a href="/boletin"><i class="bi bi-megaphone-fill"></i> Boletín</a></li>
       <li><a href="/logs-impresion"><i class="bi bi-clock-history"></i> Logs Impresión</a></li>
     </ul>
     <a class="logout" href="{{ url_for('logout') }}"><i class="bi bi-box-arrow-right"></i> Cerrar sesión</a>
@@ -132,7 +135,7 @@
     </div>
 
     <div class="cols">
-      <!-- Config & Boletos -->
+      <!-- Panel Boletos -->
       <section class="card" id="panel-boletos">
         <div class="hd">
           <div class="step"><span class="dot">1</span> Serie, fecha y valor</div>
@@ -218,7 +221,6 @@
               </div>
             </div>
 
-            <!-- Comodín seleccionado (vista) -->
             <div style="margin-top:12px">
               <label style="font-weight:900;color:#5560a1">Comodín seleccionado</label>
               <div class="preview" style="height:auto">
@@ -236,7 +238,6 @@
         </div>
         <div class="bd">
           <div class="grid cols-2">
-            <!-- Vista previa -->
             <div>
               <div class="preview">
                 <div style="font-weight:900;color:#5560a1">Vista previa</div>
@@ -253,7 +254,6 @@
               </div>
             </div>
 
-            <!-- Planillas & ZIP -->
             <div>
               <form id="formPlanilla" method="post" action="/impresion">
                 <input type="hidden" name="form_type" value="planilla">
@@ -333,7 +333,7 @@
           <table id="tbl_hist">
             <thead>
             <tr>
-              <th>Hora</th><th>Tipo</th><th>Serie</th><th>Rango</th><th>Boletos</th><th>Planillas</th><th>Reint. esp.</th><th>Cant.</th><th>Aleatorios</th>
+              <th>Hora</th><th>Tipo</th><th>Serie</th><th>Usuario</th><th>Rango</th><th>Boletos</th><th>Planillas</th><th>Reint. esp.</th><th>Cant.</th><th>Aleatorios</th><th>Acciones</th>
             </tr>
             </thead>
             <tbody><!-- JS --></tbody>
@@ -391,8 +391,8 @@
       <table id="tbl_hist_modal">
         <thead>
         <tr>
-          <th>Fecha/Hora</th><th>Tipo</th><th>Serie</th><th>Fecha (sorteo/planilla)</th>
-          <th>Desde</th><th>Hasta</th><th>Boletos</th><th>Planillas</th><th>Reint. esp.</th><th>Cant.</th><th>Aleatorios</th>
+          <th>Fecha/Hora</th><th>Tipo</th><th>Serie</th><th>Usuario</th><th>Fecha (sorteo/planilla)</th>
+          <th>Desde</th><th>Hasta</th><th>Boletos</th><th>Planillas</th><th>Reint. esp.</th><th>Cant.</th><th>Aleatorios</th><th>Acciones</th>
         </tr>
         </thead>
         <tbody><!-- JS --></tbody>
@@ -423,7 +423,16 @@
   const money = n => Number(n||0).toLocaleString('es-EC',{style:'currency',currency:'USD'});
   const reiPath = (name)=> name ? "{{ url_for('static', filename='REINTEGROS/') }}"+name : "";
 
-  // DOM refs
+  const ROLE = (document.body.dataset.role || '').toLowerCase().trim();
+  const IS_SUPER = /super\s*admin|superadmin|root/.test(ROLE);
+  const enableSuperButtons = () => {
+    $$('.only-super').forEach(btn=>{
+      if(IS_SUPER){ btn.removeAttribute('disabled'); }
+      else{ btn.setAttribute('disabled','disabled'); }
+    });
+  };
+
+  // Refs
   const serieSel = $("#serie_archivo");
   const fechaInp = $("#fecha_sorteo");
   const valorInp = $("#valor");
@@ -459,13 +468,10 @@
   const btnVerComodin = $("#btnVerComodin");
   const pillLock = $("#pillLock");
 
-  // ---- Helpers
   function showModal(m){ m.style.display='flex'; }
   function hideModal(m){ m.style.display='none'; }
   function showMsg(title, html){ msgTitle.textContent = title; msgBody.innerHTML = html; showModal(modalMsg); }
-  function parseDT(s){ return s? new Date(s.replace(' ','T')) : null; }
 
-  // Series permitidas
   const allowedLetters = new Set(['V','+','&','M']);
   function filterSeriesOptions(){
     Array.from(serieSel.options).forEach(opt=>{
@@ -478,7 +484,6 @@
   }
   filterSeriesOptions();
 
-  // Vista/preview
   function setInnerPreview(){
     const opt = serieSel.options[serieSel.selectedIndex];
     const label = opt ? ((opt.dataset.letra?opt.dataset.letra+" — ":"") + opt.value) : "—";
@@ -519,25 +524,18 @@
     totSpan.textContent = tot;
     setInnerPreview();
   }
-
-  // ---- UIs de bloqueo (sin disabled para que sí envíe valores)
   function lockElement(el, locked){
     el.classList.toggle('readonly', !!locked);
     el.setAttribute('aria-readonly', locked ? 'true' : 'false');
   }
-
-  // Clave de bloqueo de comodín
   const lockKey = ()=> `reiLock:${fechaInp.value||''}:${serieSel.value||''}`;
-  function isComodinLocked(){
-    return sessionStorage.getItem(lockKey()) ? true : false;
-  }
+  function isComodinLocked(){ return sessionStorage.getItem(lockKey()) ? true : false; }
   function applyComodinLockUI(locked){
     lockElement(reiSel, locked);
     btnVerComodin.disabled = locked;
     pillLock.style.display = locked ? 'inline-flex' : 'none';
   }
 
-  // ---- Lectura de logs
   async function readLogs(){
     const r = await fetch('/logs-impresion.json');
     return await r.json().catch(()=>({rows:[]}));
@@ -545,22 +543,22 @@
 
   function findDayConstraints(rows){
     const fecha = (fechaInp.value||'').trim();
-    const mapSerie = new Map(); // serie -> {maxHasta,minDesde,lastRei,lastDT,hasB}
-    rows.forEach(x=>{
-      const tipo = (x.tipo||'').toLowerCase();
-      const fechaOK = (tipo==='boletos') ? (x.fecha_sorteo===fecha) : (x.fecha_planilla===fecha);
+    const mapSerie = new Map();
+    rows.forEach(n=>{
+      const tipo = (n.tipo||'').toLowerCase();
+      const fechaOK = (tipo==='boletos') ? (n.fecha_sorteo===fecha) : (n.fecha_planilla===fecha);
       if(!fechaOK) return;
-      const s = (x.serie_archivo||'').trim();
+      const s = (n.serie_archivo||'').trim();
       if(!s) return;
       let o = mapSerie.get(s);
       if(!o){ o = {maxHasta:0, minDesde:Infinity, lastRei:'', lastDT:0, hasB:false}; mapSerie.set(s,o); }
-      const d = parseInt(x.desde||'0',10), h = parseInt(x.hasta||'0',10);
+      const d = parseInt(n.desde||'0',10), h = parseInt(n.hasta||'0',10);
       if(!isNaN(d)) o.minDesde = Math.min(o.minDesde,d);
       if(!isNaN(h)) o.maxHasta = Math.max(o.maxHasta,h);
       if(tipo==='boletos'){
         o.hasB = true;
-        const dt = (x.fecha_hora? new Date(x.fecha_hora.replace(' ','T')).getTime():0);
-        if((x.reintegro_especial||'') && dt >= o.lastDT){ o.lastRei = x.reintegro_especial; o.lastDT = dt; }
+        const dt = (n.fecha_hora? new Date(n.fecha_hora.replace(' ','T')).getTime():0);
+        if((n.reintegro_especial||'') && dt >= o.lastDT){ o.lastRei = n.reintegro_especial; o.lastDT = dt; }
       }
     });
     const seriesDelDia = Array.from(mapSerie.keys());
@@ -573,13 +571,12 @@
     if(seriesDelDia.length>0){
       const lockSerie = seriesDelDia[0];
       Array.from(serieSel.options).forEach(o=> o.selected = (o.value===lockSerie));
-      lockElement(serieSel, true); // bloquea interactivo pero envía valor
+      lockElement(serieSel, true);
       const o = mapSerie.get(lockSerie);
       const nextStart = (o?.maxHasta||0) + 1;
       desdeInp.value = Math.max(nextStart, 1);
       if(!hastaInp.value || Number(hastaInp.value) < Number(desdeInp.value)) hastaInp.value = desdeInp.value;
 
-      // Si el día ya tiene comodín, fijarlo y BLOQUEAR
       if(o?.hasB && o?.lastRei){
         reiSel.value = o.lastRei;
         sessionStorage.setItem(`reiLock:${fechaInp.value}:${lockSerie}`, o.lastRei);
@@ -590,7 +587,6 @@
         if(saved){ reiSel.value = saved; }
       }
     }else{
-      // Día limpio
       lockElement(serieSel, false);
       desdeInp.value = 1;
       if(!hastaInp.value || Number(hastaInp.value) < 1) hastaInp.value = 1;
@@ -621,6 +617,10 @@
     tblRes.appendChild(tr);
   }
 
+  function actionCell(id){
+    return `<button class="btn btn-mini btn-danger only-super" onclick="window.__delLog('${id}')" title="Eliminar del historial"><i class="bi bi-trash"></i> Eliminar</button>`;
+  }
+
   function paintDayDetail(rows){
     const fecha = (histFecha.value||'').trim();
     const serieFiltro = (histSerie.value||'').trim();
@@ -641,25 +641,30 @@
         <td><span class="pill pill-red">${r.fecha_hora||''}</span></td>
         <td>${isB?'<span class="pill pill-blue">Boletos</span>':'<span class="pill pill-green">Planilla</span>'}</td>
         <td>${r.serie_archivo||''}</td>
+        <td>${r.usuario||''}</td>
         <td>${(r.desde||'')}—${(r.hasta||'')}</td>
         <td>${isB? (totB||''): ''}</td>
         <td>${isB? (pl||''): '1'}</td>
         <td>${isB? rei:'—'}</td>
         <td>${isB? cant:'—'}</td>
         <td>${isB? ale:'—'}</td>
+        <td>${actionCell(r.id||'')}</td>
       `;
       tblHist.appendChild(tr);
     });
+    enableSuperButtons();
   }
 
   async function refreshAll(scroll=false){
     try{
       const js = await readLogs();
-      applyDayRulesFromLogs(findDayConstraints(js.rows)); // fija serie, desde y BLOQUEA comodín según logs/local
+      applyDayRulesFromLogs(findDayConstraints(js.rows));
       paintDaySummary(js.rows);
+
+      // Detalle día
       paintDayDetail(js.rows);
 
-      // Modal "completo"
+      // Modal completo
       tblHistModal.innerHTML = '';
       js.rows.slice().reverse().forEach(r=>{
         const tipo = (r.tipo||'').toLowerCase();
@@ -673,6 +678,7 @@
           <td>${r.fecha_hora||''}</td>
           <td>${r.tipo||''}</td>
           <td>${r.serie_archivo||''}</td>
+          <td>${r.usuario||''}</td>
           <td>${fecha}</td>
           <td>${r.desde||''}</td>
           <td>${r.hasta||''}</td>
@@ -681,9 +687,11 @@
           <td>${r.reintegro_especial||'—'}</td>
           <td>${r.cant_reintegro_especial||'—'}</td>
           <td>${ale}</td>
+          <td>${actionCell(r.id||'')}</td>
         `;
         tblHistModal.appendChild(tr);
       });
+      enableSuperButtons();
 
       if(scroll){
         const y = document.querySelector('section.card:last-of-type').getBoundingClientRect().top + window.scrollY - 80;
@@ -695,7 +703,35 @@
     }
   }
 
-  // ------ Comodín (bloqueo inmediato al aplicar) ------
+  // API: eliminar log
+  window.__delLog = async (id)=>{
+    if(!id){ return; }
+    if(!IS_SUPER){
+      showMsg('Permisos', 'Solo el <b>super administrador</b> puede eliminar registros.');
+      return;
+    }
+    const ok = confirm('¿Eliminar este registro del historial? Esta acción no se puede deshacer.');
+    if(!ok) return;
+    try{
+      const r = await fetch('/logs-impresion/delete', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({id})
+      });
+      if(!r.ok){
+        const t = await r.text().catch(()=> '');
+        showMsg('Eliminar', 'Error al eliminar (HTTP '+r.status+'). '+t);
+        return;
+      }
+      const js = await r.json();
+      if(js.ok){ await refreshAll(); showMsg('Eliminar', 'Registro eliminado correctamente.'); }
+      else{ showMsg('Eliminar', 'No se pudo eliminar: '+(js.error||'desconocido')); }
+    }catch(e){
+      showMsg('Eliminar', 'No se pudo contactar el servidor.');
+    }
+  };
+
+  // Comodín
   $("#btnVerComodin").onclick = ()=>{
     if(btnVerComodin.disabled){
       showMsg('Comodín bloqueado', 'El comodín del día ya está fijado y no puede cambiarse en excedentes.');
@@ -713,7 +749,6 @@
     const sel = $(".gal .itm.active", gal);
     if(sel){
       reiSel.value = sel.dataset.name;
-      // BLOQUEO inmediato para el día/serie
       sessionStorage.setItem(lockKey(), sel.dataset.name);
       applyComodinLockUI(true);
       setInnerPreview();
@@ -755,36 +790,33 @@
     }catch(e){ showMsg('Generando ZIP', 'No se pudo contactar el servidor para <b>/impresion_zip</b>.'); }
   };
 
-  // Botones varios
+  // Varios
   $("#btnUltimoImpreso").onclick = ()=> refreshAll(true);
   $("#btnIrHoy").onclick = ()=>{
     const t = new Date().toISOString().slice(0,10);
-    histFecha.value = t; fechaInp.value = t; fechaPlan.value = t;
+    $("#hist_fecha").value = t; $("#fecha_sorteo").value = t; $("#fecha_planilla").value = t;
     refreshAll();
   };
   $("#btnRefresh").onclick = ()=> refreshAll();
 
-  // Eventos de recálculo
-  [hastaInp, valorInp, cantEsp, aleSel].forEach(el=> el.addEventListener('input', recalcTotals));
+  [hastaInp, valorInp, cantEsp, aleSel].forEach(el=> el.addEventListener('input', ()=>{recalcTotals(); enableSuperButtons();}));
   reiSel.addEventListener('change', ()=> setInnerPreview());
-  [serieSel, fechaInp].forEach(el=> el.addEventListener('change', async ()=>{
-    // sincroniza fecha de planillas
-    if(el===fechaInp) fechaPlan.value = fechaInp.value;
+  [serieSel, $("#fecha_sorteo")].forEach(el=> el.addEventListener('change', async ()=>{
+    if(el.id==='fecha_sorteo') $("#fecha_planilla").value = $("#fecha_sorteo").value;
     await refreshAll();
   }));
   [histFecha, histSerie].forEach(el=> el.addEventListener('change', ()=> refreshAll()));
 
-  // Init
   (async function init(){
+    enableSuperButtons();
     if(serieSel.options.length===0){
       showMsg('Series', 'No hay series válidas (permitidas: V, +, &, M).');
     }
     if(!valorInp.value) valorInp.value = "1.00";
-    fechaPlan.value = fechaInp.value; // Planillas siguen fecha de boletos
+    $("#fecha_planilla").value = $("#fecha_sorteo").value;
     await refreshAll();
   })();
 
-  // Cierra modales al click fuera y botón cerrar
   window.addEventListener('click', e=>{
     [modalCom, modalHist, modalMsg].forEach(m=>{ if(e.target===m) m.style.display='none'; });
   });
@@ -793,3 +825,4 @@
 </script>
 </body>
 </html>
+
