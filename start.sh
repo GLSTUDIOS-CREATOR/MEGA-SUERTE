@@ -90,7 +90,7 @@ ls -ld instance/gl_bingo/logs DATA/usuarios DATA/CAJA DATA/REINTEGROS static/db 
 echo "Log persistente en: $DATA/logs/impresiones.xml"
 
 echo "==> Iniciando Gunicorn…"
-# Más tolerancia de tiempo y threads para evitar 500 por timeout
+# Más tolerancia para evitar 500 por timeout en planillas
 exec gunicorn app:app \
   --bind 0.0.0.0:${PORT:-10000} \
   --workers 2 \
@@ -98,5 +98,4 @@ exec gunicorn app:app \
   --timeout 600 \
   --graceful-timeout 610 \
   --keep-alive 65
-
 
