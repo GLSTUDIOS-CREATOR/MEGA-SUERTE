@@ -940,11 +940,25 @@ def _series_impresas_en_fecha(fecha_yyyy_mm_dd):
         s.add(imp.get('serie_archivo') or '')
     return s
 
+# === columnas para BONUS en la tabla simple (CSV/HTML logs)===
+_LOG_COLS = [
+    "id","fecha_hora","usuario","tipo","serie_archivo","desde","hasta",
+    "valor","telefono","fecha_sorteo","reintegro_especial",
+    "cant_reintegro_especial","incluir_aleatorio",
+    "fecha_planilla","total_boletos","total_planillas",
+    "excedente","lote",
+    # bonus:
+    "bonus_enabled","bonus_code","bonus_numbers","bonus_winners"
+]
+
 def _append_log_impresion_boletos(
     *, usuario, serie_archivo, desde, hasta, fecha_sorteo, total_boletos,
     valor, telefono, reintegro_especial, cant_reintegro_especial,
-    incluir_aleatorio, excedente=0, lote=''
-):
+    incluir_aleatorio, excedente=0, lote='',
+    # paquete bonus opcional
+    bonus_payload: dict | None = None
+) -> int:
+    """Devuelve el id (int) del log creado."""
     with _LOG_LOCK:
         tree, root = _read_logs_root()
         _ensure_log_ids()
@@ -960,6 +974,7 @@ def _append_log_impresion_boletos(
         })
         def add(tag, val):
             c = ET.SubElement(elem, tag); c.text = '' if val is None else str(val)
+
         add('valor', valor)
         add('telefono', telefono)
         add('fecha_sorteo', fecha_sorteo)
@@ -974,8 +989,36 @@ def _append_log_impresion_boletos(
         add('total_planillas', tp)
         add('excedente', '1' if excedente else '0')
         add('lote', lote)
+
+        # Bloque BONUS dentro del XML (estructurado)
+        if bonus_payload:
+            add('bonus_enabled', '1')
+            add('bonus_code', bonus_payload.get('code',''))
+            add('bonus_numbers', ','.join(map(str, bonus_payload.get('numbers',[]))))
+            # vista compacta:
+            bw = bonus_payload.get('winners', {})
+            parts = []
+            for k in [5,4,3,2,1]:
+                ids = bw.get(str(k), [])
+                parts.append(f"{k}:[{','.join(map(str,ids))}]")
+            add('bonus_winners', ';'.join(parts))
+
+            bx = ET.SubElement(elem, 'bonus')
+            bx.set('code', bonus_payload.get('code',''))
+            bx.set('feasible', '1' if bonus_payload.get('feasible', True) else '0')
+            ET.SubElement(bx, 'numbers').text = ','.join(map(str, bonus_payload.get('numbers',[])))
+            req = bonus_payload.get('requested', {})
+            ET.SubElement(bx, 'requested').text = json.dumps(req, ensure_ascii=False)
+            win = bonus_payload.get('winners', {})
+            for k in ['5','4','3','2','1']:
+                ET.SubElement(bx, f"k{k}").text = ','.join(map(str, win.get(k, [])))
+            sh = bonus_payload.get('shortages', {})
+            if sh:
+                ET.SubElement(bx, 'shortages').text = json.dumps(sh, ensure_ascii=False)
+
         root.append(elem)
         _write_logs_tree(tree)
+        return next_id
 
 def _append_log_impresion_planilla(
     *, usuario, serie_archivo, desde, hasta, fecha_planilla,
@@ -1006,7 +1049,7 @@ def _append_log_impresion_planilla(
             total_b = ''
         add('total_boletos', total_b)
         try:
-            tp = int(math.ceil(int(total_b) / 40.0)) if total_b != '' else ''
+            tp = int(math.ceil(int(total_b) / 20.0)) if total_b != '' else ''
         except Exception:
             tp = ''
         add('total_planillas', tp)
@@ -1051,17 +1094,10 @@ def _normalize(s: str) -> str:
     return s.replace('-', ' ').replace('_', ' ').strip().lower()
 
 def _is_superadmin() -> bool:
-    """
-    Verdadero si la sesión es del superadministrador.
-    Acepta variantes como 'Super Administrador', 'super-administrador', etc.
-    También permite al usuario 'GLSTUDIOS' como superadmin.
-    """
     rol_raw = session.get('rol') or ''
     rol_n = _normalize(rol_raw)
     if rol_n in {'superadmin', 'super administrador', 'superadministrador'}:
         return True
-
-    # Fallback por permisos
     perms = session.get('permisos') or []
     try:
         perms_l = {_normalize(str(p)) for p in perms}
@@ -1069,15 +1105,11 @@ def _is_superadmin() -> bool:
         perms_l = set()
     if any(p in perms_l for p in {'superadmin', 'super administrador', 'superadministrador', 'delete logs', 'logs delete'}):
         return True
-
-    # Usuario maestro
     usuario = (session.get('usuario') or '').strip().upper()
     if usuario == 'GLSTUDIOS':
         return True
-
     return False
 
-# Ruta de ayuda para pruebas locales (activar con GLBINGO_DEBUG_SUPER=1)
 if os.getenv('GLBINGO_DEBUG_SUPER') == '1':
     @app.route('/debug/make-superadmin')
     def _debug_make_superadmin():
@@ -1087,7 +1119,6 @@ if os.getenv('GLBINGO_DEBUG_SUPER') == '1':
         flash('Sesión marcada como SUPERADMIN (modo debug).', 'success')
         return redirect(url_for('impresion'))
 
-# Backup diario opcional
 def _backup_diario():
     try:
         if os.path.exists(IMPRESIONES_XML):
@@ -1100,14 +1131,6 @@ def _backup_diario():
 _backup_diario()
 
 # ─── Endpoints logs (+ UI borrar para superadmin) ───────────
-_LOG_COLS = [
-    "id","fecha_hora","usuario","tipo","serie_archivo","desde","hasta",
-    "valor","telefono","fecha_sorteo","reintegro_especial",
-    "cant_reintegro_especial","incluir_aleatorio",
-    "fecha_planilla","total_boletos","total_planillas",
-    "excedente","lote"
-]
-
 def _get_log_rows():
     rows = []
     for n in _iter_impresiones():
@@ -1147,7 +1170,7 @@ def logs_impresion_v2():
         <a href="/logs-impresion.csv">Descargar CSV</a> &nbsp;|&nbsp;
         <a href="/logs-impresion.json">Ver JSON</a>
       </p>
-      <table cellspacing="0" cellpadding="0" style="border-collapse:collapse;min-width:1100px">
+      <table cellspacing="0" cellpadding="0" style="border-collapse:collapse;min-width:1400px">
         <thead><tr>{head}</tr></thead>
         <tbody>{body}</tbody>
       </table>
@@ -1203,7 +1226,6 @@ def logs_impresion_json_v2():
     rows = _get_log_rows()
     return jsonify(rows=rows, count=len(rows))
 
-# Borrar log (solo superadmin)
 @app.route('/logs-impresion/delete', methods=['POST'])
 @require_session
 def logs_impresion_delete():
@@ -1217,7 +1239,6 @@ def logs_impresion_delete():
 
 # ================== GENERADORES PDF ==================
 def _try_draw_qr_on_canvas(c, data, x, y, size):
-    """Intenta dibujar QR; si no puede, dibuja un recuadro de marcador."""
     try:
         buf_qr = BytesIO()
         qrcode.make(data).save(buf_qr, format="PNG")
@@ -1233,7 +1254,6 @@ def _try_draw_qr_on_canvas(c, data, x, y, size):
         return False
 
 def _safe_draw_image(c, path_or_buf, x, y, w_, h_):
-    """Dibuja imagen si existe, sin romper en caso de error."""
     try:
         if isinstance(path_or_buf, (str, bytes)):
             if isinstance(path_or_buf, str) and not os.path.exists(path_or_buf):
@@ -1246,11 +1266,40 @@ def _safe_draw_image(c, path_or_buf, x, y, w_, h_):
     except Exception:
         return False
 
+# ---- Dibujo de la franja BONUS (5 cuadros bajo el reintegro)----
+def _draw_bonus_franja(c: canvas.Canvas, x_left: float, y_top_rein: float, numbers: list[int]):
+    """
+    x_left, y_top_rein: esquina superior-izquierda del área del reintegro ya dibujado.
+    Dibuja debajo 5 cuadros con los números BONUS centrados.
+    """
+    if not numbers:
+        return
+    box = 8.5  # puntos
+    gap = 3.5
+    total_w = 5*box + 4*gap
+    x0 = x_left + (REINTEGRO_W - total_w) / 2.0
+    y0 = y_top_rein - REINTEGRO_H - 10  # separación bajo el reintegro
+
+    # Etiqueta "BONUS"
+    c.setFont("Helvetica-Bold", 8.5)
+    c.drawCentredString(x_left + REINTEGRO_W/2.0, y0 + box + 10, "BONUS")
+
+    # Marcos + números
+    c.setFont("Helvetica-Bold", 9)
+    for idx, n in enumerate(numbers[:5]):
+        xi = x0 + idx * (box + gap)
+        yi = y0
+        c.roundRect(xi, yi, box, box, 2, stroke=1, fill=0)
+        c.drawCentredString(xi + box/2.0, yi + box/2.0 - 3, str(n))
+
 def generar_pdf_boletos_excel(
     ids, registros, valor, telefono,
     nombre, reintegro_especial,
     cant_especial, reintegros,
-    incluir_aleatorio, fecha_sorteo
+    incluir_aleatorio, fecha_sorteo,
+    # puedes pasar un set global o una lista por boleto
+    bonus_numbers_global: list[int] | None = None,
+    bonus_numbers_per_ticket: list[list[int]] | None = None,
 ):
     buf = BytesIO()
     c = canvas.Canvas(buf, pagesize=A4)
@@ -1320,9 +1369,21 @@ def generar_pdf_boletos_excel(
                 others = [r for r in reintegros if r != reintegro_especial]
                 img = random.choice(others) if others else None
 
+            rein_x = x0 + offs['rein_x']
+            rein_y_top = y0 - offs['rein_y']  # Y superior
+
             if img:
                 path_img = os.path.join(REINTEGROS_DIR, img)
-                _safe_draw_image(c, path_img, x0 + offs['rein_x'], y0 - offs['rein_y'], REINTEGRO_W, REINTEGRO_H)
+                _safe_draw_image(c, path_img, rein_x, rein_y_top, REINTEGRO_W, REINTEGRO_H)
+
+            # ---- BONUS debajo del reintegro ----
+            bn = None
+            if bonus_numbers_per_ticket and pos < len(bonus_numbers_per_ticket):
+                bn = bonus_numbers_per_ticket[pos]
+            elif bonus_numbers_global:
+                bn = bonus_numbers_global
+            if bn:
+                _draw_bonus_franja(c, rein_x, rein_y_top, bn)
 
         c.showPage()
         c.translate(OFFSET_X, OFFSET_Y)
@@ -1365,6 +1426,7 @@ def generar_pdf_planilla(ids, serie_archivo, vendedor, fecha, inicio, fin, serie
     M_LEFT, M_RIGHT, M_BOTTOM = 12, 20, 20
     GUTTER        = 28
     HEADER_H      = 86
+    QR_SIZE_HDR          = 56
     QR_SIZE_CENTER= min(GUTTER + 30, 50)
 
     HALF_W  = (ancho - M_LEFT - M_RIGHT - GUTTER) / 2
@@ -1390,8 +1452,6 @@ def generar_pdf_planilla(ids, serie_archivo, vendedor, fecha, inicio, fin, serie
         c.setFillColorRGB(0.92, 0.92, 0.92)
         c.rect(x0, alto - HEADER_H, HALF_W, HEADER_H, fill=1, stroke=0)
         c.setFillColor(colors.black)
-
-        # Logo seguro (si no existe, no rompe)
         try:
             img = ImageReader(LOGO_PATH)
             ow, oh = img.getSize()
@@ -1446,6 +1506,7 @@ def generar_pdf_planilla(ids, serie_archivo, vendedor, fecha, inicio, fin, serie
     c.setLineWidth(2)
     c.line(X_R, TOP_Y, X_R, BOT_Y)
 
+    fecha_limpia = dt.strftime("%Y%m%d")
     data_full = f"SORTEO{fecha_limpia}RGA{full_desde}A{full_hasta}{serie_letra}"
     cx = X_R - (GUTTER/2) - (QR_SIZE_CENTER/2)
     cy = BOT_Y + (AVAIL_H/2) - (QR_SIZE_CENTER/2)
@@ -1491,6 +1552,284 @@ def generar_pdf_planilla(ids, serie_archivo, vendedor, fecha, inicio, fin, serie
     buffer.seek(0)
     return buffer
 
+# =============== BONUS: utilidades ===================
+
+def _row_numbers_as_set(row: dict) -> set[int]:
+    """
+    Toma una fila (registro) con claves b1..b5, i1..i5, n1..n5, g1..g5, o1..o5 y devuelve un set de ints válidos.
+    Ignora vacíos o no-numéricos. (Incluye N3 aunque visualmente sea QR).
+    """
+    nums = set()
+    for letra in 'bingo':
+        for r in range(1,6):
+            key = f"{letra}{r}"
+            v = str(row.get(key,"")).strip()
+            if not v:
+                continue
+            try:
+                n = int(v)
+                if 1 <= n <= 75:
+                    nums.add(n)
+            except Exception:
+                continue
+    return nums
+
+def _bonus_try_assign(registros: list[dict], ids: list[str], requested: dict[str,int], max_iters: int = 3000):
+    """
+    (Modo antiguo - set global aleatorio). Se mantiene por compatibilidad.
+    """
+    tickets = [_row_numbers_as_set(r) for r in registros]
+
+    best = None
+    req = {int(k): max(0, int(v)) for k,v in requested.items() if str(k) in {'1','2','3','4','5'}}
+
+    for _ in range(max_iters):
+        bonus = set(random.sample(range(1,76), 5))
+        matches = [len(s & bonus) for s in tickets]
+
+        pool = {k: [i for i, m in enumerate(matches) if m == k] for k in range(6)}  # 0..5
+        winners = {}
+        feasible = True
+        shortages = {}
+        satisfied = 0
+        for k in [5,4,3,2,1]:
+            want = req.get(k, 0)
+            candidates = pool.get(k, [])
+            if want <= 0:
+                winners[str(k)] = []
+                continue
+            if len(candidates) >= want:
+                chosen = random.sample(candidates, want)
+                winners[str(k)] = [ids[i] for i in chosen]
+                satisfied += want
+            else:
+                feasible = False
+                winners[str(k)] = [ids[i] for i in candidates]
+                satisfied += len(candidates)
+                shortages[k] = want - len(candidates)
+
+        result = {
+            "numbers": sorted(list(bonus)),
+            "winners": winners,
+            "feasible": feasible,
+            "shortages": shortages,
+            "score": satisfied
+        }
+        if feasible:
+            return result
+        if (best is None) or (result["score"] > best["score"]):
+            best = result
+
+    return best or {
+        "numbers": [],
+        "winners": {str(k): [] for k in [5,4,3,2,1]},
+        "feasible": False,
+        "shortages": {k: requested.get(str(k),0) for k in [5,4,3,2,1]},
+        "score": 0
+    }
+
+# ====== NUEVO: Asignación POR BOLETO (cuando NO hay bonus global ingresado por el usuario) ======
+def _bonus_assign_per_ticket(registros: list[dict], ids: list[str], requested: dict[str,int]):
+    """
+    Genera números BONUS distintos por boleto cumpliendo el conteo solicitado
+    de ganadores por coincidencias exactas k=5..1. Si sobran boletos, se asigna k=0.
+    Retorna:
+      {
+        "per_ticket": [[5 nums], ...]  # alineado a 'ids'
+        "winners": {"5":[ids], ...},
+        "feasible": True/False,
+        "shortages": {k: faltantes}
+      }
+    """
+    N = len(registros)
+    rng_all = set(range(1, 76))
+    ticket_sets = [_row_numbers_as_set(r) for r in registros]
+
+    per_ticket = [None] * N
+    remaining = list(range(N))
+    random.shuffle(remaining)
+
+    winners = {str(k): [] for k in [5,4,3,2,1]}
+    shortages = {}
+    feasible = True
+    used_sets = set()  # para evitar duplicados exactos
+
+    def build_set(S, k):
+        # k de S, 5-k fuera de S
+        A = set(random.sample(list(S), k)) if k > 0 else set()
+        pool_out = list(rng_all - S - A)
+        B = set(random.sample(pool_out, 5 - k)) if 5 - k > 0 else set()
+        return tuple(sorted(A | B))
+
+    # Asigna exactamente los requeridos por categoría
+    for k in [5,4,3,2,1]:
+        want = max(0, int(requested.get(str(k), 0)))
+        if want == 0:
+            continue
+        # candidatos que todavía no se usaron y tienen al menos k números
+        cands = [i for i in remaining if len(ticket_sets[i]) >= k]
+        if len(cands) < want:
+            feasible = False
+            shortages[k] = want - len(cands)
+            want = len(cands)
+        chosen = random.sample(cands, want)
+        for i in chosen:
+            # intenta evitar repetir exactamente el mismo set
+            tries = 0
+            s = build_set(ticket_sets[i], k)
+            while s in used_sets and tries < 10:
+                s = build_set(ticket_sets[i], k)
+                tries += 1
+            used_sets.add(s)
+            per_ticket[i] = list(s)
+            winners[str(k)].append(ids[i])
+        remaining = [i for i in remaining if i not in chosen]
+
+    # El resto con k=0 (cero coincidencias), igualmente variados
+    for i in remaining:
+        tries = 0
+        s = build_set(ticket_sets[i], 0)
+        while s in used_sets and tries < 10:
+            s = build_set(ticket_sets[i], 0)
+            tries += 1
+        used_sets.add(s)
+        per_ticket[i] = list(s)
+
+    return {
+        "per_ticket": per_ticket,
+        "winners": winners,
+        "feasible": feasible,
+        "shortages": shortages
+    }
+
+# ====== NUEVO: Asignación desde BONUS GLOBAL con EXACTO k aciertos por boleto ======
+def _bonus_assign_from_global(registros: list[dict], ids: list[str], global_numbers: list[int], requested: dict[str,int]):
+    """
+    Usa un set BONUS GLOBAL de 5 números (p.ej., [25,44,10,8,12]) y reparte ganadores.
+    Para cada categoría k=5..1:
+      - Elige boletos candidatos.
+      - Genera para ese boleto una franja BONUS de 5 números que contenga EXACTAMENTE k
+        números del BONUS global que estén también en el boleto, y (5-k) 'distractores'
+        que NO estén en el boleto (ni en el set global) para NO completar 5 aciertos.
+    Devuelve:
+      {
+        "per_ticket": [[5 nums], ...]  # alineado a 'ids'
+        "winners": {"5":[ids], ...},
+        "feasible": True/False,
+        "shortages": {k: faltantes}
+      }
+    """
+    # Normaliza y valida BONUS:
+    try:
+        B = [int(x) for x in global_numbers]
+    except Exception:
+        B = []
+    B = [n for n in B if 1 <= n <= 75]
+    if len(set(B)) != 5:
+        # BONUS inválido
+        return {
+            "per_ticket": [[None]*5 for _ in registros],
+            "winners": {str(k): [] for k in [5,4,3,2,1]},
+            "feasible": False,
+            "shortages": {"bonus_numbers": "Se requieren 5 números únicos entre 1..75"}
+        }
+
+    Bset = set(B)
+    N = len(registros)
+    ticket_sets = [_row_numbers_as_set(r) for r in registros]
+
+    per_ticket = [None] * N
+    remaining = list(range(N))
+    random.shuffle(remaining)
+
+    winners = {str(k): [] for k in [5,4,3,2,1]}
+    shortages = {}
+    feasible = True
+    used_vectors = set()
+
+    rng_all = set(range(1, 76))
+
+    def build_vector_for_ticket(i, k):
+        """
+        Devuelve una tupla de 5 números para el boleto i con EXACTAMENTE k aciertos:
+        - k números tomados de (B ∩ ticket_i)
+        - (5-k) distractores tomados de números que NO están en el boleto y NO están en B.
+        Evita repetir exactamente la misma tupla en muchos boletos.
+        """
+        S = ticket_sets[i]
+        common = list(Bset & S)
+        if len(common) < k:
+            return None
+        # Elige k comunes
+        A = set(random.sample(common, k)) if k > 0 else set()
+        # Pool de distractores: fuera del boleto y fuera del BONUS global
+        pool_out = list(rng_all - S - Bset - A)
+        if len(pool_out) < (5 - k):
+            # si faltan, relajamos: permitimos fuera del boleto aunque estén en Bset,
+            # pero intentando NO sumar más aciertos (ya excluimos S)
+            pool_out = list(rng_all - S - A)
+        if len(pool_out) < (5 - k):
+            return None
+        B_extra = set(random.sample(pool_out, 5 - k))
+        vec = tuple(sorted(A | B_extra))
+        return vec
+
+    # Asigna categorías 5→1
+    for k in [5,4,3,2,1]:
+        want = max(0, int(requested.get(str(k), 0)))
+        if want == 0:
+            continue
+        # Candidatos: aún no asignados y con al menos k coincidencias posibles con B
+        cands = [i for i in remaining if len(ticket_sets[i] & Bset) >= k]
+        if len(cands) < want:
+            feasible = False
+            shortages[k] = want - len(cands)
+            want = len(cands)
+        if want <= 0:
+            continue
+        chosen = random.sample(cands, want)
+        for i in chosen:
+            tries = 0
+            vec = build_vector_for_ticket(i, k)
+            while (vec is None or vec in used_vectors) and tries < 20:
+                vec = build_vector_for_ticket(i, k)
+                tries += 1
+            if vec is None:
+                feasible = False
+                shortages[k] = shortages.get(k, 0) + 1
+                continue
+            used_vectors.add(vec)
+            per_ticket[i] = list(vec)
+            winners[str(k)].append(ids[i])
+        remaining = [i for i in remaining if i not in chosen]
+
+    # El resto (no ganadores): si B choca con el boleto, armamos 0 aciertos
+    for i in remaining:
+        S = ticket_sets[i]
+        if len(Bset & S) == 0:
+            vec = B[:]  # puede mostrarse tal cual (0 aciertos reales)
+        else:
+            pool_out = list(rng_all - S - Bset)
+            if len(pool_out) < 5:
+                pool_out = list(rng_all - S)
+            vec = random.sample(pool_out, 5)
+        per_ticket[i] = list(sorted(vec))
+
+    return {
+        "per_ticket": per_ticket,
+        "winners": winners,
+        "feasible": feasible,
+        "shortages": shortages
+    }
+
+def _save_bonus_json(log_id: int, payload: dict):
+    try:
+        path = os.path.join(LOGS_DIR, f"bonus_{log_id}.json")
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump(payload, f, ensure_ascii=False, indent=2)
+    except Exception as e:
+        print("[WARN] No se pudo escribir bonus json:", e)
+
 # ============== /impresion =================
 @app.route('/impresion', methods=['GET', 'POST'])
 @require_session
@@ -1527,6 +1866,25 @@ def impresion():
         cntesp        = _to_int(request.form.get('cant_reintegro_especial'), 0)
         incA_raw      = (request.form.get('incluir_aleatorio') or '1').strip().lower()
         incA          = incA_raw in ('1', 'true', 'on', 'si', 'sí')
+
+        # === BONUS: lectura del formulario
+        bonus_enabled = (request.form.get('bonus_enabled') or '').lower() in ('1','true','on','si','sí')
+        b5 = _to_int(request.form.get('bonus_k5'), 0)
+        b4 = _to_int(request.form.get('bonus_k4'), 0)
+        b3 = _to_int(request.form.get('bonus_k3'), 0)
+        b2 = _to_int(request.form.get('bonus_k2'), 0)
+        b1 = _to_int(request.form.get('bonus_k1'), 0)
+        requested_counts = {'5': b5, '4': b4, '3': b3, '2': b2, '1': b1}
+
+        # BONUS GLOBAL (opcional): bonus_n1..bonus_n5
+        bonus_n_inputs = []
+        for k in [1,2,3,4,5]:
+            v = request.form.get(f'bonus_n{k}')
+            if v is not None and str(v).strip() != '':
+                try:
+                    bonus_n_inputs.append(int(str(v).strip()))
+                except Exception:
+                    pass
 
         if not serie_archivo:
             flash('Selecciona una serie para imprimir boletos.', 'warning')
@@ -1568,8 +1926,46 @@ def impresion():
         ids       = all_ids[s_idx:e_idx]
         registros = df.iloc[s_idx:e_idx].to_dict('records')
 
+        # === BONUS: cálculo y log preparado
+        bonus_payload = None
+        bonus_numbers_global = None
+        bonus_numbers_per_ticket = None
+
+        if bonus_enabled:
+            # Si el usuario ingresó los 5 números, seguir MODO GLOBAL:
+            if len(set([n for n in bonus_n_inputs if 1 <= n <= 75])) == 5:
+                global_bonus = list(dict.fromkeys([n for n in bonus_n_inputs if 1 <= n <= 75]))[:5]
+                assign_glob = _bonus_assign_from_global(registros, ids, global_bonus, requested_counts)
+                bonus_numbers_per_ticket = assign_glob["per_ticket"]
+                bonus_payload = {
+                    "enabled": True,
+                    "code": f"BNS-{datetime.now().strftime('%Y%m%d-%H%M%S')}-{random.randint(1000,9999)}",
+                    "numbers": global_bonus,  # guardamos el BONUS base
+                    "requested": requested_counts,
+                    "winners": assign_glob["winners"],
+                    "feasible": assign_glob["feasible"],
+                    "shortages": assign_glob.get("shortages", {})
+                }
+                if not assign_glob["feasible"]:
+                    flash("BONUS: no fue posible cumplir exactamente todas las cantidades solicitadas (modo global); se asignó lo máximo posible.", "warning")
+            else:
+                # Si NO ingresó los 5, usar el modo per-ticket (compatible)
+                assign_pt = _bonus_assign_per_ticket(registros, ids, requested_counts)
+                bonus_numbers_per_ticket = assign_pt["per_ticket"]
+                bonus_payload = {
+                    "enabled": True,
+                    "code": f"BNS-{datetime.now().strftime('%Y%m%d-%H%M%S')}-{random.randint(1000,9999)}",
+                    "numbers": [],  # per-ticket (no global)
+                    "requested": requested_counts,
+                    "winners": assign_pt["winners"],
+                    "feasible": assign_pt["feasible"],
+                    "shortages": assign_pt.get("shortages", {})
+                }
+                if not assign_pt["feasible"]:
+                    flash("BONUS: no fue posible cumplir exactamente todas las cantidades solicitadas; se asignó lo máximo posible.", "warning")
+
         try:
-            _append_log_impresion_boletos(
+            log_id = _append_log_impresion_boletos(
                 usuario=session.get('usuario', ''),
                 serie_archivo=serie_archivo,
                 desde=start, hasta=end,
@@ -1579,15 +1975,37 @@ def impresion():
                 reintegro_especial=rein_esp,
                 cant_reintegro_especial=cntesp,
                 incluir_aleatorio=incA,
+                bonus_payload=bonus_payload
             )
         except Exception as e:
             print('[WARN] No se pudo escribir en impresiones.xml (boletos):', e)
+            log_id = None
+
+        # Guarda JSON del informe BONUS (si aplica)
+        if bonus_payload and log_id:
+            try:
+                bonus_payload_out = dict(bonus_payload)
+                bonus_payload_out["log_id"] = log_id
+                bonus_payload_out["serie_archivo"] = serie_archivo
+                bonus_payload_out["desde"] = start
+                bonus_payload_out["hasta"] = end
+                bonus_payload_out["fecha_sorteo"] = fecha_str
+                _save_bonus_json(log_id, bonus_payload_out)
+                # Link al HTML con el resultado del BONUS
+                flash(Markup(
+                    f"BONUS asignado | Informe ID {log_id}. "
+                    f"<a href='{url_for('bonus_informe_html', log_id=log_id)}' target='_blank'>Ver BONUS</a>"
+                ), "success")
+            except Exception as e:
+                print("[WARN] No se pudo guardar JSON BONUS:", e)
 
         rein_list = sorted(f for f in os.listdir(REINTEGROS_DIR) if f.lower().endswith('.png')) if os.path.exists(REINTEGROS_DIR) else []
         buf_b = generar_pdf_boletos_excel(
             ids, registros, valor, telefono,
             serie_archivo, rein_esp, cntesp,
-            rein_list, incA, fecha_str
+            rein_list, incA, fecha_str,
+            bonus_numbers_global=bonus_numbers_global,
+            bonus_numbers_per_ticket=bonus_numbers_per_ticket
         )
         return _send_bytesio(buf_b, 'boletos_bingo.pdf', 'application/pdf')
 
@@ -1640,7 +2058,6 @@ def impresion():
             except Exception:
                 pass
 
-        # Una sola fila para todo el rango impreso
         try:
             _append_log_impresion_planilla(
                 usuario=session.get('usuario',''),
@@ -1648,7 +2065,7 @@ def impresion():
                 desde=inicio, hasta=fin,
                 fecha_planilla=fecha_p,
                 lote_text=f"{inicio}-{fin}",
-                excedente=1 if ((fin - inicio + 1) % 40) != 0 else 0
+                excedente=1 if ((fin - inicio + 1) % 20) != 0 else 0
             )
         except Exception as e:
             print('[WARN] No se pudo escribir en impresiones.xml (planilla-range):', e)
@@ -1699,10 +2116,13 @@ def _crear_zip_boletos_planilla(nombre_serie, start, end, valor, telefono, fecha
     if os.path.exists(REINTEGROS_DIR):
         rein_list = sorted(f for f in os.listdir(REINTEGROS_DIR) if f.lower().endswith('.png'))
 
+    # ZIP (sin cálculo de BONUS en este atajo; se imprimen sin franja BONUS)
     buf_boletos = generar_pdf_boletos_excel(
         ids, registros, valor, telefono,
         nombre_serie, rein_esp, cnt_esp,
-        rein_list, incA, fecha_str
+        rein_list, incA, fecha_str,
+        bonus_numbers_global=None,
+        bonus_numbers_per_ticket=None
     )
     buf_planilla = generar_pdf_planilla(
         ids, nombre_serie, "Vendedor", fecha_str,
@@ -1764,7 +2184,6 @@ def descargar_zip():
     return _crear_zip_boletos_planilla(nombre_serie, start, end, valor, telefono, fecha_str,
                                        rein_esp, cnt_esp, incA)
 
-# Atajo GET/POST
 @app.route('/impresion_zip', methods=['GET', 'POST'])
 @require_session
 def impresion_zip():
@@ -1786,11 +2205,75 @@ def impresion_zip():
                                            rein_esp, cnt_esp, incA)
     return descargar_zip()
 
-# ================== MAIN ==================
-if __name__ == '__main__':
-    # debug=False evita doble ejecución del reloader
-    app.run(host='0.0.0.0', port=5000, debug=False, threaded=True)
+# ===== Endpoint para ver el informe BONUS de una impresión =====
+@app.route('/impresion/bonus-informe/<int:log_id>.json')
+@require_session
+def bonus_informe(log_id: int):
+    path = os.path.join(LOGS_DIR, f"bonus_{log_id}.json")
+    if not os.path.exists(path):
+        return jsonify(ok=False, error="informe no encontrado"), 404
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        return jsonify(ok=True, informe=data)
+    except Exception as e:
+        return jsonify(ok=False, error=str(e)), 500
 
+# ===== VISTA HTML del BONUS =====
+@app.route('/impresion/bonus-informe/<int:log_id>')
+@require_session
+def bonus_informe_html(log_id: int):
+    path = os.path.join(LOGS_DIR, f"bonus_{log_id}.json")
+    if not os.path.exists(path):
+        return f"<h3 style='font-family:Arial'>No existe informe BONUS {log_id}</h3>", 404
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+    except Exception as e:
+        return f"<h3 style='font-family:Arial'>Error leyendo informe: {e}</h3>", 500
+
+    winners = data.get("winners", {})
+    requested = data.get("requested", {})
+    feasible = data.get("feasible", True)
+    shortages = data.get("shortages", {})
+    nums = data.get("numbers", [])
+
+    rows = []
+    for k in [5,4,3,2,1]:
+        want = int(requested.get(str(k), 0) or 0)
+        got = len(winners.get(str(k), []))
+        ids_str = ", ".join(map(str, winners.get(str(k), [])))
+        rows.append(f"<tr><td>{k}</td><td>{want}</td><td>{got}</td><td style='max-width:800px;white-space:normal'>{ids_str}</td></tr>")
+
+    base = f"<p><b>Bonus Global:</b> {', '.join(map(str, nums))}</p>" if nums else "<p><b>Bonus por boleto (no global).</b></p>"
+
+    return f"""
+    <html>
+      <head>
+        <meta charset='utf-8'>
+        <title>Informe BONUS #{log_id}</title>
+        <style>
+          body {{ font-family: Arial, Helvetica, sans-serif; margin: 24px; }}
+          table {{ border-collapse: collapse; width: 100%; max-width: 1200px; }}
+          th, td {{ border: 1px solid #ddd; padding: 8px; }}
+          th {{ background: #f3f3f3; }}
+          .pill {{ display:inline-block; padding:4px 10px; border-radius:999px; background:#eee; margin-left:10px; font-size:12px; }}
+        </style>
+      </head>
+      <body>
+        <h2>Informe BONUS #{log_id}
+          <span class="pill">{'FACTIBLE' if feasible else 'NO FACTIBLE'}</span>
+        </h2>
+        {base}
+        <p><b>Código:</b> {data.get('code','')}</p>
+        <table>
+          <tr><th>Coincidencias</th><th>Solicitados</th><th>Asignados</th><th>Boletos ganadores (IDs)</th></tr>
+          {''.join(rows)}
+        </table>
+        {"<p style='color:#b00'><b>Faltantes:</b> " + ", ".join(f"{k}:{v}" for k,v in shortages.items()) + "</p>" if shortages else ""}
+      </body>
+    </html>
+    """
 
 
 
