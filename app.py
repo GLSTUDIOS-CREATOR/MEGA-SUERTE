@@ -1152,16 +1152,15 @@ def _resolve_series_path(archivo: str) -> str:
     raise FileNotFoundError(f"No existe el archivo de serie: {archivo}. Busqué en: {buscadas}")
 
 # ── OFFSETS EN CÓDIGO (boleto 0…7) ──
-# Ajusta aquí X/Y para grid, info y reintegro de cada boleto:
 per_cell_offsets = {
-    0: {"grid_x": -1, "grid_y": 28,  "info_x": 125,  "info_y": 48, "rein_x": 22,  "rein_y": 55},
-    1: {"grid_x": -35, "grid_y": 28,  "info_x": 90,  "info_y": 48, "rein_x": -10, "rein_y": 55},
-    2: {"grid_x": -1, "grid_y": 80,  "info_x": 125,  "info_y": 98, "rein_x": 22,  "rein_y": 10},
-    3: {"grid_x": -35, "grid_y": 80,  "info_x": 90,  "info_y": 98, "rein_x": -10, "rein_y": 10},
-    4: {"grid_x": -1, "grid_y": 130, "info_x": 125,   "info_y":150, "rein_x": 22,  "rein_y": -45},
-    5: {"grid_x": -35, "grid_y": 130, "info_x": 90,  "info_y": 150, "rein_x": -10, "rein_y": -45},
-    6: {"grid_x": -1, "grid_y": 185, "info_x": 125,  "info_y": 200, "rein_x": 22,  "rein_y": -95},
-    7: {"grid_x": -35, "grid_y": 185, "info_x": 90,  "info_y": 200, "rein_x": -10, "rein_y": -95},
+    0: {"grid_x": -80, "grid_y": 20,  "info_x": 5,   "info_y": 25,  "rein_x":  225, "rein_y": 30},
+    1: {"grid_x": -155, "grid_y": 20,  "info_x": -60, "info_y": 25,  "rein_x": 140, "rein_y": 30},
+    2: {"grid_x": -80, "grid_y": 75,  "info_x": 5,   "info_y": 80,  "rein_x":  225, "rein_y":-25},
+    3: {"grid_x": -155, "grid_y": 75,  "info_x": -60, "info_y": 80,  "rein_x": 140, "rein_y":-25},
+    4: {"grid_x": -80, "grid_y": 133, "info_x": 5,   "info_y": 143, "rein_x":  225, "rein_y":-85},
+    5: {"grid_x": -155, "grid_y": 133, "info_x": -60, "info_y": 143, "rein_x": 140, "rein_y":-85},
+    6: {"grid_x": -80, "grid_y": 195, "info_x": 5,   "info_y": 200, "rein_x":  225, "rein_y":-145},
+    7: {"grid_x": -155, "grid_y": 195, "info_x": -60, "info_y": 200, "rein_x": 140, "rein_y":-145},
 }
 
 
@@ -13710,8 +13709,8 @@ def _detectar_ganadores(fecha_iso: str, stack: list, ultimo_marcado: int, recalc
             key = f"{fecha_iso}|{fig_code}|{serie_archivo}|{carton_id_norm}"
             if key in known:
                 continue
-            if (not recalc) and pat.get("fig_key") and pat.get("fig_key") in figuras_cerradas_prev:
-                continue
+            # NO bloquear la TL programada por coincidencia semántica de nombre ("LLENA", "RELLENA", etc.).
+            # Solo se evita repetirla por key única y por estado real ya guardado en known / tl_codes_closed_prev.
 
             closed_fig_keys_now = set(figuras_cerradas_prev)
             if not recalc:
@@ -13736,12 +13735,12 @@ def _detectar_ganadores(fecha_iso: str, stack: list, ultimo_marcado: int, recalc
             semantic_code = _tl_prog_semantic_code(fig_code)
             natural_trigger = semantic_code in natural_stage_hits_now
             objetivo = max(0, _tl_prog_parse_int(target_tl.get("objetivo"), 0))
-            count_trigger = True if natural_trigger else ((marked_count >= objetivo) if objetivo > 0 else True)
+            count_trigger = (marked_count >= objetivo) if objetivo > 0 else True
             if not (natural_trigger or count_trigger):
                 continue
 
             grid_forzada, needed_forzados, marked_forzados, tl_grid_completa = _tl_prog_force_grid_with_marked(
-                grid, stack, ultimo, required_pos=pat["required_pos"], force_ultimo=False
+                grid, stack, ultimo, required_pos=pat["required_pos"], force_ultimo=True
             )
             if not tl_grid_completa:
                 continue
