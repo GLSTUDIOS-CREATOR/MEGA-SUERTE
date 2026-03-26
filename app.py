@@ -1152,15 +1152,16 @@ def _resolve_series_path(archivo: str) -> str:
     raise FileNotFoundError(f"No existe el archivo de serie: {archivo}. Busqué en: {buscadas}")
 
 # ── OFFSETS EN CÓDIGO (boleto 0…7) ──
+# Ajusta aquí X/Y para grid, info y reintegro de cada boleto:
 per_cell_offsets = {
-    0: {"grid_x": -80, "grid_y": 20,  "info_x": 5,   "info_y": 25,  "rein_x":  225, "rein_y": 30},
-    1: {"grid_x": -155, "grid_y": 20,  "info_x": -60, "info_y": 25,  "rein_x": 140, "rein_y": 30},
-    2: {"grid_x": -80, "grid_y": 75,  "info_x": 5,   "info_y": 80,  "rein_x":  225, "rein_y":-25},
-    3: {"grid_x": -155, "grid_y": 75,  "info_x": -60, "info_y": 80,  "rein_x": 140, "rein_y":-25},
-    4: {"grid_x": -80, "grid_y": 133, "info_x": 5,   "info_y": 143, "rein_x":  225, "rein_y":-85},
-    5: {"grid_x": -155, "grid_y": 133, "info_x": -60, "info_y": 143, "rein_x": 140, "rein_y":-85},
-    6: {"grid_x": -80, "grid_y": 195, "info_x": 5,   "info_y": 200, "rein_x":  225, "rein_y":-145},
-    7: {"grid_x": -155, "grid_y": 195, "info_x": -60, "info_y": 200, "rein_x": 140, "rein_y":-145},
+    0: {"grid_x": -1, "grid_y": 28,  "info_x": 125,  "info_y": 48, "rein_x": 22,  "rein_y": 55},
+    1: {"grid_x": -35, "grid_y": 28,  "info_x": 90,  "info_y": 48, "rein_x": -10, "rein_y": 55},
+    2: {"grid_x": -1, "grid_y": 80,  "info_x": 125,  "info_y": 98, "rein_x": 22,  "rein_y": 10},
+    3: {"grid_x": -35, "grid_y": 80,  "info_x": 90,  "info_y": 98, "rein_x": -10, "rein_y": 10},
+    4: {"grid_x": -1, "grid_y": 130, "info_x": 125,   "info_y":150, "rein_x": 22,  "rein_y": -45},
+    5: {"grid_x": -35, "grid_y": 130, "info_x": 90,  "info_y": 150, "rein_x": -10, "rein_y": -45},
+    6: {"grid_x": -1, "grid_y": 185, "info_x": 125,  "info_y": 200, "rein_x": 22,  "rein_y": -95},
+    7: {"grid_x": -35, "grid_y": 185, "info_x": 90,  "info_y": 200, "rein_x": -10, "rein_y": -95},
 }
 
 
@@ -1796,6 +1797,18 @@ def generar_pdf_boletos_excel(
     qr_public_base: str | None = None,
     bonus_style: dict | None = None,
 ):
+    """
+    Layout base tomado del app(30).py para conservar exactamente:
+    - grilla 5x5
+    - posición de números
+    - QR centrado en N3
+    - texto inferior
+    - reintegro
+
+    Sobre esa geometría del app 30 se mantiene lo nuevo del app final:
+    - QR público opcional
+    - bonus por boleto / global
+    """
     buf = BytesIO()
     c = canvas.Canvas(buf, pagesize=A4)
     c.translate(OFFSET_X, OFFSET_Y)
@@ -1819,13 +1832,16 @@ def generar_pdf_boletos_excel(
             alto_b  = (h + 2 * MARGEN_SUP - ESPACIO_Y * (FILAS   - 1)) / FILAS
             x0 = MARGEN_IZQ + col * (ancho_b + ESPACIO_X)
             y0 = h - MARGEN_SUP - fil * (alto_b + ESPACIO_Y)
-            if fil == 2: y0 -= DELTA_Y_FILA_3
-            if fil == 3: y0 -= DELTA_Y_FILA_4
+            if fil == 2:
+                y0 -= DELTA_Y_FILA_3
+            if fil == 3:
+                y0 -= DELTA_Y_FILA_4
 
+            # --- BLOQUE DE GEOMETRÍA COPIADO DEL app(30).py ---
             size = min(ancho_b, alto_b) / 5
-            offs = per_cell_offsets[i]
+            offs = per_cell_offsets.get(i, per_cell_offsets[0])
 
-            # Rejilla 5×5 y QR en N3
+            # Rejilla 5×5 y QR en N3 (misma fórmula del app 30)
             bx0 = x0 + ancho_b - size * 5 + offs['grid_x']
             by0 = y0 + offs['grid_y']
             c.setFont('Helvetica-Bold', SIZE_NUM)
@@ -1841,7 +1857,7 @@ def generar_pdf_boletos_excel(
                                     base_url=qr_public_base,
                                     serie_archivo=nombre,
                                     boleto_id=str(ids[pos]),
-                                    fecha_iso=fecha_sorteo
+                                    fecha_iso=fecha_sorteo,
                                 )
                         except Exception:
                             pass
@@ -1850,8 +1866,8 @@ def generar_pdf_boletos_excel(
                         v = str(row.get(f"{letra}{r+1}", "-"))
                         c.drawCentredString(cx + size / 2, cy + size * 0.28, v)
 
-            # Texto inferior: ID grande + fecha + valor
-            boleto_text = f"{ids[pos]}{SERIE_MAP.get(nombre, nombre)}"
+            # Texto inferior: misma base del app 30
+            boleto_text = f"{ids[pos]}{_serie_label(nombre)}"
             x_info = x0 + offs['info_x']
             y_info = y0 - size * 5 + offs['info_y']
 
@@ -1867,7 +1883,7 @@ def generar_pdf_boletos_excel(
             c.setFont('Helvetica-Bold', SIZE_INFO)
             c.drawString(x_info + dx_id + dx_fecha, y_info, precio_str)
 
-            # Reintegro seguro
+            # Reintegro seguro (misma referencia geométrica del app 30)
             img = None
             if pos in esp_idx and reintegro_especial:
                 img = reintegro_especial
@@ -1876,18 +1892,19 @@ def generar_pdf_boletos_excel(
                 img = random.choice(others) if others else None
 
             rein_x = x0 + offs['rein_x']
-            rein_y_top = y0 - offs['rein_y']  # Y superior
+            rein_y_top = y0 - offs['rein_y']
 
             if img:
                 path_img = os.path.join(REINTEGROS_DIR, img)
                 _safe_draw_image(c, path_img, rein_x, rein_y_top, REINTEGRO_W, REINTEGRO_H)
 
-            # ---- BONUS debajo del reintegro ----
+            # BONUS: se mantiene en el app final, colgado del mismo punto del reintegro
             bn = None
             if bonus_numbers_per_ticket and pos < len(bonus_numbers_per_ticket):
                 bn = bonus_numbers_per_ticket[pos]
             elif bonus_numbers_global:
                 bn = bonus_numbers_global
+
             if bn:
                 ticket_bonus_style = _bonus_style_for_ticket(i, bonus_style)
                 _draw_bonus_franja(c, rein_x, rein_y_top, bn, style=ticket_bonus_style)
@@ -13709,8 +13726,8 @@ def _detectar_ganadores(fecha_iso: str, stack: list, ultimo_marcado: int, recalc
             key = f"{fecha_iso}|{fig_code}|{serie_archivo}|{carton_id_norm}"
             if key in known:
                 continue
-            # NO bloquear la TL programada por coincidencia semántica de nombre ("LLENA", "RELLENA", etc.).
-            # Solo se evita repetirla por key única y por estado real ya guardado en known / tl_codes_closed_prev.
+            if (not recalc) and pat.get("fig_key") and pat.get("fig_key") in figuras_cerradas_prev:
+                continue
 
             closed_fig_keys_now = set(figuras_cerradas_prev)
             if not recalc:
@@ -13735,12 +13752,12 @@ def _detectar_ganadores(fecha_iso: str, stack: list, ultimo_marcado: int, recalc
             semantic_code = _tl_prog_semantic_code(fig_code)
             natural_trigger = semantic_code in natural_stage_hits_now
             objetivo = max(0, _tl_prog_parse_int(target_tl.get("objetivo"), 0))
-            count_trigger = (marked_count >= objetivo) if objetivo > 0 else True
+            count_trigger = True if natural_trigger else ((marked_count >= objetivo) if objetivo > 0 else True)
             if not (natural_trigger or count_trigger):
                 continue
 
             grid_forzada, needed_forzados, marked_forzados, tl_grid_completa = _tl_prog_force_grid_with_marked(
-                grid, stack, ultimo, required_pos=pat["required_pos"], force_ultimo=True
+                grid, stack, ultimo, required_pos=pat["required_pos"], force_ultimo=False
             )
             if not tl_grid_completa:
                 continue
