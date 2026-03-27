@@ -393,13 +393,13 @@ function renderList(){
   const head = document.createElement('div');
   head.className='row head';
   head.style.setProperty('--accent', '#23375e');
-  head.innerHTML = `<div>Figura / Boleto</div><div>Planilla</div><div>Sector</div><div>Monto</div><div>Estado</div><div style="text-align:right">Acciones</div>`;
+  head.innerHTML = `<div>Figura / Boleto</div><div>Vendedor</div><div>Planilla/Sector</div><div>Monto</div><div>Estado</div><div style="text-align:right">Acciones</div>`;
   cont.appendChild(head);
 
   const q = ($('#busca').value||'').toLowerCase();
 
   ITEMS.filter(it=>{
-    const s = (it.figura+' '+it.boleto+' '+(it.nombre||'')).toLowerCase();
+    const s = (it.figura+' '+it.boleto+' '+(it.nombre||'')+' '+(it.vendedor||'')+' '+(it.sector||'')).toLowerCase();
     return s.includes(q) && matchesView(it);
   }).forEach(it=>{
     const color = colorForFigure(it.figura);
@@ -445,7 +445,10 @@ function renderList(){
         <span class="figtag" style="--ac:${color}">${it.figura}</span>
         <span class="muted"> · Boleto ${it.boleto}</span>
       </div>
-      <div>${it.nombre||'-'}</div>
+      <div>
+        <div>${it.vendedor||'Golpe de Suerte'}</div>
+        ${(it.nombre && String(it.nombre).trim()) ? `<div class="muted" style="font-size:11px">${it.nombre}</div>` : ''}
+      </div>
       <div>${it.sector||'-'}</div>
       <div style="font-variant-numeric:tabular-nums">${money(it.premio||0)}</div>
       <div>${estadoHTML}</div>
@@ -465,7 +468,7 @@ function startPay(it){
 
   $('#f_figura').value  = it.figura;
   $('#f_boleto').value  = it.boleto;
-  $('#f_ganador').value = it.nombre || '';
+  $('#f_ganador').value = (it.nombre || it.vendedor || 'Golpe de Suerte');
   $('#f_premio').value  = money(it.premio||0);
   $('#f_caduca').value  = it.fecha_caduca;
 
@@ -487,7 +490,7 @@ async function pagar(){
   fd.append('fecha', FECHA);
   fd.append('figura', SELEC.figura);
   fd.append('boleto', SELEC.boleto);
-  fd.append('ganador_nombre', SELEC.nombre||'');
+  fd.append('ganador_nombre', ($('#f_ganador').value||SELEC.nombre||SELEC.vendedor||'').trim());
   fd.append('premio', String(SELEC.premio||0));
   fd.append('cobrador_ci', $('#f_ci').value.trim());
   fd.append('cobrador_nombre', $('#f_cobrador').value.trim());

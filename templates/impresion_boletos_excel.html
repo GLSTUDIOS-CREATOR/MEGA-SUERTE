@@ -48,10 +48,11 @@
     .grid{display:grid;gap:12px}
     .grid.cols-2{grid-template-columns:1fr 1fr}
     .grid.cols-3{grid-template-columns:repeat(3,1fr)}
+    .grid.cols-5{grid-template-columns:repeat(5,minmax(0,1fr))}
     label{font-size:.82rem;color:#6772a6;font-weight:800;margin-bottom:6px;display:block}
     input,select{width:100%;padding:10px;border:1px solid var(--ring);border-radius:12px;background:#fff;font-weight:700;color:#1b2240}
     input[readonly]{background:#f5f7ff;color:#6973a6}
-    .help{font-size:.82rem;color:var(--muted);margin-top:6px}
+    .help{font-size:.82rem;color:#muted;margin-top:6px}
 
     .btn{display:inline-flex;align-items:center;gap:8px;border:none;border-radius:12px;padding:12px 16px;font-weight:900;cursor:pointer}
     .btn-primary{background:var(--brand);color:#fff}
@@ -95,7 +96,16 @@
     .only-super[disabled]{opacity:.5;cursor:not-allowed}
     @media (max-width:1100px){ .cols{grid-template-columns:1fr} }
     @media (max-width:900px){ .app{grid-template-columns:1fr} .sidebar{display:none} main{padding:12px} }
-  </style>
+  
+    .subpanel{margin-top:12px;padding:14px;border:1px solid var(--ring);border-radius:16px;background:linear-gradient(180deg,#fbfcff 0%,#f4f7ff 100%)}
+    .subpanel h4{margin:0 0 10px;font-size:1rem;color:#253a93}
+    .mini-note{margin-top:8px;color:var(--muted);font-size:.92rem}
+    .ticket-cfg-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:12px}
+    .ticket-cfg{padding:12px;border:1px solid var(--ring);border-radius:14px;background:#fff;box-shadow:0 6px 18px rgba(28,63,170,.05)}
+    .ticket-cfg .tag{display:inline-flex;align-items:center;gap:8px;font-weight:900;color:#2442ad;margin-bottom:10px}
+    .ticket-cfg .tag .n{width:24px;height:24px;border-radius:999px;background:#2442ad;color:#fff;display:grid;place-items:center;font-size:.82rem}
+    @media (max-width: 1200px){.ticket-cfg-grid{grid-template-columns:1fr}}
+</style>
 </head>
 <body data-role="{{ (rol|default('')|lower) }}">
 <div class="app">
@@ -107,18 +117,20 @@
     </div>
     <ul class="nav">
       <li><a href="/dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
-      <li><a href="/usuarios"><i class="bi bi-people-fill"></i> Usuarios</a></li>
-      <li><a href="/juego"><i class="bi bi-dice-5-fill"></i> Juego</a></li>
-      <li><a href="/contabilidad"><i class="bi bi-bar-chart-fill"></i> Contabilidad</a></li>
-      <li><a href="/vendedores"><i class="bi bi-person-badge-fill"></i> Vendedores</a></li>
-      <li><a href="/asignar-planillas"><i class="bi bi-journal-text"></i> Asignar Planillas</a></li>
+      
+      {% if can('admin_sistema') %}<li><a href="/admin/sistema">🛠️ Sistema</a></li>{% endif %}
+{% if can('usuarios') %}<li><a href="/usuarios"><i class="bi bi-people-fill"></i> Usuarios</a></li>{% endif %}
+      {% if can('juego') %}<li><a href="/juego"><i class="bi bi-dice-5-fill"></i> Juego</a></li>{% endif %}
+      {% if can('contabilidad') %}<li><a href="/contabilidad"><i class="bi bi-bar-chart-fill"></i> Contabilidad</a></li>{% endif %}
+      {% if can('vendedores') %}<li><a href="/vendedores"><i class="bi bi-person-badge-fill"></i> Vendedores</a></li>{% endif %}
+      {% if can('asignar_planillas') %}<li><a href="/asignar-planillas"><i class="bi bi-journal-text"></i> Asignar Planillas</a></li>{% endif %}
       <li><a class="active" href="/impresion"><i class="bi bi-printer-fill"></i> Impresión de Boletos</a></li>
-      <li><a href="/cobro"><i class="bi bi-cash-coin"></i> Cobro de Caja</a></li>
-      <li><a href="/pago-premios"><i class="bi bi-trophy-fill"></i> Pago de Premios</a></li>
-      <li><a href="/sorteo"><i class="bi bi-ticket-perforated"></i> Sorteo</a></li>
-      <li><a href="/crear-figuras"><i class="bi bi-shapes"></i> Crear Figuras</a></li>
-      <li><a href="/escoger-figuras"><i class="bi bi-grid-3x3-gap-fill"></i> Escoger Figuras</a></li>
-      <li><a href="/boletin"><i class="bi bi-megaphone-fill"></i> Boletín</a></li>
+      {% if can('cobro') %}<li><a href="/cobro"><i class="bi bi-cash-coin"></i> Cobro de Caja</a></li>{% endif %}
+      {% if can('pago_premios') %}<li><a href="/pago-premios"><i class="bi bi-trophy-fill"></i> Pago de Premios</a></li>{% endif %}
+      {% if can('sorteo') %}<li><a href="/sorteo"><i class="bi bi-ticket-perforated"></i> Sorteo</a></li>{% endif %}
+      {% if can('crear_figuras') %}<li><a href="/crear-figuras"><i class="bi bi-shapes"></i> Crear Figuras</a></li>{% endif %}
+      {% if can('escoger_figuras') %}<li><a href="/escoger-figuras"><i class="bi bi-grid-3x3-gap-fill"></i> Escoger Figuras</a></li>{% endif %}
+      {% if can('boletin') %}<li><a href="/boletin"><i class="bi bi-megaphone-fill"></i> Boletín</a></li>{% endif %}
       <li><a href="/logs-impresion"><i class="bi bi-clock-history"></i> Logs Impresión</a></li>
     </ul>
     <a class="logout" href="{{ url_for('logout') }}"><i class="bi bi-box-arrow-right"></i> Cerrar sesión</a>
@@ -145,7 +157,7 @@
           <form id="formBoletos" method="post" action="/impresion">
             <input type="hidden" name="form_type" value="boletos">
 
-            <div class="grid cols-3">
+            <div class="grid cols-4">
               <div>
                 <label>Serie (solo V, +, &, M)</label>
                 <select name="serie_archivo" id="serie_archivo" required>
@@ -163,6 +175,7 @@
                 <label>Valor</label>
                 <input type="number" step="0.01" min="0" name="valor" id="valor" value="1.00" required>
               </div>
+              <input type="hidden" name="qr_scale" id="qr_scale" value="{{ qr_scale_default|default(0.90) }}">
             </div>
 
             <div class="hd" style="margin-top:10px;border:0;padding:0">
@@ -170,6 +183,7 @@
               <span id="pillLock" class="pill pill-lock" style="display:none"><i class="bi bi-lock-fill"></i> Comodín bloqueado por el día</span>
               <button class="btn btn-mini btn-ghost" type="button" id="btnVerComodin"><i class="bi bi-eye"></i> Ver comodín</button>
               <button class="btn btn-mini btn-ghost" type="button" id="btnUltimoImpreso"><i class="bi bi-clock-history"></i> Último impreso</button>
+              <button class="btn btn-mini btn-accent" type="button" id="btnVerBonusDia"><i class="bi bi-stars"></i> BONUS</button>
             </div>
 
             <div class="grid cols-3" style="margin-top:8px">
@@ -194,6 +208,23 @@
                 </select>
               </div>
             </div>
+            <!-- ===== BONUS ===== -->
+            <input type="hidden" name="bonus_move_x" value="{{ bonus_base_default.offset_x|default(0) }}">
+            <input type="hidden" name="bonus_move_y" value="{{ bonus_base_default.offset_y|default(0) }}">
+            <input type="hidden" name="bonus_scale" value="{{ bonus_base_default.scale|default(1.0) }}">
+            <input type="hidden" name="bonus_num_size" value="{{ bonus_base_default.font_size|default(9) }}">
+            <input type="hidden" name="bonus_num_gap" value="{{ bonus_base_default.gap|default(3.5) }}">
+            <input type="hidden" name="bonus_num_width" value="{{ bonus_base_default.slot_w|default(8.5) }}">
+            {% for i in range(8) %}
+            {% set cfg = bonus_defaults.get(i, {}) %}
+            <input type="hidden" name="bonus{{ i + 1 }}_move_x" value="{{ cfg.get('bonus_x', 0) }}">
+            <input type="hidden" name="bonus{{ i + 1 }}_move_y" value="{{ cfg.get('bonus_y', 0) }}">
+            <input type="hidden" name="bonus{{ i + 1 }}_scale" value="{{ cfg.get('bonus_scale', 1.0) }}">
+            <input type="hidden" name="bonus{{ i + 1 }}_num_size" value="{{ cfg.get('bonus_size', 9) }}">
+            <input type="hidden" name="bonus{{ i + 1 }}_num_gap" value="{{ cfg.get('bonus_gap', 3.5) }}">
+            <input type="hidden" name="bonus{{ i + 1 }}_num_width" value="{{ cfg.get('bonus_width', 8.5) }}">
+            {% endfor %}
+            <!-- ===== /BONUS ===== -->
 
             <div class="note" style="margin:10px 0">
               <i class="bi bi-exclamation-triangle"></i>
@@ -333,7 +364,7 @@
           <table id="tbl_hist">
             <thead>
             <tr>
-              <th>Hora</th><th>Tipo</th><th>Serie</th><th>Usuario</th><th>Rango</th><th>Boletos</th><th>Planillas</th><th>Reint. esp.</th><th>Cant.</th><th>Aleatorios</th><th>Acciones</th>
+              <th>Hora</th><th>Tipo</th><th>Serie</th><th>Usuario</th><th>Rango</th><th>Boletos</th><th>Planillas</th><th>Reint. esp.</th><th>Cant.</th><th>Aleatorios</th><th>BONUS</th><th>Acciones</th>
             </tr>
             </thead>
             <tbody><!-- JS --></tbody>
@@ -392,7 +423,7 @@
         <thead>
         <tr>
           <th>Fecha/Hora</th><th>Tipo</th><th>Serie</th><th>Usuario</th><th>Fecha (sorteo/planilla)</th>
-          <th>Desde</th><th>Hasta</th><th>Boletos</th><th>Planillas</th><th>Reint. esp.</th><th>Cant.</th><th>Aleatorios</th><th>Acciones</th>
+          <th>Desde</th><th>Hasta</th><th>Boletos</th><th>Planillas</th><th>Reint. esp.</th><th>Cant.</th><th>Aleatorios</th><th>BONUS</th><th>Acciones</th>
         </tr>
         </thead>
         <tbody><!-- JS --></tbody>
@@ -412,6 +443,57 @@
     </div>
     <div class="bd" style="padding:14px 16px">
       <div id="msgBody">—</div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: BONUS -->
+<div class="modal" id="modalBonus">
+  <div class="box" style="max-width:620px">
+    <div class="hd" style="display:flex;align-items:center;gap:10px;padding:12px 16px">
+      <i class="bi bi-stars"></i><h3 style="margin:0">Configuración BONUS</h3>
+      <div style="margin-left:auto">
+        <button class="btn btn-mini btn-danger" type="button" id="bonusClose"><i class="bi bi-x-lg"></i> Cerrar</button>
+      </div>
+    </div>
+    <div class="bd" style="padding:16px">
+      <div class="note" style="margin-bottom:12px">
+        <i class="bi bi-info-circle"></i>
+        <div>Aquí eliges si quieres imprimir <b>BONUS</b> y la cantidad de ganadores por aciertos. El resto de ajustes queda interno para no recargar la pantalla.</div>
+      </div>
+      <div class="grid cols-2" style="align-items:end">
+        <div>
+          <label>¿Quieres BONUS?</label>
+          <select name="bonus_enabled" id="bonus_enabled" form="formBoletos">
+            <option value="0" selected>No</option>
+            <option value="1">Sí</option>
+          </select>
+        </div>
+        <div>
+          <label>Ganadores con 5 aciertos</label>
+          <input type="number" min="0" step="1" name="bonus_k5" id="bonus_k5" value="0" form="formBoletos">
+        </div>
+        <div>
+          <label>Ganadores con 4 aciertos</label>
+          <input type="number" min="0" step="1" name="bonus_k4" id="bonus_k4" value="0" form="formBoletos">
+        </div>
+        <div>
+          <label>Ganadores con 3 aciertos</label>
+          <input type="number" min="0" step="1" name="bonus_k3" id="bonus_k3" value="0" form="formBoletos">
+        </div>
+        <div>
+          <label>Ganadores con 2 aciertos</label>
+          <input type="number" min="0" step="1" name="bonus_k2" id="bonus_k2" value="0" form="formBoletos">
+        </div>
+        <div>
+          <label>Ganadores con 1 acierto</label>
+          <input type="number" min="0" step="1" name="bonus_k1" id="bonus_k1" value="0" form="formBoletos">
+        </div>
+      </div>
+      <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:14px">
+        <button class="btn btn-ghost" type="button" id="bonusCancel">Cancelar</button>
+        <button class="btn btn-accent" type="button" id="bonusSave"><i class="bi bi-check2-circle"></i> Listo</button>
+      </div>
     </div>
   </div>
 </div>
@@ -443,6 +525,10 @@
   const hastaInp = $("#serie_fin");
   const totSpan  = $("#tot_boletos");
 
+  // BONUS refs
+  const bonusEnabled = $("#bonus_enabled");
+  const bk5 = $("#bonus_k5"), bk4=$("#bonus_k4"), bk3=$("#bonus_k3"), bk2=$("#bonus_k2"), bk1=$("#bonus_k1");
+
   const kvSerie=$("#kv-serie"), kvFecha=$("#kv-fecha"), kvValor=$("#kv-valor"),
         kvRango=$("#kv-rango"), kvTot=$("#kv-tot"), kvRei=$("#kv-rei"), kvPlan=$("#kv-planillas");
   const img1 = $("#imgPreview"), img2 = $("#imgPreview2");
@@ -463,24 +549,60 @@
   const barSerie=$("#barSerie"), barRango=$("#barRango"), barBoletos=$("#barBoletos"), barPlanillas=$("#barPlanillas");
 
   const modalCom = $("#modalComodin"), gal = $("#galeriaComodin");
-  const modalHist= $("#modalHist"), modalMsg=$("#modalMsg");
+  const modalHist= $("#modalHist"), modalMsg=$("#modalMsg"), modalBonus=$("#modalBonus");
   const msgTitle=$("#msgTitle"), msgBody=$("#msgBody");
   const btnVerComodin = $("#btnVerComodin");
   const pillLock = $("#pillLock");
+
+  // NUEVO: botón para abrir el modal BONUS del día
+  const btnVerBonusDia = $("#btnVerBonusDia");
 
   function showModal(m){ m.style.display='flex'; }
   function hideModal(m){ m.style.display='none'; }
   function showMsg(title, html){ msgTitle.textContent = title; msgBody.innerHTML = html; showModal(modalMsg); }
 
   const allowedLetters = new Set(['V','+','&','M']);
+
+  function inferSerieLetter(opt){
+    const current = (opt?.dataset?.letra || '').trim();
+    if(allowedLetters.has(current)) return current;
+
+    const value = String(opt?.value || '').toLowerCase().trim();
+    let inferred = '';
+    if(value.includes('manila')) inferred = 'M';
+    else if(value.includes('ib1')) inferred = 'V';
+    else if(value.includes('ib2')) inferred = '+';
+    else if(value.includes('ib3')) inferred = '&';
+
+    if(inferred){
+      opt.dataset.letra = inferred;
+      opt.textContent = `${inferred} — ${opt.value}`;
+      return inferred;
+    }
+    return current;
+  }
+
   function filterSeriesOptions(){
-    Array.from(serieSel.options).forEach(opt=>{
-      if(!allowedLetters.has((opt.dataset.letra||'').trim())) opt.remove();
+    const serieOptions = Array.from(serieSel.options || []);
+    const histOptions  = Array.from(histSerie.options || []).filter(opt => opt.value !== '');
+
+    let validMain = 0;
+    serieOptions.forEach(opt=>{
+      const letra = inferSerieLetter(opt);
+      if(allowedLetters.has(letra)) validMain += 1;
     });
-    Array.from(histSerie.options).forEach(opt=>{
-      const letra = opt.dataset?.letra;
-      if(letra && !allowedLetters.has(letra.trim())) opt.remove();
-    });
+    histOptions.forEach(opt=> inferSerieLetter(opt));
+
+    // Solo filtrar si realmente encontramos series válidas.
+    // Así evitamos dejar el selector vacío por una diferencia entre CSV/XLSX.
+    if(validMain > 0){
+      serieOptions.forEach(opt=>{
+        if(!allowedLetters.has((opt.dataset.letra || '').trim())) opt.remove();
+      });
+      histOptions.forEach(opt=>{
+        if(!allowedLetters.has((opt.dataset.letra || '').trim())) opt.remove();
+      });
+    }
   }
   filterSeriesOptions();
 
@@ -621,6 +743,15 @@
     return `<button class="btn btn-mini btn-danger only-super" onclick="window.__delLog('${id}')" title="Eliminar del historial"><i class="bi bi-trash"></i> Eliminar</button>`;
   }
 
+  function bonusCell(r){
+    if((r.bonus_enabled==='1') || (r.bonus_numbers && r.bonus_numbers.length)){
+      const nums = (r.bonus_numbers||'').toString().replace(/,/g,' ');
+      const btn = `<button class="btn btn-mini btn-ghost" onclick="window.__verBonus('${r.id||''}')"><i class="bi bi-stars"></i> Ver BONUS</button>`;
+      return `<span class="pill pill-green">ON</span> <span class="pill pill-blue">${nums||'—'}</span> ${btn}`;
+    }
+    return '<span class="pill pill-red">OFF</span>';
+  }
+
   function paintDayDetail(rows){
     const fecha = (histFecha.value||'').trim();
     const serieFiltro = (histSerie.value||'').trim();
@@ -648,6 +779,7 @@
         <td>${isB? rei:'—'}</td>
         <td>${isB? cant:'—'}</td>
         <td>${isB? ale:'—'}</td>
+        <td>${isB? bonusCell(r):'—'}</td>
         <td>${actionCell(r.id||'')}</td>
       `;
       tblHist.appendChild(tr);
@@ -687,6 +819,7 @@
           <td>${r.reintegro_especial||'—'}</td>
           <td>${r.cant_reintegro_especial||'—'}</td>
           <td>${ale}</td>
+          <td>${isB? bonusCell(r):'—'}</td>
           <td>${actionCell(r.id||'')}</td>
         `;
         tblHistModal.appendChild(tr);
@@ -731,75 +864,48 @@
     }
   };
 
-  // Comodín
-  $("#btnVerComodin").onclick = ()=>{
-    if(btnVerComodin.disabled){
-      showMsg('Comodín bloqueado', 'El comodín del día ya está fijado y no puede cambiarse en excedentes.');
-      return;
-    }
-    $$(".gal .itm", gal).forEach(itm=>{
-      itm.classList.toggle('active', itm.dataset.name === reiSel.value);
-      itm.onclick = ()=> $$(".gal .itm", gal).forEach(x=> x.classList.toggle('active', x===itm));
-    });
-    showModal(modalCom);
-  };
+  // Historial / utilidades
+  const btnHistorial = $("#btnHistorial");
+  const btnHistCompleto = $("#btnHistCompleto");
+  const closeHist = $("#closeHist");
+  const btnRefresh = $("#btnRefresh");
+  const btnIrHoy = $("#btnIrHoy");
+  const btnUltimoImpreso = $("#btnUltimoImpreso");
 
-  $("#comodinAceptar").onclick = ()=>{
-    if(btnVerComodin.disabled){ hideModal(modalCom); return; }
-    const sel = $(".gal .itm.active", gal);
-    if(sel){
-      reiSel.value = sel.dataset.name;
-      sessionStorage.setItem(lockKey(), sel.dataset.name);
-      applyComodinLockUI(true);
-      setInnerPreview();
-    }
-    hideModal(modalCom);
-  };
+  async function openHistorialModal(){
+    await refreshAll();
+    showModal(modalHist);
+  }
 
-  $("#comodinNone").onclick = ()=>{
-    if(btnVerComodin.disabled){
-      showMsg('Comodín bloqueado', 'No puedes quitar el comodín: ya está fijado para el día.');
-      return;
-    }
-    reiSel.value = ""; sessionStorage.removeItem(lockKey()); applyComodinLockUI(false); setInnerPreview();
-    hideModal(modalCom);
-  };
+  if(btnHistorial){ btnHistorial.onclick = openHistorialModal; }
+  if(btnHistCompleto){ btnHistCompleto.onclick = openHistorialModal; }
+  if(closeHist){ closeHist.onclick = ()=> hideModal(modalHist); }
+  if(btnRefresh){ btnRefresh.onclick = ()=> refreshAll(true); }
+  if(btnIrHoy){
+    btnIrHoy.onclick = ()=>{
+      const hoy = fechaInp?.value || histFecha?.value || '';
+      if(hoy) histFecha.value = hoy;
+      histSerie.value = '';
+      refreshAll(true);
+    };
+  }
+  if(btnUltimoImpreso){
+    btnUltimoImpreso.onclick = async ()=>{
+      await refreshAll();
+      const firstRow = tblHistModal.querySelector('tr');
+      if(!firstRow){
+        showMsg('Historial', 'Aún no hay registros de impresión.');
+        return;
+      }
+      showModal(modalHist);
+      firstRow.scrollIntoView({behavior:'smooth', block:'center'});
+    };
+  }
 
-  // Historial UI
-  $("#btnHistorial").onclick = ()=> showModal(modalHist);
-  $("#btnHistCompleto").onclick = ()=> showModal(modalHist);
-  $("#closeHist").onclick = ()=> hideModal(modalHist);
+  // BONUS: abre ventana flotante de configuración
+  if(btnVerBonusDia){ btnVerBonusDia.onclick = ()=> showModal(modalBonus); }
 
-  // ZIP
-  $("#btnZip").onclick = async ()=>{
-    const q = new URLSearchParams({
-      fecha: fechaInp.value||'',
-      serie: serieSel.value||'',
-      desde: desdeInp.value||'',
-      hasta: hastaInp.value||'',
-      valor: valorInp.value||'',
-      reintegro: reiSel.value||'',
-      cant: cantEsp.value||'',
-      aleatorio: aleSel.value||''
-    }).toString();
-    const url = '/impresion_zip?'+q;
-    try{
-      const r = await fetch(url, {method:'GET'});
-      if(r.ok){ window.location.href = url; }
-      else{ showMsg('Generando ZIP', `<b>Error:</b> <code>/impresion_zip</code> no disponible (HTTP ${r.status}).`); }
-    }catch(e){ showMsg('Generando ZIP', 'No se pudo contactar el servidor para <b>/impresion_zip</b>.'); }
-  };
-
-  // Varios
-  $("#btnUltimoImpreso").onclick = ()=> refreshAll(true);
-  $("#btnIrHoy").onclick = ()=>{
-    const t = new Date().toISOString().slice(0,10);
-    $("#hist_fecha").value = t; $("#fecha_sorteo").value = t; $("#fecha_planilla").value = t;
-    refreshAll();
-  };
-  $("#btnRefresh").onclick = ()=> refreshAll();
-
-  [hastaInp, valorInp, cantEsp, aleSel].forEach(el=> el.addEventListener('input', ()=>{recalcTotals(); enableSuperButtons();}));
+  [hastaInp, valorInp, cantEsp, aleSel, bonusEnabled, bk5, bk4, bk3, bk2, bk1].forEach(el=> el.addEventListener('input', ()=>{recalcTotals(); enableSuperButtons();}));
   reiSel.addEventListener('change', ()=> setInnerPreview());
   [serieSel, $("#fecha_sorteo")].forEach(el=> el.addEventListener('change', async ()=>{
     if(el.id==='fecha_sorteo') $("#fecha_planilla").value = $("#fecha_sorteo").value;
@@ -818,9 +924,12 @@
   })();
 
   window.addEventListener('click', e=>{
-    [modalCom, modalHist, modalMsg].forEach(m=>{ if(e.target===m) m.style.display='none'; });
+    [modalCom, modalHist, modalMsg, modalBonus].forEach(m=>{ if(e.target===m) m.style.display='none'; });
   });
   $("#msgClose").onclick = ()=> modalMsg.style.display='none';
+  $("#bonusClose").onclick = ()=> modalBonus.style.display='none';
+  $("#bonusCancel").onclick = ()=> modalBonus.style.display='none';
+  $("#bonusSave").onclick = ()=> modalBonus.style.display='none';
 })();
 </script>
 </body>

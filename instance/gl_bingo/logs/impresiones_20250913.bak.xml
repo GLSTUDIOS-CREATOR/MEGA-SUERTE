@@ -1,0 +1,22 @@
+<?xml version='1.0' encoding='utf-8'?>
+<impresiones>
+  <impresion id="1" fecha_hora="2025-09-08 10:29:41" usuario="DMANQUILLO" tipo="boletos" serie_archivo="Srs_Manila.xlsx" desde="1" hasta="3600">
+    <valor>0.50</valor>
+    <telefono />
+    <fecha_sorteo>2025-09-10</fecha_sorteo>
+    <reintegro_especial>AMBULANCIA.png</reintegro_especial>
+    <cant_reintegro_especial>20</cant_reintegro_especial>
+    <incluir_aleatorio>1</incluir_aleatorio>
+    <total_boletos>3600</total_boletos>
+    <total_planillas>180</total_planillas>
+    <excedente>0</excedente>
+    <lote />
+  </impresion>
+  <impresion id="2" fecha_hora="2025-09-08 10:30:50" usuario="DMANQUILLO" tipo="planilla" serie_archivo="Srs_Manila.xlsx" desde="1" hasta="3600">
+    <fecha_planilla>2025-09-10</fecha_planilla>
+    <excedente>0</excedente>
+    <lote>1-3600</lote>
+    <total_boletos>3600</total_boletos>
+    <total_planillas>90</total_planillas>
+  </impresion>
+</impresiones>

@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>Spinners | GL Bingo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    html,body{
+      margin:0; padding:0; height:100%; width:100%;
+      background: radial-gradient(80% 80% at 50% 0%, #122440 0%, #0b1220 70%, #090f1a 100%);
+      color:#fff; font-family: 'Segoe UI', Roboto, sans-serif;
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+    }
+    .title3d{
+      font-weight:900; text-transform:uppercase;
+      font-size: clamp(28px, 6vw, 72px);
+      color:#e8f4ff;
+      margin-bottom:28px;
+      text-shadow: 0 3px 0 #3a6fb8, 0 6px 0 #274e82, 0 10px 20px rgba(0,0,0,.55);
+    }
+    .digits{
+      display:flex; gap:14px;
+    }
+    .digit-box{
+      width: clamp(70px, 12vw, 120px);
+      height: clamp(100px, 18vh, 160px);
+      display:flex; align-items:center; justify-content:center;
+      background:linear-gradient(#ffffff,#dfe6f6);
+      color:#0d1a32;
+      border-radius:16px;
+      box-shadow:0 6px 16px rgba(0,0,0,.4), inset 0 0 6px rgba(0,0,0,.25);
+      font-size: clamp(48px, 9vw, 110px);
+      font-weight:900;
+      font-variant-numeric: tabular-nums;
+    }
+  </style>
+</head>
+<body>
+  <div class="title3d">Spinners</div>
+  <div class="digits" id="digitRow">
+    <div class="digit-box">-</div>
+    <div class="digit-box">-</div>
+    <div class="digit-box">-</div>
+    <div class="digit-box">-</div>
+  </div>
+
+  <script>
+    const digitRow = document.getElementById("digitRow");
+    let used = new Set();
+    let currentIndex = 0;
+    let numbers = [];
+
+    // Animación tipo tambola por dígito
+    async function animateTo(targetStr){
+      const boxes = [...digitRow.children];
+      for(let i=0;i<targetStr.length;i++){
+        let box = boxes[i];
+        let final = targetStr[i];
+        for(let k=0;k<15;k++){
+          box.textContent = Math.floor(Math.random()*10);
+          await new Promise(r=>setTimeout(r,50));
+        }
+        box.textContent = final;
+      }
+    }
+
+    async function loadNumbers(){
+      try{
+        const r = await fetch("/juego/spinners");
+        const j = await r.json();
+        numbers = j.spinners || [];
+        lanzar();
+      }catch(e){
+        console.error("Error cargando spinners", e);
+      }
+    }
+
+    async function lanzar(){
+      if(currentIndex>=numbers.length) return;
+      const val = numbers[currentIndex].toString().padStart(4,"0");
+      if(used.has(currentIndex)){
+        if(!confirm("Este spinner ya fue lanzado. ¿Quieres relanzarlo?")) return;
+      }
+      await animateTo(val);
+      used.add(currentIndex);
+      currentIndex++;
+    }
+
+    // Autoarranque
+    loadNumbers();
+    // Si quieres que cada 15s lance el siguiente automáticamente:
+    // setInterval(lanzar,15000);
+  </script>
+</body>
+</html>

@@ -92,18 +92,20 @@
       </div>
       <ul class="menu">
         <li><a href="/dashboard"><span>🏠</span> Dashboard</a></li>
-        <li><a href="/usuarios"><span>🧑‍💼</span> Usuarios</a></li>
-        <li><a href="/juego"><span>🎲</span> Juego</a></li>
-        <li><a href="/contabilidad"><span>📊</span> Contabilidad</a></li>
+        
+        {% if can('admin_sistema') %}<li><a href="/admin/sistema">🛠️ Sistema</a></li>{% endif %}
+{% if can('usuarios') %}<li><a href="/usuarios"><span>🧑‍💼</span> Usuarios</a></li>{% endif %}
+        {% if can('juego') %}<li><a href="/juego"><span>🎲</span> Juego</a></li>{% endif %}
+        {% if can('contabilidad') %}<li><a href="/contabilidad"><span>📊</span> Contabilidad</a></li>{% endif %}
         <li><a class="active" href="/vendedores"><span>🧾</span> Vendedores</a></li>
-        <li><a href="/asignar-planillas"><span>📑</span> Asignar Planillas</a></li>
-        <li><a href="/impresion"><span>🖨️</span> Impresión de Boletos</a></li>
-        <li><a href="/cobro"><span>💵</span> Cobro de Caja</a></li>
-        <li><a href="/pago-premios"><span>🏅</span> Pago de Premios</a></li>
-        <li><a href="/sorteo"><span>🎟️</span> Sorteo</a></li>
-        <li><a href="/crear-figuras"><span>🟩</span> Crear Figuras</a></li>
-        <li><a href="/escoger-figuras"><span>🟦</span> Escoger Figuras</a></li>
-        <li><a href="/boletin"><span>📋</span> Boletín</a></li>
+        {% if can('asignar_planillas') %}<li><a href="/asignar-planillas"><span>📑</span> Asignar Planillas</a></li>{% endif %}
+        {% if can('impresion') %}<li><a href="/impresion"><span>🖨️</span> Impresión de Boletos</a></li>{% endif %}
+        {% if can('cobro') %}<li><a href="/cobro"><span>💵</span> Cobro de Caja</a></li>{% endif %}
+        {% if can('pago_premios') %}<li><a href="/pago-premios"><span>🏅</span> Pago de Premios</a></li>{% endif %}
+        {% if can('sorteo') %}<li><a href="/sorteo"><span>🎟️</span> Sorteo</a></li>{% endif %}
+        {% if can('crear_figuras') %}<li><a href="/crear-figuras"><span>🟩</span> Crear Figuras</a></li>{% endif %}
+        {% if can('escoger_figuras') %}<li><a href="/escoger-figuras"><span>🟦</span> Escoger Figuras</a></li>{% endif %}
+        {% if can('boletin') %}<li><a href="/boletin"><span>📋</span> Boletín</a></li>{% endif %}
       </ul>
       <a href="{{ url_for('logout') }}" class="logout-btn">Cerrar sesión</a>
     </nav>

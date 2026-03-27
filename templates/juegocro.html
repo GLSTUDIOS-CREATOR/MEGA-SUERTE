@@ -1,0 +1,1266 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>Juego | GL Bingo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root{
+      --bg:#0b1220; --panel:#0f1b33; --card:#0e182c; --ink:#e8eef8; --muted:#ffffff22;
+      --brand:#64b5ff; --blue:#2d6cff; --blueSoft:#6aa7ff; --gold:#ffd061; --red:#ff1f2d; --redSoft:#ff6b73;
+      --ok:#23d18b; --warn:#ffb84d; --danger:#ff5364; --ring:0 10px 30px rgba(0,0,0,.35);
+      --pill-fs: clamp(14px, 1.5vw, 19px);
+      --ball: clamp(30px, 3.3vw, 54px); --ball-fs: clamp(18px, 2.1vw, 28px);
+      --chip: clamp(34px, 3.8vw, 52px); --chip-fs: clamp(16px, 2.0vw, 24px);
+      --last: clamp(62px, 7.5vw, 98px); --last-fs: clamp(34px, 4.2vw, 56px);
+
+      /* spinners modal */
+      --spnBlue:#0b3a9c; --spnBlueLive:#1e5cff;
+      --spnPanelA:#ffffff; --spnPanelB:#f6f8ff; --spnPanelC:#e9eef9;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;color:var(--ink);
+      background:radial-gradient(90% 90% at 50% 0%, #16294f 0%, #0b1220 60%, #090f1a 100%);
+      font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial
+    }
+    html.overlay, body.overlay{ background:transparent !important; }
+    .layout.hidden{display:none !important}
+
+    .layout{display:grid;grid-template-columns:260px 1fr;min-height:100vh}
+    nav{background:#0c1426;border-right:1px solid #0f1d36;color:#d6def0;display:flex;flex-direction:column;gap:12px}
+    .brand{display:flex;align-items:center;gap:10px;padding:16px 18px;border-bottom:1px solid #0f1d36}
+    .brand img{width:34px;height:34px;border-radius:8px}
+    .brand .t{font-weight:900;letter-spacing:.2px}
+    nav ul{list-style:none;margin:0;padding:8px}
+    nav li a{display:flex;align-items:center;gap:10px;color:#d6def0;text-decoration:none;padding:10px 14px;margin:4px 8px;border-radius:10px}
+    nav li a:hover{background:#111e39}
+    .logout{margin:8px;padding:10px 14px;border-radius:10px;text-decoration:none;text-align:center;color:#f3b4b4;background:#3a0e14;border:1px solid #611f29}
+
+    header{padding:20px 22px;border-bottom:1px solid #0f1d36;background:linear-gradient(180deg,#122440,#0f1b33)}
+    .status{display:flex;gap:16px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+    .chips{display:flex;gap:16px;flex-wrap:wrap;align-items:center}
+    .pill{
+      display:inline-flex;align-items:center;gap:10px;
+      background:#0c182e;border:1px solid var(--muted);color:#e9f0fb;border-radius:999px;
+      padding:12px 16px;font-weight:800;box-shadow:var(--ring);font-size:var(--pill-fs)
+    }
+    .pill.metric{font-size: clamp(18px, 2.2vw, 26px); padding: 16px 20px}
+    .pill .dot{width:10px;height:10px;border-radius:999px;background:#999;display:inline-block;box-shadow:0 0 12px currentColor}
+
+    .last-wrap{display:flex;align-items:center;gap:16px}
+    
+    .last-ball{
+      width:var(--last); height:var(--last); border-radius:18px;
+      background:radial-gradient(120% 120% at 50% 8%, #d7e6ff 0%, var(--blueSoft) 45%, var(--blue) 100%);
+      color:#ffffff; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:var(--last-fs);
+      box-shadow:0 2px 10px rgba(0,0,0,.25),0 0 0 3px #0002 inset,0 0 30px 10px rgba(45,108,255,.45);
+      animation:pop .35s ease-out;
+      letter-spacing:.5px
+    }
+    @keyframes pop{0%{transform:scale(.85)}100%{transform:scale(1)}}
+
+    
+    .last6{
+      display:flex;gap:10px;align-items:center;background:#0c182e;border:1px solid var(--muted);
+      border-radius:14px;padding:12px 14px;font-weight:800;box-shadow:var(--ring);overflow-x:auto
+    }
+    .chip6{
+      min-width:var(--chip); height:var(--chip);
+      border-radius:14px; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:var(--chip-fs);
+      background:linear-gradient(#fff,#eaf0ff); color:#0e1a2f; border:1px solid #0001; box-shadow:0 2px 8px rgba(0,0,0,.25);
+      font-variant-numeric:tabular-nums
+    }
+    .chip6.prev{background:radial-gradient(120% 120% at 50% 10%, #fff3cf 0%, var(--gold) 55%, #f1b938 100%); color:#1b1202}
+    .chip6.last, .chip6.live{background:radial-gradient(120% 120% at 50% 8%, #d7e6ff 0%, var(--blueSoft) 45%, var(--blue) 100%); color:#fff}
+
+    .controls{display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding:14px 22px}
+    .btn{border:0;border-radius:12px;font-weight:900;padding:10px 14px;cursor:pointer;box-shadow:var(--ring);transition:transform .06s ease,filter .15s ease}
+    .btn:active{transform:translateY(1px)}
+    .start{background:var(--ok);color:#05271c}.stop{background:var(--danger);color:#fff}.reset{background:var(--warn);color:#291401}
+    .ghost{background:#162542;color:#e8eef8;border:1px solid var(--muted)}
+    .spacer{flex:1}
+
+    .main{padding:0 22px 26px}
+    .board{position:relative;background:linear-gradient(180deg,#0f1b33,#0e182c);border:1px solid var(--muted);border-radius:18px;padding:18px;box-shadow:var(--ring)}
+    .grid-wrap{overflow-x:auto}
+    
+    .grid{display:grid; gap:10px; grid-template-columns: repeat(15, minmax(var(--ball), 1fr)); min-width: 660px;}
+    .ball{
+      width:var(--ball); height:var(--ball); border-radius:14px;
+      display:flex; align-items:center; justify-content:center;
+      color:#0f1b33; background:linear-gradient(#ffffff,#e9eef6);
+      font-weight:900; font-size:var(--ball-fs);
+      cursor:pointer; user-select:none;
+      border:1px solid #0001; box-shadow:0 2px 8px rgba(0,0,0,.25);
+      transition:transform .08s ease, filter .15s ease, box-shadow .15s ease
+    }
+    .ball:hover{ transform:translateY(-1px); filter:brightness(1.03); box-shadow:0 10px 26px rgba(0,0,0,.35); }
+    .ball:active{ transform:translateY(0px) scale(.99); }
+    .ball.marked{
+      color:#1b1202;
+      background:radial-gradient(120% 120% at 50% 10%, #fff3cf 0%, var(--gold) 55%, #f1b938 100%);
+    }
+    .ball.last{
+      color:#ffffff;
+      background:radial-gradient(120% 120% at 50% 8%, #d7e6ff 0%, var(--blueSoft) 45%, var(--blue) 100%);
+      box-shadow:0 2px 10px rgba(0,0,0,.25),0 0 18px rgba(45,108,255,.55);
+    }
+
+    .lock{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,rgba(7,12,22,.72),rgba(7,12,22,.72));border-radius:18px;backdrop-filter:blur(2px);color:#d7def1;font-weight:900;letter-spacing:.3px;font-size:20px}
+    .lock .tag{background:#182747;border:1px solid #26406e;padding:10px 14px;border-radius:14px;display:flex;gap:10px;align-items:center}
+    .hint{margin-top:8px;opacity:.85;font-size:14px}
+
+    .figs-wrap{padding:0 22px 20px}
+    .figs{background:linear-gradient(180deg,#0f1b33,#0e182c);border:1px solid var(--muted);border-radius:18px;padding:16px;box-shadow:var(--ring)}
+    .figs h3{margin:0 0 12px;font-size:18px;display:flex;align-items:center;gap:10px}
+    .fig-list{display:flex;flex-direction:column;gap:10px}
+    .fig-item{display:grid;grid-template-columns:1.2fr .6fr .6fr 1fr;gap:10px;align-items:center;background:#0c182e;border:1px solid var(--muted);border-radius:12px;padding:10px 12px}
+    .fig-name{font-weight:900}
+    .badge{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:6px 10px;font-weight:900}
+    
+    .badge.win{background:#0f223f;color:#9fc4ff;border:1px solid #2d6cff}
+    .fig-item.won{opacity:.78}
+    .fig-item.won .btn-xs{opacity:.55; pointer-events:none}
+.badge.ok{background:#112a20;color:#8ef2c6;border:1px solid #1e7f57}
+    .badge.no{background:#2a1114;color:#ffb5b9;border:1px solid #7f1e26}
+    .btn-xs{border:1px solid #ffffff1f;background:#172a4b;color:#e8eef8;padding:8px 10px;border-radius:10px;font-weight:800;cursor:pointer}
+    .btn-xs.ok{background:#143826;border-color:#1e7f57}
+    .btn-xs.no{background:#3a1520;border-color:#7f1e26}
+
+    .history-wrap{padding:0 22px 28px}
+    .history{background:linear-gradient(180deg,#0f1b33,#0e182c);border:1px solid var(--muted);border-radius:18px;padding:16px;box-shadow:var(--ring)}
+    .history h3{margin:0 0 10px;font-size:16px;opacity:.9}
+    .history-list{display:flex; flex-wrap:wrap; gap:8px; max-height:220px; overflow:auto; padding:6px; background:#0c182e; border:1px solid var(--muted); border-radius:12px}
+    
+    .hchip{
+      width:44px; height:44px; border-radius:12px; display:flex; align-items:center; justify-content:center;
+      font-weight:900; background:linear-gradient(#fff,#eaf0ff); color:#0e1a2f; border:1px solid #0001;
+      box-shadow:0 2px 8px rgba(0,0,0,.25); font-size:16px; position:relative
+    }
+    
+    .hchip.live{
+      background:radial-gradient(120% 120% at 50% 8%, #d7e6ff 0%, var(--blueSoft) 45%, var(--blue) 100%);
+      color:#fff;
+    }
+    .order{position:absolute; top:2px; left:4px; font-size:9px; font-weight:800; opacity:.6}
+
+    @media (max-width:980px){ .layout{grid-template-columns:1fr} nav{display:none} .fig-item{grid-template-columns:1fr .6fr .6fr 1fr}}
+
+    /* ===== MODAL SPINNERS ===== */
+    .modal.hidden{display:none}
+    .modal{position:fixed; inset:0; display:grid; place-items:center; z-index:9999}
+    .modal-backdrop{position:absolute; inset:0; background:rgba(0,0,0,.6); backdrop-filter:blur(3px)}
+    .modal-card{
+      position:relative; width:min(1080px, 94vw); max-height:88vh;
+      background:linear-gradient(180deg,rgba(16,29,54,.9),rgba(10,20,40,.9));
+      border:1px solid #2a3f68; border-radius:18px; box-shadow:0 30px 80px rgba(0,0,0,.5);
+      display:flex; flex-direction:column; overflow:hidden
+    }
+    .modal-head{
+      display:flex; align-items:center; justify-content:space-between;
+      padding:14px 16px; background:linear-gradient(180deg,#0f1f3e,#0d1b36);
+      border-bottom:1px solid #23375f; position:sticky; top:0; z-index:2
+    }
+    .modal-head h3{margin:0; letter-spacing:.4px}
+    .modal-body{padding:16px; overflow:auto}
+    .modal-foot{display:flex; justify-content:flex-end; gap:10px; padding:12px 16px; border-top:1px solid #23375f; background:#0e1e3a}
+    .iconbtn{border:0; background:#162542; color:#e8eef8; width:34px; height:34px; border-radius:10px; cursor:pointer; font-size:20px; line-height:1}
+    .iconbtn:hover{filter:brightness(1.15)}
+    .subbar{display:flex; gap:12px; align-items:center; justify-content:space-between; margin-bottom:12px}
+    .subbar .pill{background:#0f223f;border-color:#21406e}
+    .subbar-actions{display:flex; gap:8px; align-items:center}
+
+    .spn-grid{display:grid; gap:12px; grid-template-columns: repeat(5, 1fr)}
+    .spn-cell{
+      background:linear-gradient(#ffffff,#e9eef6); color:#0e1a2f; border:1px solid #0002; border-radius:14px;
+      min-height:112px; display:flex; align-items:center; justify-content:center; font-weight:900;
+      font-size:clamp(22px, 2.6vw, 34px); box-shadow:0 2px 10px rgba(0,0,0,.28), 0 0 0 2px #0001 inset;
+      position:relative; padding:12px 12px 60px; transition:transform .08s ease, box-shadow .15s ease; /* ↑ más espacio abajo para botones */
+    }
+    .spn-cell:hover{ transform:translateY(-2px); box-shadow:0 10px 26px rgba(0,0,0,.35), 0 0 0 2px #0001 inset }
+    .spn-cell .label{position:absolute; top:6px; left:8px; font-size:11px; font-weight:800; opacity:.55}
+    .spn-num{font-variant-numeric:tabular-nums; letter-spacing:.5px}
+    .spn-actions{
+      position:absolute; bottom:10px; left:10px; right:10px;
+      display:flex; gap:8px; flex-wrap:wrap; justify-content:center;   /* ↑ visibles y sin solaparse */
+    }
+    .mini{border:0; border-radius:999px; padding:7px 12px; font-weight:900; cursor:pointer}
+    .mini.gen{background:#172a4b; color:#e8eef8; border:1px solid #274e82}
+    .mini.lanz{background:#23d18b; color:#05271c}
+    .mini.lock{background:#2a1114; color:#ffb5b9; border:1px solid #7f1e26; cursor:not-allowed}
+    .mini.unlock{background:#162542; color:#e8eef8; border:1px solid #274e82}
+
+    .spn-cell.used{opacity:.78}
+    .spn-cell.used::after{content:'🔒'; position:absolute; top:8px; right:10px; font-size:14px; opacity:.9}
+
+    .spn-full.hidden{display:none}
+    .spn-full{position:fixed; inset:0; background:radial-gradient(80% 80% at 50% 0%, #122440 0%, #0b1220 60%, #090f1a 100%); z-index:9998; display:flex; align-items:center; justify-content:center}
+    .spn-full-wrap{width:min(1200px, 92vw); padding:20px}
+    .spn-title{text-align:center; font-weight:900; font-size:clamp(22px, 3vw, 36px); margin-bottom:16px; color:#8cc9ff}
+    .spn-grid.large .spn-cell{min-height:92px; font-size:clamp(28px, 3.2vw, 44px)}
+
+    .solo.hidden{display:none}
+    .solo{position:fixed; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:18px; background: transparent;}
+    .solo .card{ width:min(900px, 92vw); border-radius:26px; padding:22px 24px; border:1px solid #ffffff26; background:transparent; }
+    .solo .screen{display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:220px}
+    .solo .digits{display:flex; gap:18px; align-items:center; justify-content:center}
+    .solo .d{
+      width:clamp(80px,10.5vw,140px); height:clamp(112px,14vw,168px);
+      display:flex; align-items:center; justify-content:center;
+      background:linear-gradient(#ffffff,#e9eef6);
+      color:#0d1a32; border:1px solid #0002; border-radius:18px;
+      font-weight:900; font-size:clamp(56px,8.4vw,128px);
+      box-shadow: inset 0 0 0 2px #0001, 0 10px 30px rgba(0,0,0,.35);
+      font-variant-numeric:tabular-nums; user-select:none;
+    }
+    .solo .toolbar, .solo .meta {display:none!important}
+
+    /* ====== SOLO: util para pintar "Spinners" en rojo sin tocar más lógica ====== */
+    .spn-red{ color: var(--red); font-weight: 900; }
+  /* ======= MODAL GANADORES (cuadrado) ======= */
+
+.winner-grid{
+  display:grid;
+  grid-template-columns:repeat(5, 1fr);
+  gap:8px;
+  margin:14px 0;
+}
+
+.wcell{
+  aspect-ratio: 1 / 1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border:2px solid rgba(255,255,255,.10);
+  border-radius:10px;
+  font-weight:900;
+  font-size:22px;
+  background:#ffffff;
+  color:#111;
+  box-shadow: 0 10px 26px rgba(0,0,0,.25);
+  user-select:none;
+}
+.wcell.req{
+  background:#ff1f2d;
+  color:#fff;
+  border-color:#ff1f2d;
+}
+.wcell.marked:not(.req):not(.lastwin){
+  box-shadow: inset 0 0 0 3px rgba(45,108,255,.22), 0 10px 26px rgba(0,0,0,.25);
+}
+
+.wcell.free{
+  background:#ffffff;
+  color:#666;
+  border-style:dashed;
+  font-size:14px;
+  letter-spacing:.6px;
+}
+.wcell.lastwin{
+  background:#2d6cff;
+  color:#fff;
+  border-color:#2d6cff;
+}
+.winner-meta{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap:10px;
+  margin-top:6px;
+}
+.winner-meta .kv{
+  border:1px solid var(--muted);
+  border-radius:14px;
+  padding:10px 12px;
+  background:rgba(255,255,255,.05);
+  font-size:14px;
+  line-height:1.2;
+}
+.winner-meta .kv b{ color: var(--gold); }
+.winner-actions{
+  display:flex;
+  gap:10px;
+  justify-content:flex-end;
+  margin-top:10px;
+  flex-wrap:wrap;
+}
+.winner-actions .btn{
+  border:none;
+  border-radius:14px;
+  padding:12px 14px;
+  font-weight:900;
+  cursor:pointer;
+  box-shadow: var(--ring);
+}
+.winner-actions .btn.gold{ background:linear-gradient(180deg, #ffd061, #ffb84d); color:#111; }
+.winner-actions .btn.red{ background:linear-gradient(180deg, #ff5364, #ff1f2d); color:#fff; }
+
+/* ======= FIGURAS EN JUEGO (resumen ganadores) ======= */
+.fig-toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.fig-actions{display:flex;flex-direction:column;gap:6px;align-items:flex-end}
+.fig-wins{font-size:12px;opacity:.92}
+.fig-wins b{color:var(--gold)}
+</style>
+</head>
+<body>
+  <div class="layout">
+    <nav>
+      <div class="brand">
+        <img src="{{ url_for('static', filename='img/logo.png') }}" alt="">
+        <div class="t">GL Bingo</div>
+      </div>
+      <ul>
+        <li><a href="/dashboard">🏠 Dashboard</a></li>
+        
+        {% if can('admin_sistema') %}<li><a href="/admin/sistema">🛠️ Sistema</a></li>{% endif %}
+{% if can('usuarios') %}<li><a href="/usuarios">🧑‍💼 Usuarios</a></li>{% endif %}
+        <li><a href="/juego/">🎲 Juego</a></li>
+        {% if can('contabilidad') %}<li><a href="/contabilidad">📊 Contabilidad</a></li>{% endif %}
+        {% if can('vendedores') %}<li><a href="/vendedores">🧾 Vendedores</a></li>{% endif %}
+        {% if can('asignar_planillas') %}<li><a href="/asignar-planillas">📑 Asignar Planillas</a></li>{% endif %}
+        {% if can('impresion') %}<li><a href="/impresion">🖨️ Impresión de Boletos</a></li>{% endif %}
+        {% if can('cobro') %}<li><a href="/cobro">💵 Cobro de Caja</a></li>{% endif %}
+        {% if can('pago_premios') %}<li><a href="/pago-premios">🏅 Pago de Premios</a></li>{% endif %}
+        {% if can('sorteo') %}<li><a href="/sorteo">🎟️ Sorteo</a></li>{% endif %}
+        {% if can('crear_figuras') %}<li><a href="/crear-figuras">🟩 Crear Figuras</a></li>{% endif %}
+        {% if can('escoger_figuras') %}<li><a href="/escoger-figuras">🟦 Escoger Figuras</a></li>{% endif %}
+        {% if can('boletin') %}<li><a href="/boletin">📋 Boletín</a></li>{% endif %}
+      </ul>
+      <a class="logout" href="{{ url_for('logout') }}">⏻ Cerrar sesión</a>
+    </nav>
+
+    <main>
+      <header>
+        <div class="status">
+          <div class="chips">
+            <div class="pill metric">⏱ Segundos: <b id="seg">0</b></div>
+            <div class="pill metric">🔢 Total: <b id="tot">0</b></div>
+            <div class="last-wrap">
+              <div class="pill">🎯 Última Balota</div>
+              <div id="ultimoCircle" class="last-ball">–</div>
+            </div>
+            <div class="last6" id="last6"><span style="opacity:.85;white-space:nowrap">Últimas 6:</span></div>
+            <div class="pill">XML: <a href="/static/db/datos_bingo.xml" target="_blank">/static/db/datos_bingo.xml</a></div>
+
+            <!-- Estado Overlay/Spinners -->
+            <div id="pillSpinner" class="pill" title="Estado Spinners / Overlay">
+              <span class="dot" id="dotOverlay"></span>
+              <span id="txtOverlay">Overlay OFF · Libre</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div class="controls">
+        <button id="start" class="btn start">▶ INICIAR JUEGO</button>
+        <button id="stop"  class="btn stop" disabled>⛔ FINALIZAR JUEGO</button>
+        <button id="reset" class="btn reset">🔁 RESET</button>
+        <div class="spacer"></div>
+
+        <!-- control Spinner/Overlay -->
+        <button id="spnLaunch"  class="btn" style="background:#23d18b;color:#05271c">🎰 Lanzar</button>
+        <button id="spnLock"    class="btn" style="background:#ff5364;color:#fff">🔒 Bloquear</button>
+        <button id="spnUnlock"  class="btn ghost">🔓 Desbloquear</button>
+
+        <button id="btnSpinners" class="btn ghost">🎰 <span class="spn-red">Spinners</span></button>
+        <button id="btnSoloSpin" class="btn ghost">🎯 Spinner 1 a 1</button>
+        <button id="rev1"   class="btn ghost">↩ Reversa 1</button>
+        <button id="revn"   class="btn ghost">↩ Reversa N…</button>
+        <button id="revall" class="btn ghost">↩ Reversa TODO</button>
+      </div>
+
+      <div class="main">
+        <div class="board">
+          <div class="grid-wrap"><div id="grid" class="grid"></div></div>
+          <div id="lock" class="lock"><div class="tag">🔒 Juego bloqueado · Presiona <b>INICIAR JUEGO</b></div></div>
+        </div>
+        <div class="hint">Para corregir usa <b>Reversa</b>; el clic no desmarca.</div>
+      </div>
+
+      <!-- FIGURAS -->
+      <div class="figs-wrap">
+        <div class="figs">
+          <h3>🧩 Figuras del día (en juego)</h3>
+          <div class="fig-toolbar">
+            <div class="pill">Fecha de sorteo: <b id="figFecha">—</b></div>
+            <div class="pill">Ganadores: <b id="ganCount">0</b></div>
+            <div class="pill">Figuras ganadas: <b id="ganFigList">—</b></div>
+            <button class="btn" id="btnRefrescarFig">⟳ Actualizar</button>
+          </div>
+          <div id="figList" class="fig-list"></div>
+        </div>
+      </div>
+
+      <!-- HISTORIAL -->
+      <div class="history-wrap">
+        <div class="history">
+          <h3>Historial de números marcados (orden de salida)</h3>
+          <div id="hist" class="history-list"></div>
+        </div>
+      </div>
+
+      <!-- MODAL SPINNERS 20 -->
+      <div id="spinnerModal" class="modal hidden" aria-hidden="true">
+        <div class="modal-backdrop" data-close-modal></div>
+        <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="mdlTitleSpn">
+          <div class="modal-head">
+            <h3 id="mdlTitleSpn">🎰 <span class="spn-red">Spinners</span> del día</h3>
+            <button class="iconbtn" title="Cerrar" data-close-modal>&times;</button>
+          </div>
+          <div class="modal-body">
+            <div class="subbar">
+              <div class="pill">Fuente: <b>/juego/spinners</b> (fallback: XML /static/db)</div>
+              <div class="subbar-actions">
+                <button id="btnRefreshSpn" class="btn-xs">⟳ Actualizar</button>
+                <button id="btnOpenWindowSpn" class="btn-xs">🗔 Previsualizar overlay</button>
+                <a id="lnkFullUrlSpn" class="btn-xs" target="_blank" href="#">🔗 Abrir visor (URL)</a>
+                <a id="lnkOverlayUrlSpn" class="btn-xs" target="_blank" href="#" title="Overlay integrado">🧷 Overlay integrado</a>
+                <a id="lnkOverlayStaticSpn" class="btn-xs" target="_blank" href="/juego/spinner_overlay" title="Para vMix/OBS">🌐 Overlay público</a>
+              </div>
+            </div>
+            <div id="gridSpinners" class="spn-grid"></div>
+            <p class="hint" style="margin-top:10px">Usa <b>Generar</b> (0000), <b>Lanzar</b> y <b>Desbloquear</b> para controlar cada spinner.</p>
+          </div>
+          <div class="modal-foot">
+            <button class="btn ghost" data-close-modal>Cerrar</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- VISOR 20 -->
+      <div id="SpinnersFullView" class="spn-full hidden">
+        <div class="spn-full-wrap">
+          <div class="spn-title">🎰 <span class="spn-red">Spinners</span></div>
+          <div id="spnFullGrid" class="spn-grid large"></div>
+        </div>
+      </div>
+
+      <!-- OVERLAY ÚNICO (integrado) -->
+      <div id="soloSpin" class="solo hidden">
+        <div class="card">
+          <div class="screen" id="soloScreen">
+            <div id="soloDigits" class="digits" title="Click / Espacio = lanzar · G = generar">
+              <span class="d">0</span><span class="d">0</span><span class="d">0</span><span class="d">0</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    <!-- MODAL GANADORES (UNO A UNO) -->
+<div id="winnerModal" class="modal hidden" aria-hidden="true">
+  <div class="modal-backdrop" data-close-winner></div>
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="mdlTitleWin">
+    <div class="modal-head">
+      <h3 id="mdlTitleWin">🏆 <span class="spn-red">GANADOR</span> DETECTADO</h3>
+      <button class="iconbtn" title="Cerrar" data-close-winner>&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="winner-meta">
+        <div class="kv"><b>Figura:</b> <span id="wFigura">—</span></div>
+        <div class="kv"><b>Tabla:</b> <span id="wTabla">—</span></div>
+        <div class="kv"><b>Serie:</b> <span id="wSerie">—</span></div>
+        <div class="kv"><b>Último número:</b> <span id="wUltimo">—</span></div>
+        <div class="kv" style="grid-column:1/-1"><b>Números de la figura:</b> <span id="wNums">—</span></div>
+      </div>
+
+      <div id="wGrid" class="winner-grid"></div>
+
+      <div class="pill" id="wCounter" style="margin:10px 0;justify-content:center;opacity:.9"></div>
+
+      <div class="winner-actions">
+        <button id="wNext" class="btn gold">SIGUIENTE GANADOR</button>
+        <button id="wClose" class="btn red">CERRAR</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+    </main>
+  </div>
+
+  <script>
+    /* ========= Helpers ========= */
+    const $ = s => document.querySelector(s);
+    const $$ = (s,root=document)=> Array.from(root.querySelectorAll(s));
+    const sleep = ms => new Promise(r=>setTimeout(r, ms));
+    const bust  = () => `?_=${Date.now()}`;
+    const Q = new URL(location.href).searchParams;
+    const isSpin = () => Q.get('spin') === '1';
+    const isVisor20 = () => Q.get('spinners') === '1';
+
+    const safeFetch = async (url, opts={}) => {
+      try{
+        const r = await fetch(url, opts);
+        if(!r.ok) throw new Error(r.statusText);
+        return await r.json();
+      }catch(e){
+        console.error('fetch error', url, e);
+        return null;
+      }
+    };
+
+    // Canal local
+    const BC_NAME='glbingo-spin';
+    let bc;
+    try{ bc=new BroadcastChannel(BC_NAME);}catch(_){ bc=null; }
+
+    /* ========= Juego base ========= */
+    let running=false, timer=null, secs=0, stack=[];
+    const seg=$('#seg'), tot=$('#tot'), last6El=$('#last6'), ultimoCircle=$('#ultimoCircle'),
+          grid=$('#grid'), lockEl=$('#lock'), histEl=$('#hist');
+
+    const setDisabled = (el,on)=>{ el.disabled=!!on; el.style.opacity=on? .6:1; el.style.cursor=on?'not-allowed':'pointer'; };
+
+    function updateSecondsUI(){ seg.textContent = String(secs); }
+    function setLockedUI(on){ lockEl.style.display = on ? 'flex' : 'none'; }
+
+    
+    function render(){
+      const last = stack.at(-1);
+      const marked = new Set(stack);
+
+      grid.innerHTML='';
+      for(let n=1;n<=75;n++){
+        const d=document.createElement('div');
+        const isMarked = marked.has(n);
+        d.className = isMarked ? (n===last ? 'ball marked last' : 'ball marked') : 'ball';
+        d.textContent = n;
+        d.onclick = ()=>marcar(n);
+        grid.appendChild(d);
+      }
+
+      tot.textContent = stack.length;
+      ultimoCircle.textContent = last ?? '–';
+
+      // Últimas 6 (la primera es la más reciente)
+      const ult6 = stack.slice(-6).reverse();
+      last6El.innerHTML = '<span style="opacity:.85;white-space:nowrap">Últimas 6:</span>';
+      ult6.forEach((num, i)=>{
+        const b=document.createElement('div');
+        b.className = 'chip6 ' + (i===0 ? 'last' : 'prev');
+        b.textContent = num;
+        last6El.appendChild(b);
+      });
+
+      // Historial (orden)
+      histEl.innerHTML='';
+      stack.forEach((num,idx)=>{
+        const c=document.createElement('div');
+        c.className='hchip'+(num===last?' live':'');
+        c.innerHTML=`<span class="order">${idx+1}</span>${num}`;
+        histEl.appendChild(c);
+      });
+    }
+
+      tot.textContent = stack.length;
+      ultimoCircle.textContent = last ?? '–';
+
+      const ult6 = stack.slice(-6).reverse();
+      last6El.innerHTML = '<span style="opacity:.85;white-space:nowrap">Últimas 6:</span>';
+      ult6.forEach(num=>{
+        const b=document.createElement('div');
+        b.className='chip6 live'; b.textContent=num;
+        last6El.appendChild(b);
+      });
+
+      histEl.innerHTML='';
+      stack.forEach((num,idx)=>{
+        const c=document.createElement('div');
+        c.className='hchip'+(num===last?' live':'');
+        c.innerHTML=`<span class="order">${idx+1}</span>${num}`;
+        histEl.appendChild(c);
+      });
+    }
+
+    async function cargar(){
+      const j = await safeFetch('/juego/estado.json'+bust());
+      if(j && j.ok){
+        stack=(j.stack||[]).map(Number); render();
+        applySpinnerStateUI(j.spinner_state);
+      }
+    }
+
+    async function marcar(n){
+  if(!running){ lockEl.animate([{opacity:.9},{opacity:1}],{duration:200}); return; }
+  if(stack.includes(n)) return;
+  const j = await safeFetch('/juego/marcar', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({numero:n})});
+  if(j && j.success){
+    stack=(j.stack||[]).map(Number);
+    secs=0; updateSecondsUI();
+    render();
+
+    // 🏆 Ganadores: mostrar ventana flotante (uno a uno)
+    if(Array.isArray(j.ganadores_nuevos) && j.ganadores_nuevos.length){
+      enqueueWinners(j.ganadores_nuevos);
+    }
+  }
+}
+
+
+    async function reversaOne(){
+      const j = await safeFetch('/juego/reversa', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({})});
+      if(j && j.success){ stack=j.stack.map(Number); render(); }
+    }
+    async function reversaK(k){
+      if(!Number.isFinite(k) || k<=0) return;
+      for(let i=0;i<k;i++){ await reversaOne(); }
+    }
+    async function reversaAll(){
+      const j = await safeFetch('/juego/reversa', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({all:true})});
+      if(j && j.success){ stack=j.stack.map(Number); render(); }
+    }
+    async function resetJuego(){
+      if(!confirm('¿Seguro que quieres resetear TODO?')) return;
+      const j = await safeFetch('/juego/reset',{method:'POST'});
+      if(j && j.success){ stack=[]; render(); secs=0; updateSecondsUI(); stop(); await cargar(); }
+    }
+
+    function start(){
+      if(running) return;
+      running=true; setLockedUI(false);
+      setDisabled($('#start'), true); setDisabled($('#stop'), false);
+      timer=setInterval(()=>{ secs++; updateSecondsUI(); },1000);
+    }
+    function stop(){
+      running=false; setLockedUI(true);
+      setDisabled($('#start'), false); setDisabled($('#stop'), true);
+      if(timer){clearInterval(timer); timer=null;}
+    }
+
+    $('#start').onclick=start;
+    $('#stop').onclick=stop;
+    $('#reset').onclick=resetJuego;
+    $('#rev1').onclick=reversaOne;
+    $('#revn').onclick=()=>{ const k=parseInt(prompt('¿Cuántas balotas reversar?','1'),10); if(Number.isFinite(k)&&k>0) reversaK(k); };
+    $('#revall').onclick=reversaAll;
+
+    $('#ultimoCircle').addEventListener('click', async ()=>{
+      const n=stack.at(-1); if(!n) return;
+      await fetch('/juego/activar_stinger',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({numero:n})});
+    });
+
+    /* ========= Figuras ========= */
+    async function resolverFecha(){
+      const j = await safeFetch('/juego/sorteo_fecha'+bust());
+      return (j && j.fecha) ? j.fecha : new Date().toISOString().slice(0,10);
+    }
+    async function loadFiguras(){
+        const fecha = await resolverFecha();
+        $('#figFecha') && ($('#figFecha').textContent = fecha);
+
+        // Cargamos figuras del día y ganadores (para mostrar resumen + tablas ganadoras por figura)
+        const [jF, jG] = await Promise.all([
+          safeFetch('/juego/figuras' + bust()),
+          safeFetch('/juego/ganadores' + bust())
+        ]);
+
+        const figs = (jF && jF.figuras) ? jF.figuras : [];
+        const wins = (jG && jG.ganadores) ? jG.ganadores : [];
+
+        // Resumen de ganadores
+        const totalWins = wins.length;
+        $('#ganCount') && ($('#ganCount').textContent = String(totalWins));
+
+        const countByFig = {};
+        const tablasByFig = {}; // { 'FIGURA': Set(['25','183']) }
+        wins.forEach(w=>{
+          const fig = (w.figura || '').toString().trim();
+          if(!fig) return;
+          countByFig[fig] = (countByFig[fig] || 0) + 1;
+
+          const t = (w.tabla ?? w.tabla_num ?? w.carton_id ?? w.carton ?? '').toString().trim();
+          if(t){
+            if(!tablasByFig[fig]) tablasByFig[fig] = new Set();
+            tablasByFig[fig].add(t);
+          }
+        });
+
+        const figsDoneTxt = Object.keys(countByFig).length
+          ? Object.entries(countByFig)
+              .sort((a,b)=> (b[1]-a[1]) || a[0].localeCompare(b[0]))
+              .map(([k,v])=> `${k} (${v})`)
+              .join(', ')
+          : '—';
+        $('#ganFigList') && ($('#ganFigList').textContent = figsDoneTxt);
+
+        const el = $('#figList');
+        if(!el) return;
+        el.innerHTML = '';
+
+        if(!figs.length){
+          el.innerHTML = '<div class="pill" style="justify-content:center;opacity:.8">No hay figuras cargadas.</div>';
+          return;
+        }
+
+        figs.forEach(f=>{
+          const row = document.createElement('div');
+          row.className = 'fig-item' + (tablasSet.length ? ' won' : '');
+
+          const stay = ((f.estado||'').toLowerCase() !== 'se-fue');
+          const nombre = (f.nombre||'').toString();
+          const valor = (f.valor!=null ? f.valor : '').toString();
+
+          const tablasSet = tablasByFig[nombre] ? Array.from(tablasByFig[nombre]) : [];
+          tablasSet.sort((a,b)=> (parseInt(a,10)||0) - (parseInt(b,10)||0));
+
+          const infoTablas = tablasSet.length
+            ? `🏆 Tablas: ${tablasSet.map(t=>`<button class="btn-xs" data-open-winner data-fig="${nombre}" data-tab="${t}" title="Ver tabla ${t}">#${t}</button>`).join(' ')}`
+            : `<span style="opacity:.65">Sin ganadores aún</span>`;
+
+          row.innerHTML = `
+            <div class="fig-name">${nombre}</div>
+            <div>💰 Valor: <b>${valor}</b></div>
+            <div><span class="badge ${tablasSet.length?'win':(stay?'ok':'no')}">${tablasSet.length?'Ganada':(stay?'Se quedó':'Se fue')}</span></div>
+            <div class="fig-actions">
+              <div class="fig-wins">${infoTablas}</div>
+              <div style="display:flex;gap:8px">
+                <button class="btn-xs ok">Se quedó</button>
+                <button class="btn-xs no">Se fue</button>
+              </div>
+            </div>
+          `;
+
+          const [btnOk, btnNo] = row.querySelectorAll('button');
+
+          // Si ya tuvo ganadores, la figura queda fuera de juego (solo lectura)
+          const isWon = tablasSet.length > 0;
+          if(isWon){ btnOk.disabled = true; btnNo.disabled = true; }
+
+          btnOk.addEventListener('click', async ()=>{
+            await safeFetch('/juego/figura_estado' + bust(), {
+              method:'POST',
+              headers:{'Content-Type':'application/json'},
+              body: JSON.stringify({ fecha, figura: nombre, estado: 'se-quedo' })
+            });
+            loadFiguras();
+          });
+          btnNo.addEventListener('click', async ()=>{
+            await safeFetch('/juego/figura_estado' + bust(), {
+              method:'POST',
+              headers:{'Content-Type':'application/json'},
+              body: JSON.stringify({ fecha, figura: nombre, estado: 'se-fue' })
+            });
+            loadFiguras();
+          });
+
+          
+          // Click en una tabla ganadora -> reabrir modal con esa tabla
+          row.querySelectorAll('[data-open-winner]').forEach(btn=>{
+            btn.addEventListener('click', ()=>{
+              const fig = btn.getAttribute('data-fig') || '';
+              const tab = btn.getAttribute('data-tab') || '';
+              const found = wins.find(w => String(w.figura||'').trim()===String(fig).trim() && String(w.tabla||'').trim()===String(tab).trim());
+              if(found && window.forceShowWinner){ window.forceShowWinner(found); }
+            });
+          });
+
+          el.appendChild(row);
+
+        });
+      }
+
+    $('#btnRefrescarFig')?.addEventListener('click', loadFiguras);
+
+    /* ========= Spinners (control backend) ========= */
+    const dotOverlay   = $('#dotOverlay');
+    const txtOverlay   = $('#txtOverlay');
+    const btnLaunch    = $('#spnLaunch');
+    const btnLock      = $('#spnLock');
+    const btnUnlock    = $('#spnUnlock');
+
+    function applySpinnerStateUI(st){
+      if(!st) return;
+      dotOverlay.style.background = st.overlay_on ? '#23d18b' : '#666';
+      txtOverlay.textContent = (st.overlay_on ? 'Overlay ON' : 'Overlay OFF') + ' · ' + (st.locked ? 'Bloqueado' : 'Libre');
+      setDisabled(btnLaunch, !!st.locked);
+      setDisabled(btnLock,   false);
+      setDisabled(btnUnlock, !st.locked);
+    }
+
+    async function fetchSpinnerState(){
+      const j = await safeFetch('/juego/estado.json'+bust());
+      if(j && j.ok) applySpinnerStateUI(j.spinner_state);
+    }
+
+    // === Botón "🎰 Lanzar" (barra) -> /juego/spinners/launch  (index 0..19)
+    btnLaunch.addEventListener('click', async ()=>{
+      const idxStr = prompt('¿Qué spinner (1–20) quieres lanzar?', '1');
+      const index = parseInt(idxStr||'1', 10);
+      if (!Number.isFinite(index) || index < 1 || index > 20) return;
+
+      const index0 = index - 1;
+      const target = (prompt('Objetivo (4 dígitos):', '0123')||'').replace(/\D/g,'').padStart(4,'0').slice(0,4);
+      if (!target) return;
+
+      const r = await fetch('/juego/spinners/launch', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ index:index0, target, overlay_on: true })
+      });
+
+      let js = null;
+      try{ js = await r.json(); }catch(_){}
+      if (!r.ok || !js || !js.ok){
+        alert((js && (js.error||js.msg)) || 'No se pudo lanzar el spinner');
+        return;
+      }
+
+      await fetchSpinnerState();
+      try{ bc && bc.postMessage({type:'solo-spin', op:'launch', index:index0}); }catch(_){}
+      try{ localStorage.setItem('glbingo-spin-evt', JSON.stringify({t:Date.now(), op:'launch', index:index0})); }catch(_){}
+    });
+
+    btnLock.addEventListener('click', async ()=>{
+      const j = await safeFetch('/juego/spinners/lock',{method:'POST'});
+      if(j) applySpinnerStateUI(j.state || j.spinner_state);
+      fetchSpinnerState();
+    });
+    btnUnlock.addEventListener('click', async ()=>{
+      const j = await safeFetch('/juego/spinners/unlock',{method:'POST'});
+      if(j) applySpinnerStateUI(j.state || j.spinner_state);
+      fetchSpinnerState();
+    });
+
+    /* ========= Spinners (20 / modal / overlay 1:1) ========= */
+    const modalSpn = $('#spinnerModal'), gridSpinners=$('#gridSpinners'),
+          btnSpinners=$('#btnSpinners'), btnRefreshSpn=$('#btnRefreshSpn'),
+          btnOpenWindowSpn=$('#btnOpenWindowSpn'), lnkFullUrlSpn=$('#lnkFullUrlSpn'), lnkOverlayUrlSpn=$('#lnkOverlayUrlSpn'), lnkOverlayStaticSpn=$('#lnkOverlayStaticSpn');
+
+    const VISOR20_URL = location.origin + location.pathname + '?spinners=1';
+    const SOLO_INTEGRATED = location.origin + location.pathname + '?spin=1&overlay=1';
+    lnkFullUrlSpn.href = VISOR20_URL;
+    lnkOverlayUrlSpn.href = SOLO_INTEGRATED;
+    lnkOverlayStaticSpn.href = '/juego/spinner_overlay';
+
+    // --- COMPAT: acepta JSON como lista directa o como {spinners:[...]} ---
+    async function fetchSpnersJSON(){
+      const j = await safeFetch('/juego/spinners'+bust());
+      if (!j) return new Array(20).fill('');
+      if (Array.isArray(j)) return j.slice(0,20).map(normaliza4);
+      if (Array.isArray(j.spinners)) return j.spinners.slice(0,20).map(normaliza4);
+      return new Array(20).fill('');
+    }
+    const fetchSpinnersJSON = fetchSpnersJSON; // alias
+
+    function normaliza4(v){
+      if (v==null) return '';
+      if (typeof v === 'object' && v.value!=null) return String(v.value).padStart(4,'0').slice(0,4);
+      return String(v).replace(/\D/g,'').padStart(4,'0').slice(0,4);
+    }
+
+    // --- COMPAT XML ---
+    async function fetchXML(url){
+      const r = await fetch(url + (url.includes('?')?'&':'?') + '_=' + Date.now());
+      if(!r.ok) return null;
+      const txt = await r.text();
+      const xml = new DOMParser().parseFromString(txt, "text/xml");
+      const out=[];
+      xml.querySelectorAll('spinner').forEach(n=>{
+        const v = n.getAttribute('value') || n.textContent || '';
+        out.push(normaliza4(v));
+      });
+      if (out.length===0){
+        xml.querySelectorAll('n').forEach(n=>{
+          const v = n.getAttribute('v') || n.textContent || '';
+          out.push(normaliza4(v));
+        });
+      }
+      return (out.concat(Array(20).fill(''))).slice(0,20);
+    }
+
+    async function fetchSpinnersSafe(){
+      const j = await fetchSpinnersJSON(); if(j.some(Boolean)) return j;
+      let x = await fetchXML('/static/db/vmix_spinners.xml'); if(x && x.some(Boolean)) return x;
+      x = await fetchXML('/static/db/spinners.xml'); if(x && x.some(Boolean)) return x;
+      const s = await safeFetch('/juego/estado.json'+bust()); if(s && Array.isArray(s.spinners)) return s.spinners.slice(0,20).map(normaliza4);
+      return new Array(20).fill('');
+    }
+
+    function storeBase(f){ return `soloSpin:${f}`; }
+    function loadUsed(f){ try{ const raw = localStorage.getItem(storeBase(f)+':used'); if(raw) return new Set(JSON.parse(raw)); }catch(_){ } return new Set(); }
+    function saveUsed(f, set){ localStorage.setItem(storeBase(f)+':used', JSON.stringify(Array.from(set))); }
+
+    function emitSpin(op,index){
+      try{ bc && bc.postMessage({type:'solo-spin',op,index}); }catch(_){}
+      try{ localStorage.setItem('glbingo-spin-evt', JSON.stringify({t:Date.now(),op,index})); }catch(_){}
+    }
+
+    async function renderSpinnersGridWithActions(container){
+      const valores = await fetchSpinnersSafe();
+      const fecha = await resolverFecha();
+      const usados = loadUsed(fecha);
+
+      container.innerHTML='';
+      valores.forEach((val,idx)=>{
+        const valor = (val||'').toString().padStart(4,'•');
+        const used = usados.has(idx);
+        const cell=document.createElement('div'); cell.className='spn-cell';
+        if (used) cell.classList.add('used');
+        cell.innerHTML=`
+          <div class="label">#${idx+1}</div>
+          <div class="spn-num">${valor}</div>
+          <div class="spn-actions">
+            <button class="mini gen"   data-gen>⚙ Generar</button>
+            <button class="mini ${used?'lock':'lanz'}" data-launch>${used?'🔒 Enviado':'🚀 Lanzar'}</button>
+            ${used ? '<button class="mini unlock" data-unlock>🔓 Desbloquear</button>' : ''}
+          </div>`;
+
+        // Generar => sólo posiciona el overlay 1:1
+        cell.querySelector('[data-gen]').onclick = ()=> emitSpin('gen', idx);
+
+        // Lanzar (si está usado, pregunta y lo libera antes de volver a lanzarlo)
+        cell.querySelector('[data-launch]').onclick = async ()=>{
+          if (usados.has(idx)){
+            const ok = confirm('Este spinner ya fue lanzado. ¿Deseas volver a lanzarlo?');
+            if (!ok) return;
+            usados.delete(idx); saveUsed(fecha, usados);
+          }
+          const target = String((val||'')).replace(/\D/g,'').padStart(4,'0').slice(0,4);
+          if (!target) { alert('Este spinner no tiene valor asignado.'); return; }
+
+          const r = await fetch('/juego/spinners/launch',{
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({ index: idx, target, overlay_on: true }) // 0-based
+          });
+          let js=null; try{ js = await r.json(); }catch(_){}
+          if (!r.ok || !js || !js.ok){
+            alert((js && (js.error||js.msg)) || 'No se pudo lanzar el spinner');
+            return;
+          }
+
+          usados.add(idx); saveUsed(fecha, usados);
+          renderSpinnersGridWithActions(container);
+
+          try{ bc && bc.postMessage({type:'solo-spin', op:'launch', index:idx}); }catch(_){}
+          try{ localStorage.setItem('glbingo-spin-evt', JSON.stringify({t:Date.now(), op:'launch', index:idx})); }catch(_){}
+        };
+
+        // Desbloquear individual (nuevo)
+        const btnUn = cell.querySelector('[data-unlock]');
+        if (btnUn){
+          btnUn.onclick = ()=>{
+            usados.delete(idx); saveUsed(fecha, usados);
+            renderSpinnersGridWithActions(container);
+          };
+        }
+
+        container.appendChild(cell);
+      });
+    }
+
+    function openModalSpinners(){ modalSpn.classList.remove('hidden'); renderSpinnersGridWithActions(gridSpinners); }
+    function closeModalSpinners(){ modalSpn.classList.add('hidden'); }
+    $('#btnSpinners')?.addEventListener('click', openModalSpinners);
+    $('#btnRefreshSpn')?.addEventListener('click', ()=>renderSpinnersGridWithActions(gridSpinners));
+    $('#btnOpenWindowSpn')?.addEventListener('click', ()=> window.open('/juego/spinner_overlay','SoloSpinnerPreview','width=920,height=680'));
+    $$('#spinnerModal [data-close-modal]').forEach(el=> el.addEventListener('click', closeModalSpinners));
+    window.addEventListener('focus', ()=> !modalSpn.classList.contains('hidden') && renderSpinnersGridWithActions(gridSpinners));
+
+    // Visor 20 (página completa)
+    async function bootFull20(){
+      $('.layout')?.classList.add('hidden');
+      $('#SpinnersFullView').classList.remove('hidden');
+      const valores = await fetchSpinnersSafe();
+      const fecha = await resolverFecha();
+      const usados = loadUsed(fecha);
+      const g = $('#spnFullGrid'); g.innerHTML='';
+      valores.forEach((val,idx)=>{
+        const cell=document.createElement('div'); cell.className='spn-cell';
+        if (usados.has(idx)) cell.classList.add('used');
+        cell.innerHTML=`<div class="label">#${idx+1}</div><div class="spn-num">${(val||'').toString().padStart(4,'•')}</div>`;
+        g.appendChild(cell);
+      });
+      setTimeout(bootFull20, 3000);
+    }
+
+    // Overlay integrado 1:1
+    $('#btnSoloSpin')?.addEventListener('click', ()=> window.open(location.origin + location.pathname + '?spin=1&overlay=1', 'SoloSpinner', 'width=900,height=650'));
+
+    /* ========= Overlay integrado (solo navegador) ========= */
+    const soloDigits = $('#soloDigits');
+    let SOLO_LIST = new Array(20).fill(''), SOLO_I=0, SOLO_USED=new Set();
+    const DIGS = 4;
+
+    function setSoloDigits(str){
+      const s = (str ?? '').padStart(DIGS, '0').slice(-DIGS);
+      const boxes = $$('.d', soloDigits);
+      for(let i=0;i<DIGS;i++) boxes[i].textContent = s[i];
+    }
+    function kBase(fecha){ return `soloSpin:${fecha}`; }
+    function loadUsedSolo(fecha){ try{ const raw = localStorage.getItem(kBase(fecha)+':used'); if(raw){ return new Set(JSON.parse(raw)); } }catch(_){ } return new Set(); }
+    function saveUsedSolo(fecha){ localStorage.setItem(kBase(fecha)+':used', JSON.stringify(Array.from(SOLO_USED))); }
+    function saveIdx(fecha){ localStorage.setItem(kBase(fecha)+':idx', String(SOLO_I)); }
+    function readIdx(fecha){ const v = parseInt(localStorage.getItem(kBase(fecha)+':idx')||'0',10); return Number.isFinite(v) ? v : 0; }
+    function targetForIndex(i){ const v = (SOLO_LIST[i]||'').trim(); return v ? v.padStart(4,'0') : ''; }
+    function isAvailable(i){ const has = !!targetForIndex(i); return has && !SOLO_USED.has(i); }
+    function nextAvailableFrom(start){
+      const n = SOLO_LIST.length;
+      for(let step=0; step<n; step++){ const j = (start + step) % n; if (isAvailable(j)) return j; }
+      return -1;
+    }
+
+    async function rollDigitTo(el, targetDigit, extraTurns=1){
+      let cur = /^\d$/.test(el.textContent) ? parseInt(el.textContent,10) : 0;
+      const to = parseInt(targetDigit,10);
+      const steps = extraTurns*10 + ((to - cur + 10) % 10);
+      for(let s=0; s<steps; s++){
+        cur = (cur+1) % 10;
+        el.textContent = String(cur);
+        const t = 30 + Math.min(200, s*3);
+        await sleep(t);
+      }
+    }
+    async function tambolaRollTo(targetStr){
+      const t = targetStr.padStart(DIGS,'0').slice(-DIGS);
+      const boxes = $$('.d', soloDigits);
+      for(let i=0;i<DIGS;i++){ await rollDigitTo(boxes[i], t[i], 2+i); }
+      setSoloDigits(t);
+    }
+
+    function updateSoloUI(fecha){
+      if (SOLO_I>=0 && SOLO_USED.has(SOLO_I)) setSoloDigits(targetForIndex(SOLO_I));
+      else setSoloDigits('0000');
+      saveIdx(fecha);
+    }
+
+    async function soloGenerar(){
+      const f = await resolverFecha();
+      const next = nextAvailableFrom((SOLO_I+1) % SOLO_LIST.length);
+      if (next !== -1){ SOLO_I = next; updateSoloUI(f); }
+    }
+    async function soloLanzar(){
+      const f = await resolverFecha();
+      if (SOLO_I < 0) return;
+      const target = targetForIndex(SOLO_I);
+      if (!target) return;
+      if (SOLO_USED.has(SOLO_I)){
+        const ok = confirm('Este spinner ya fue lanzado. ¿Deseas volver a lanzarlo?');
+        if (!ok) return;
+        SOLO_USED.delete(SOLO_I); saveUsedSolo(f);
+      }
+      await tambolaRollTo(target);
+      SOLO_USED.add(SOLO_I); saveUsedSolo(f);
+      saveIdx(f);
+    }
+
+    async function bootSolo(){
+      const j = await safeFetch('/juego/spinners'+bust());
+      if (j){
+        if (Array.isArray(j)) SOLO_LIST = j.slice(0,20).map(normaliza4);
+        else if (Array.isArray(j.spinners)) SOLO_LIST = j.spinners.slice(0,20).map(normaliza4);
+      } else {
+        SOLO_LIST = new Array(20).fill('');
+      }
+      const f = await resolverFecha();
+      SOLO_USED = loadUsedSolo(f);
+      const qI = parseInt(Q.get('i')||'-1',10);
+      if (Number.isFinite(qI) && qI>=0 && qI<SOLO_LIST.length){ SOLO_I = qI; }
+      else { SOLO_I = readIdx(f); if (!isAvailable(SOLO_I)) SOLO_I = nextAvailableFrom(SOLO_I); }
+      updateSoloUI(f);
+
+      $('#soloScreen').addEventListener('click', soloLanzar);
+      window.addEventListener('keydown', e=>{
+        if (e.code==='Space'){ e.preventDefault(); soloLanzar(); }
+        else if (e.key==='g' || e.key==='G'){ e.preventDefault(); soloGenerar(); }
+      });
+
+      try{ bc && bc.addEventListener('message', async (ev)=>{ const d=ev.data||{}; if(d.type!=='solo-spin') return; if(Number.isFinite(d.index)){ SOLO_I=d.index; updateSoloUI(await resolverFecha()); } if(d.op==='gen') await soloGenerar(); else if(d.op==='launch') await soloLanzar(); }); }catch(_){}
+      window.addEventListener('storage', async (ev)=>{
+        if (ev.key !== 'glbingo-spin-evt') return;
+        try{
+          const d = JSON.parse(ev.newValue||{});
+          if (Number.isFinite(d.index)){ SOLO_I = d.index; updateSoloUI(await resolverFecha()); }
+          if (d.op === 'gen')      await soloGenerar();
+          else if (d.op === 'launch') await soloLanzar();
+        }catch(_){}
+      });
+    }
+
+    // Modo visor/overlay
+    if (isVisor20()){
+      $('.layout')?.classList.add('hidden');
+      $('#SpinnersFullView').classList.remove('hidden');
+      setTimeout(async function loop(){ await bootFull20(); }, 1);
+    } else if (isSpin()){
+      $('.layout')?.classList.add('hidden');
+      document.documentElement.classList.add('overlay');
+      document.body.classList.add('overlay');
+      $('#soloSpin').classList.remove('hidden');
+      bootSolo();
+    }
+
+    // Boot
+    setLockedUI(true);
+    cargar();
+    loadFiguras();
+    setInterval(fetchSpinnerState, 3000);
+  
+// ===========================
+// GANADORES: MODAL + COLA + POLLING (AUTO)
+// ===========================
+(() => {
+  const byId = (id) => document.getElementById(id);
+
+  // Persistimos "vistos" para que no se repita al recargar
+  const SEEN_KEY = "glbingo_winner_seen_v1";
+  const seen = new Set();
+  try {
+    const saved = JSON.parse(localStorage.getItem(SEEN_KEY) || "[]");
+    if (Array.isArray(saved)) saved.forEach(k => seen.add(String(k)));
+  } catch(_) {}
+
+  const saveSeen = () => {
+    try {
+      const arr = Array.from(seen).slice(-300);
+      localStorage.setItem(SEEN_KEY, JSON.stringify(arr));
+    } catch(_) {}
+  };
+
+  const makeKey = (w) => {
+    if (!w || typeof w !== "object") return "";
+    if (w.key) return String(w.key);
+    const fecha = w.fecha ?? "";
+    const fig = w.fig_code ?? w.figura ?? "";
+    const serie = w.serie ?? "";
+    const tabla = w.tabla ?? "";
+    return `${fecha}|${fig}|${serie}|${tabla}`;
+  };
+
+  let queue = [];
+  let showing = false;
+
+  const openModal = () => {
+    const m = byId("winnerModal");
+    if (!m) return;
+    m.classList.remove("hidden");
+    showing = true;
+  };
+
+  const closeModal = () => {
+    const m = byId("winnerModal");
+    if (!m) return;
+    m.classList.add("hidden");
+    showing = false;
+    queue = [];
+    // limpiamos el contador
+    const c = byId("wCounter");
+    if (c) c.textContent = "";
+  };
+
+  const renderGrid = (w) => {
+    const gridEl = byId("wGrid");
+    if (!gridEl) return;
+    gridEl.innerHTML = "";
+
+    const cols = ["B", "I", "N", "G", "O"];
+    const required = new Set((w.required_pos || []).map(String));
+    const markedNums = new Set((w.marcados_nums || []).map(n => String(n)));
+    const lastWin = (w.ultima_bola != null ? String(w.ultima_bola) : '');
+    const grid = w.grid || [];
+
+    for (let r = 0; r < 5; r++) {
+      for (let c = 0; c < 5; c++) {
+        const pos = cols[c] + String(r + 1);
+        const num = (grid[r] || [])[c];
+
+        const cell = document.createElement("div");
+        cell.className = "wcell";
+
+        // FREE (centro)
+        const isFree = (pos === "N3") && (!num || Number(num) === 0);
+        if (isFree) {
+          cell.classList.add("free");
+          cell.textContent = "QR";
+        } else {
+          cell.textContent = (num === null || num === undefined) ? "" : String(num);
+        }
+
+        if (required.has(pos)) cell.classList.add("req");
+        if (!isFree && num && markedNums.has(String(num))) cell.classList.add("marked");
+        if (!isFree && lastWin && String(num) === lastWin) cell.classList.add("lastwin");
+
+        gridEl.appendChild(cell);
+      }
+    }
+  };
+
+  const renderWinner = (w) => {
+    const t = byId("wTitle");   if (t) t.textContent = "🏆 Tabla ganadora";
+    const f = byId("wFigura");  if (f) f.textContent = `${w.figura || ""}${(w.valor !== undefined && w.valor !== null) ? `  ($${w.valor})` : ""}`;
+    const tb = byId("wTabla");  if (tb) tb.textContent = `Tabla # ${w.tabla || ""}`;
+    const s = byId("wSerie");   if (s) s.textContent = `Serie: ${w.serie || ""}`;
+    const u = byId("wUltimo");  if (u) u.textContent = `Última balota: ${w.ultima_bola ?? ""}`;
+
+    const nums = (w.numeros_figura || []).map(String).join(", ");
+    const n = byId("wNums");    if (n) n.textContent = nums ? `Números figura: ${nums}` : "";
+
+    const c = byId("wCounter");
+    if (c) c.textContent = queue.length ? `Pendientes: ${queue.length}` : "";
+
+    renderGrid(w);
+  };
+
+  const showNext = () => {
+    if (!queue.length) { closeModal(); return; }
+    const w = queue.shift();
+    renderWinner(w);
+    openModal();
+  };
+
+  // ESTA ES LA FUNCIÓN QUE FALTABA (la llama /juego/marcar)
+  window.enqueueWinners = (list) => {
+    if (!Array.isArray(list) || !list.length) return;
+
+    for (const w of list) {
+      const k = makeKey(w);
+      if (!k) continue;
+      if (seen.has(k)) continue;
+      seen.add(k);
+      queue.push(w);
+    }
+    saveSeen();
+
+    if (!showing) showNext();
+  };
+
+  // Polling por si el ganador ya existe (o si se perdió la respuesta del POST)
+  const pollGanadores = async () => {
+    try {
+      const j = await safeFetch("/juego/ganadores" + bust());
+      if (j && j.ok && Array.isArray(j.ganadores) && j.ganadores.length) {
+        window.enqueueWinners(j.ganadores);
+      }
+    } catch(_) {}
+  };
+
+  // Botones / eventos
+  const bind = () => {
+    const btnNext = byId("wNext");
+    const btnClose = byId("wClose");
+    if (btnNext) btnNext.addEventListener("click", () => showNext());
+    if (btnClose) btnClose.addEventListener("click", () => closeModal());
+
+    document.addEventListener("click", (ev) => {
+      const t = ev.target;
+      if (t && t.getAttribute && t.getAttribute("data-close-winner") !== null) closeModal();
+    });
+
+    document.addEventListener("keydown", (ev) => {
+      if (ev.key === "Escape") closeModal();
+    });
+  };
+
+  // Start
+  bind();
+  pollGanadores();
+  setInterval(() => {
+    if (document.visibilityState === "visible") pollGanadores();
+  }, 1500);
+
+})();
+
+</script>
+</body>
+</html>
+

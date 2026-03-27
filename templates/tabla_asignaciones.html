@@ -1,23 +1,133 @@
-{% for v in asignaciones_mostrar %}
-    <div style="margin:10px 0 10px 0;">
-        <b style="font-size:1.1em;">{{ v.nombre }} {{ v.apellido }}</b>
-        <span style="color:#13c7b0;font-weight:600;">({{ v.seudonimo }})</span>
-        <div style="margin:3px 0;">
-            {% for p in v.planillas %}
-                <span style="display:inline-block;margin:1.5px;">
-                  Planilla #{{ p.numero }} ({{ p.rango }})
-                  <button class="btn-eliminar"
-                    title="Eliminar"
-                    data-fecha="{{ fecha_seleccionada }}"
-                    data-nombre="{{ v.nombre }}"
-                    data-apellido="{{ v.apellido }}"
-                    data-seudonimo="{{ v.seudonimo }}"
-                    data-numero="{{ p.numero }}"
-                    style="background:#e74c3c;color:#fff;border:none;border-radius:5px;padding:2px 7px;cursor:pointer;font-size:0.98em;margin-left:3px;">
-                    &times;
-                  </button>
-                </span>
-            {% endfor %}
-        </div>
+{# tabla_asignaciones.html - Vista elegante y operativa por vendedor / serie #}
+<div class="assign-wrap">
+  {% if not serie_seleccionada %}
+    <div class="empty-box">
+      <div style="font-weight:900;font-size:1.04rem;margin-bottom:4px">Selecciona una serie</div>
+      <div>Primero elige una <b>serie</b> y una <b>fecha</b> con impresión registrada para ver y administrar las planillas.</div>
     </div>
-{% endfor %}
+  {% else %}
+
+    <div class="top-resume">
+      <div class="resume-card">
+        <div class="resume-title"><i class="bi bi-kanban"></i> Resumen de asignación</div>
+        <div class="resume-grid">
+          <div class="kpi">
+            <div class="l">Impresas</div>
+            <div class="n">{{ impresas_serie }}</div>
+          </div>
+          <div class="kpi">
+            <div class="l">Asignadas</div>
+            <div class="n">{{ asignadas_serie }}</div>
+          </div>
+          <div class="kpi">
+            <div class="l">Vacías</div>
+            <div class="n">{{ blanco_serie }}</div>
+          </div>
+        </div>
+        <div class="resume-meta">
+          Serie: <b>{{ serie_seleccionada }}</b> &nbsp;•&nbsp; Fecha: <b>{{ fecha_seleccionada }}</b>
+        </div>
+      </div>
+
+      <div class="avail-card">
+        <div class="avail-title">
+          <span><i class="bi bi-list-check"></i> Planillas disponibles</span>
+          <span class="badge-soft">{{ planillas_disponibles.total if planillas_disponibles else 0 }} libres</span>
+        </div>
+
+        {% if planillas_disponibles and planillas_disponibles.total > 0 %}
+          <div class="avail-ranges">
+            <b>Rangos:</b> {{ planillas_disponibles.rangos or '—' }}
+          </div>
+
+          {% if planillas_disponibles.sugeridos %}
+          <div class="avail-actions">
+            {% for rg in planillas_disponibles.sugeridos %}
+              <button type="button" class="mini-btn ok pick-rango" data-rango="{{ rg }}">
+                <i class="bi bi-plus-circle"></i> Agregar {{ rg }}
+              </button>
+            {% endfor %}
+          </div>
+          {% endif %}
+
+          <div class="avail-grid">
+            {% for num in planillas_disponibles.lista %}
+              <button type="button" class="num-btn pick-planilla" data-numero="{{ num }}" title="Agregar planilla {{ num }}">{{ num }}</button>
+            {% endfor %}
+          </div>
+          {% if planillas_disponibles.truncado %}
+            <div class="hint-bottom">Mostrando las primeras 140. Puedes seguir usando el campo con rangos (ej: 141-180).</div>
+          {% else %}
+            <div class="hint-bottom">Haz clic en cualquier número para agregarlo al campo de asignación.</div>
+          {% endif %}
+        {% else %}
+          <div class="avail-ranges">No quedan planillas vacías para esta serie/fecha.</div>
+        {% endif %}
+      </div>
+    </div>
+
+    {% if asignaciones_mostrar and asignaciones_mostrar|length > 0 %}
+      <div class="vendor-list">
+        {% for a in asignaciones_mostrar %}
+          {% set nombre_full = ((a.nombre or '') ~ ' ' ~ (a.apellido or '')).strip() %}
+          {% set vendor_value = (a.nombre or '') ~ '|' ~ (a.apellido or '') ~ '|' ~ (a.seudonimo or '') %}
+          <div class="vendor-card">
+            <div class="vendor-head">
+              <div class="vendor-id">
+                <div class="avatar-badge">{{ (a.seudonimo or nombre_full or 'V')[:2]|upper }}</div>
+                <div class="v-name">
+                  {{ nombre_full if nombre_full else 'Vendedor' }}
+                  <small>{{ a.seudonimo or 'Sin seudónimo' }}</small>
+                </div>
+              </div>
+
+              <div class="v-stats">
+                <span class="count-pill">{{ a.total_planillas }} planilla{{ 's' if a.total_planillas != 1 else '' }}</span>
+                {% if a.rango_resumen %}
+                  <span class="range-pill" title="{{ a.rango_resumen }}">{{ a.rango_resumen }}</span>
+                {% endif %}
+                <div class="vendor-actions">
+                  <button type="button"
+                          class="mini-btn pick-vendor"
+                          data-vendor-value="{{ vendor_value }}"
+                          title="Seleccionar vendedor para agregar más planillas">
+                    <i class="bi bi-person-check"></i> Usar vendedor
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="vendor-body">
+              {% if a.planillas and a.planillas|length > 0 %}
+                <div class="planillas-wrap">
+                  {% for p in a.planillas %}
+                    <span class="pill" title="Planilla {{ p.numero }} | {{ p.rango }}">
+                      <span>#{{ p.numero }}</span>
+                      {% if p.rango %}<small>{{ p.rango }}</small>{% endif %}
+                      <button type="button" class="del"
+                              data-fecha="{{ fecha_seleccionada }}"
+                              data-serie="{{ serie_seleccionada }}"
+                              data-numero="{{ p.numero }}"
+                              data-nombre="{{ a.nombre }}"
+                              data-apellido="{{ a.apellido }}"
+                              data-seudonimo="{{ a.seudonimo }}"
+                              title="Quitar planilla">×</button>
+                    </span>
+                  {% endfor %}
+                </div>
+              {% else %}
+                <div class="muted">Este vendedor no tiene planillas en esta serie.</div>
+              {% endif %}
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty-box">
+        <div style="font-weight:900;font-size:1.04rem;margin-bottom:4px">Aún no hay asignaciones</div>
+        <div>Selecciona un vendedor arriba y asigna planillas. Aquí podrás verlas, agregar más y quitarlas una por una.</div>
+      </div>
+    {% endif %}
+
+  {% endif %}
+</div>

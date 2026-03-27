@@ -4,105 +4,353 @@
   <meta charset="utf-8" />
   <title>Contabilidad | GL Bingo</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <!-- Iconos + Gráficos -->
+
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
   <style>
     :root{
-      --bg:#0b1121; --panel:#0f1731; --card:#121a2f; --muted:#9eb0d6; --ink:#e9f1ff;
-      --primary:#6ea8fe; --accent:#10b981; --warn:#ffd166; --danger:#ef4444; --info:#38bdf8; --vio:#8b5cf6;
-      --r:16px; --shadow:0 10px 30px rgba(0,0,0,.32);
+      --bg:#f2f6ff;
+      --bg2:#e9f0ff;
+      --panel:#ffffff;
+      --panel2:#f8fafc;
+      --line:#dbe3f3;
+
+      --ink:#081126;
+      --muted:#475569;
+
+      --primary:#1d4ed8;
+      --primary2:#1e40af;
+      --accent:#16a34a;
+      --warn:#b45309;
+      --danger:#dc2626;
+      --info:#0284c7;
+      --vio:#7c3aed;
+
+      --r:16px;
+      --shadow:0 16px 44px rgba(2,6,23,.12);
+      --shadow2:0 10px 26px rgba(2,6,23,.08);
+      --font:system-ui,-apple-system,"Segoe UI",Roboto,Arial;
     }
     *{box-sizing:border-box}
-    body{margin:0;background:linear-gradient(180deg,#0b1121,#0e1630 60%,#0b1121);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial}
-    a{color:var(--primary);text-decoration:none}
-
-    /* Layout */
-    .layout{display:grid;grid-template-columns:260px 1fr;min-height:100vh}
-    .aside{background:#0b1429;border-right:1px solid #16264a;padding:14px 10px}
-    .brand{display:flex;gap:10px;align-items:center;margin-bottom:16px;padding:6px 8px}
-    .brand img{width:42px;height:42px;border-radius:8px}
-    .brand .t{font-weight:800;letter-spacing:.3px}
-    .menu a{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;color:#cfe0ff}
-    .menu a:hover{background:#15224b}
-    .menu a.active{background:#1b2e60;color:#fff;font-weight:700}
-
-    .content{padding:18px}
-    .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
-    .user{display:flex;align-items:center;gap:12px}
-    .user img{width:36px;height:36px;border-radius:50%}
-
-    /* Panels & controls */
-    .panel{background:var(--panel);border-radius:var(--r);box-shadow:var(--shadow);padding:16px}
-    .filters{display:grid;grid-template-columns:repeat(12,1fr);gap:10px;align-items:end}
-    .filters .f{display:flex;flex-direction:column;gap:6px}
-    label{font-size:.8rem;color:var(--muted)}
-    input[type="date"],input[type="text"],input[type="number"],select{
-      background:#0b1323;border:1px solid #293a64;color:var(--ink);border-radius:10px;padding:10px 12px;width:100%
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:var(--font);
+      color:var(--ink);
+      background:
+        radial-gradient(900px 520px at 12% 0%, rgba(29,78,216,.14), transparent 62%),
+        radial-gradient(820px 520px at 88% 10%, rgba(22,163,74,.10), transparent 62%),
+        linear-gradient(180deg, var(--bg), var(--bg2));
     }
-    .btn{border:none;cursor:pointer;border-radius:12px;padding:10px 14px;font-weight:800}
-    .btn-primary{background:var(--primary);color:#08122c}
-    .btn-ghost{background:#16264d;color:#cfe0ff;border:1px solid #2a4377}
-    .btn-danger{background:var(--danger);color:#fff}
+    a{color:var(--primary);text-decoration:none}
+    .muted{color:var(--muted)}
+    .hide{display:none!important}
+
+    .layout{
+      display:grid;
+      grid-template-columns:290px 1fr;
+      min-height:100vh;
+    }
+
+    .aside{
+      background:linear-gradient(180deg, #ffffff, #f5f7ff);
+      border-right:1px solid var(--line);
+      padding:14px 12px;
+      position:sticky; top:0; height:100vh; overflow:auto;
+    }
+    .brand{
+      display:flex;gap:10px;align-items:center;
+      padding:12px;
+      border-radius:14px;
+      background:linear-gradient(180deg, rgba(29,78,216,.10), rgba(255,255,255,1));
+      border:1px solid rgba(29,78,216,.18);
+      box-shadow:var(--shadow2);
+      margin-bottom:12px;
+    }
+    .brand img{width:46px;height:46px;border-radius:12px;object-fit:cover;background:#fff;border:1px solid rgba(2,6,23,.08)}
+    .brand .t{font-weight:1000;letter-spacing:.2px}
+    .brand small{display:block;margin-top:2px}
+
+    .menu{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+    .menu a{
+      display:flex;align-items:center;gap:10px;
+      padding:10px 12px;border-radius:12px;
+      color:#0f172a;
+      border:1px solid transparent;
+      background:transparent;
+      font-weight:900;
+    }
+    .menu a:hover{
+      background:rgba(29,78,216,.08);
+      border-color:rgba(29,78,216,.18);
+    }
+    .menu a.active{
+      background:linear-gradient(180deg, rgba(29,78,216,.18), rgba(29,78,216,.12));
+      border-color:rgba(29,78,216,.30);
+      color:#081126;
+      box-shadow:0 12px 20px rgba(29,78,216,.12);
+    }
+
+    .content{padding:18px 18px 28px}
+    .topbar{
+      display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;
+      margin-bottom:12px;
+    }
+    .title{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+    h2{margin:0;font-size:1.40rem;letter-spacing:.2px}
+    .badge{
+      display:inline-flex;align-items:center;gap:6px;
+      padding:6px 10px;border-radius:999px;
+      background:rgba(29,78,216,.12);
+      border:1px solid rgba(29,78,216,.22);
+      color:#081126;font-weight:1000;font-size:.78rem;
+    }
+    .badge.super{
+      background:rgba(220,38,38,.10);
+      border-color:rgba(220,38,38,.20);
+      color:#5b0b0b;
+    }
+    .user{
+      display:flex;align-items:center;gap:10px;
+      padding:10px 12px;border-radius:14px;
+      background:rgba(255,255,255,.94);
+      border:1px solid rgba(2,6,23,.10);
+      box-shadow:var(--shadow2);
+    }
+    .user img{width:38px;height:38px;border-radius:50%;object-fit:cover;background:#fff;border:1px solid rgba(2,6,23,.08)}
+    .user .name{font-weight:1000}
+    .user .role{font-size:.84rem}
+
+    .panel{
+      background:rgba(255,255,255,.94);
+      border:1px solid rgba(2,6,23,.10);
+      border-radius:var(--r);
+      box-shadow:var(--shadow2);
+      padding:14px;
+    }
+
+    .filters{
+      display:grid;
+      grid-template-columns:repeat(12,1fr);
+      gap:10px;
+      align-items:end;
+    }
+    .f{display:flex;flex-direction:column;gap:6px}
+    label{font-size:.78rem;color:var(--muted);font-weight:900}
+    input[type="date"],input[type="text"],input[type="number"],select{
+      background:#ffffff;
+      border:1px solid #bfcce3;
+      color:#081126;
+      border-radius:12px;
+      padding:10px 12px;
+      width:100%;
+      outline:none;
+      font-weight:900;
+    }
+    input::placeholder{color:#94a3b8;font-weight:800}
+    input:focus,select:focus{
+      border-color:rgba(29,78,216,.70);
+      box-shadow:0 0 0 3px rgba(29,78,216,.16);
+    }
+    .file{
+      background:#ffffff;
+      border:1px dashed #94a3b8;
+      border-radius:12px;
+      padding:10px;
+      width:100%;
+      font-weight:900;
+    }
+
+    .btn{
+      border:none; cursor:pointer;
+      border-radius:12px;
+      padding:10px 14px;
+      font-weight:1000;
+      display:inline-flex;align-items:center;gap:8px;justify-content:center;
+      transition:transform .08s ease, filter .12s ease;
+      user-select:none;
+    }
+    .btn:active{transform:translateY(1px)}
+    .btn-primary{
+      background:linear-gradient(180deg,var(--primary),var(--primary2));
+      color:#fff;
+      box-shadow:0 14px 22px rgba(29,78,216,.18);
+    }
+    .btn-ghost{
+      background:#ffffff;
+      border:1px solid #bfcce3;
+      color:#081126;
+    }
+    .btn-danger{
+      background:linear-gradient(180deg,#ef4444,var(--danger));
+      color:#fff;
+      box-shadow:0 14px 22px rgba(220,38,38,.15);
+    }
+    .btn-warn{
+      background:rgba(180,83,9,.12);
+      border:1px solid rgba(180,83,9,.30);
+      color:#7c2d12;
+    }
     .quick{display:flex;gap:8px;flex-wrap:wrap}
+
+    .toggle{
+      display:flex;align-items:center;gap:10px;
+      padding:10px 12px;border-radius:12px;
+      border:1px solid #bfcce3;
+      background:#fff;
+      font-weight:950;
+      color:#081126;
+      user-select:none;
+    }
+    .toggle input{transform:scale(1.15)}
+    .toggle small{display:block;color:var(--muted);font-weight:800}
+
+    .tabs{
+      display:flex;gap:8px;flex-wrap:wrap;
+      margin:12px 0;
+      position:sticky; top:10px;
+      z-index:10;
+    }
+    .tab{
+      background:#ffffff;
+      border:1px solid #bfcce3;
+      color:#081126;
+      padding:10px 12px;
+      border-radius:999px;
+      font-weight:1000;
+      cursor:pointer;
+      display:inline-flex;align-items:center;gap:8px;
+      box-shadow:0 10px 18px rgba(2,6,23,.05);
+    }
+    .tab.active{
+      background:linear-gradient(180deg, rgba(29,78,216,.14), rgba(29,78,216,.10));
+      border-color:rgba(29,78,216,.34);
+    }
 
     .grid{display:grid;gap:14px}
     .kpis{grid-template-columns:repeat(6,1fr)}
-    .card{background:radial-gradient(130% 140% at 100% 0%,#16203b 0%,#121a2f 42%);border-radius:var(--r);box-shadow:var(--shadow);padding:14px}
-    .kpi{cursor:pointer;transition:transform .08s ease}
-    .kpi:hover{transform:translateY(-2px)}
-    .kpi .h{display:flex;align-items:center;gap:8px;color:#a3b7e8;font-weight:700}
-    .kpi .v{margin-top:6px;font-size:1.55rem;font-weight:900}
-    .kpi small{color:#7fb0ff}
-
+    .card{
+      background:rgba(255,255,255,.97);
+      border:1px solid rgba(2,6,23,.10);
+      border-radius:var(--r);
+      box-shadow:var(--shadow2);
+      padding:14px;
+    }
+    .kpi{
+      cursor:pointer;
+      transition:transform .10s ease, box-shadow .15s ease, border-color .15s ease;
+    }
+    .kpi:hover{
+      transform:translateY(-2px);
+      border-color:rgba(29,78,216,.28);
+      box-shadow:0 18px 30px rgba(29,78,216,.12);
+    }
+    .kpi .h{display:flex;align-items:center;gap:8px;color:#0f172a;font-weight:1000}
+    .kpi .v{margin-top:8px;font-size:1.55rem;font-weight:1100;letter-spacing:.2px}
+    .kpi .s{margin-top:4px;font-size:.78rem;color:var(--muted);font-weight:850}
+    .kpi i{font-size:1.05rem;color:var(--primary)}
     .section{margin-top:16px}
-    .section h3{margin:0 0 8px 2px;color:#d7e4ff}
+    .section h3{margin:0 0 10px 2px;color:#0f172a}
 
-    /* Tablas */
-    table{width:100%;border-collapse:collapse}
-    thead{background:#1a2a56}
-    th,td{padding:9px 8px;text-align:center;border-bottom:1px solid #1b2a4f}
-    .pill{display:inline-block;padding:3px 8px;border-radius:999px;font-size:.75rem}
-    .pill.caja{background:#173a4b;color:#90f0df}
-    .pill.banco{background:#3a214f;color:#f7c6ff}
-    .money{font-weight:900;text-align:right}
-    .file{background:#0b1323;border:1px dashed #324574;border-radius:10px;padding:10px;color:#a9b9e5;width:100%}
-    .muted{color:var(--muted)}
-    .legend{display:flex;gap:12px;align-items:center}
-    .dot{width:10px;height:10px;border-radius:50%}
+    .table-wrap{overflow:auto;border-radius:14px;border:1px solid rgba(2,6,23,.10);background:#fff}
+    table{width:100%;border-collapse:collapse;background:#fff}
+    thead{background:#eef4ff}
+    th,td{
+      padding:10px 9px;
+      text-align:center;
+      border-bottom:1px solid #e2e8f0;
+      white-space:nowrap;
+      font-weight:900;
+      color:#081126;
+    }
+    tbody tr:nth-child(even){background:#f9fbff}
+    tbody tr:hover{background:rgba(29,78,216,.06)}
+    td.left{text-align:left;white-space:normal}
+    .money{font-weight:1100;text-align:right}
+    .pill{
+      display:inline-flex;align-items:center;gap:6px;
+      padding:3px 10px;border-radius:999px;font-size:.75rem;font-weight:1100;
+      border:1px solid rgba(2,6,23,.10);
+      background:#fff;
+    }
+    .pill.caja{background:rgba(2,132,199,.12);border-color:rgba(2,132,199,.24);color:#083344}
+    .pill.banco{background:rgba(124,58,237,.12);border-color:rgba(124,58,237,.22);color:#3b0764}
+    .pill.transferencia{background:rgba(29,78,216,.12);border-color:rgba(29,78,216,.22);color:#081126}
+    .pill.efectivo{background:rgba(22,163,74,.12);border-color:rgba(22,163,74,.22);color:#064e3b}
+    .pill.mixto{background:rgba(180,83,9,.12);border-color:rgba(180,83,9,.22);color:#7c2d12}
+    .pill.ingreso{background:rgba(22,163,74,.12);border-color:rgba(22,163,74,.22);color:#064e3b}
+    .pill.egreso{background:rgba(220,38,38,.12);border-color:rgba(220,38,38,.22);color:#5b0b0b}
+    .pill.lock{background:rgba(220,38,38,.12);border-color:rgba(220,38,38,.22);color:#5b0b0b}
 
-    /* Modal */
-    .modal-back{position:fixed;inset:0;background:#0008;display:none;align-items:center;justify-content:center;z-index:60}
-    .modal{width:min(1020px,92vw);max-height:88vh;background:var(--card);border-radius:14px;box-shadow:var(--shadow);display:flex;flex-direction:column}
-    .modal header{padding:12px 16px;border-bottom:1px solid #1e2c52;display:flex;align-items:center;justify-content:space-between}
-    .modal header h4{margin:0}
+    .modal-back{
+      position:fixed;inset:0;background:rgba(2,6,23,.60);
+      display:none;align-items:center;justify-content:center;z-index:60;
+      padding:14px;
+    }
+    .modal{
+      width:min(1100px,96vw);
+      max-height:90vh;
+      background:#ffffff;
+      border:1px solid rgba(2,6,23,.10);
+      border-radius:16px;
+      box-shadow:var(--shadow);
+      display:flex;flex-direction:column;
+      overflow:hidden;
+    }
+    .modal header{
+      padding:12px 16px;
+      border-bottom:1px solid rgba(2,6,23,.10);
+      display:flex;align-items:center;justify-content:space-between;gap:10px;
+      background:#f7faff;
+    }
+    .modal header h4{margin:0;font-size:1.02rem}
     .modal .body{padding:12px 16px;overflow:auto}
-    .modal .foot{padding:12px 16px;border-top:1px solid #1e2c52;text-align:right}
-    .close{background:#223867;border:1px solid #36518f;color:#e6efff;border-radius:10px;padding:6px 10px;cursor:pointer}
+    .modal .foot{padding:12px 16px;border-top:1px solid rgba(2,6,23,.10);text-align:right;background:#f7faff}
+    .close{
+      background:#ffffff;
+      border:1px solid #bfcce3;
+      color:#081126;border-radius:12px;padding:8px 12px;cursor:pointer;
+      display:inline-flex;align-items:center;gap:8px;font-weight:1000;
+    }
+
+    .toast{
+      position:fixed;right:14px;bottom:14px;z-index:80;
+      background:#081126;
+      border:1px solid rgba(255,255,255,.18);
+      color:#fff;
+      border-radius:14px;
+      padding:12px 14px;
+      box-shadow:var(--shadow2);
+      display:none;
+      max-width:min(440px,92vw);
+    }
+    .toast .t{font-weight:1100}
+    .toast .d{margin-top:4px;color:#dbeafe;font-size:.9rem}
 
     @media (max-width:1200px){ .kpis{grid-template-columns:repeat(3,1fr)} }
-    @media (max-width:860px){
+    @media (max-width:920px){
       .layout{grid-template-columns:1fr}
-      .aside{position:sticky;top:0;z-index:5}
+      .aside{position:relative;height:auto}
       .kpis{grid-template-columns:repeat(2,1fr)}
       .filters{grid-template-columns:repeat(2,1fr)}
+      .tabs{top:0}
     }
     @media (max-width:560px){ .kpis{grid-template-columns:1fr} }
   </style>
 </head>
-<body>
-<div class="layout">
 
-  <!-- Lateral -->
+<body data-user="{{ usuario }}" data-role="{{ rol }}">
+<div class="layout">
   <aside class="aside">
     <div class="brand">
       <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo">
       <div>
         <div class="t">GL Bingo</div>
-        <small class="muted">Panel</small>
+        <small class="muted">Contabilidad &amp; Caja</small>
       </div>
     </div>
+
     <nav class="menu">
       <a href="/dashboard"><i class="bi bi-house-door"></i> Dashboard</a>
       <a href="/usuarios"><i class="bi bi-person-badge"></i> Usuarios</a>
@@ -114,27 +362,35 @@
       <a href="/cobro"><i class="bi bi-cash-coin"></i> Cobro de Caja</a>
       <a href="/pago-premios"><i class="bi bi-trophy"></i> Pago de Premios</a>
       <a href="/sorteo"><i class="bi bi-dice-3"></i> Sorteo</a>
-      <a href="/crear-figuras"><i class="bi bi-square-fill" style="color:#22c55e"></i> Crear Figuras</a>
-      <a href="/escoger-figuras"><i class="bi bi-square-fill" style="color:#3b82f6"></i> Escoger Figuras</a>
+      <a href="/crear-figuras"><i class="bi bi-square-fill" style="color:var(--accent)"></i> Crear Figuras</a>
+      <a href="/escoger-figuras"><i class="bi bi-square-fill" style="color:var(--primary)"></i> Escoger Figuras</a>
       <a href="/boletin"><i class="bi bi-file-earmark-text"></i> Boletín</a>
+
+      <div class="sep"></div>
+
+      <a href="/contabilidad/balance"><i class="bi bi-clipboard2-check"></i> Balance (Pro)</a>
+      <a href="/contabilidad/gastos-fotos"><i class="bi bi-receipt-cutoff"></i> Gastos con Foto</a>
     </nav>
   </aside>
 
-  <!-- Contenido -->
   <main class="content">
     <div class="topbar">
-      <h2 style="margin:0">Contabilidad</h2>
+      <div class="title">
+        <h2>Contabilidad</h2>
+        <span class="badge" id="badgePeriodo"><i class="bi bi-calendar2-week"></i> Cargando período…</span>
+        <span class="badge super hide" id="badgeSuper"><i class="bi bi-shield-lock-fill"></i> Super Admin</span>
+      </div>
+
       <div class="user">
         <img src="{{ url_for('static', filename='avatars/' + (avatar or 'avatar-male.png')) }}" alt="">
         <div>
-          <div style="font-weight:700">{{ usuario }}</div>
-          <small class="muted">{{ rol }}</small>
+          <div class="name">{{ usuario }}</div>
+          <div class="role muted">{{ rol }}</div>
         </div>
       </div>
     </div>
 
-    <!-- Filtros globales -->
-    <div class="panel section">
+    <div class="panel">
       <div class="filters" id="filtros">
         <div class="f" style="grid-column:span 3">
           <label>Desde</label>
@@ -144,187 +400,344 @@
           <label>Hasta</label>
           <input type="date" id="f-hasta">
         </div>
+
         <div class="f" style="grid-column:span 3">
           <label>&nbsp;</label>
           <button class="btn btn-primary" id="btnActualizar"><i class="bi bi-arrow-repeat"></i> Actualizar</button>
         </div>
+
         <div class="f" style="grid-column:span 3">
           <label>Rangos rápidos</label>
           <div class="quick">
-            <button class="btn btn-ghost" data-r="hoy">Hoy</button>
-            <button class="btn btn-ghost" data-r="7d">7 días</button>
-            <button class="btn btn-ghost" data-r="30d">30 días</button>
-            <button class="btn btn-ghost" data-r="ytd">Año en curso</button>
+            <button class="btn btn-ghost" data-r="hoy"><i class="bi bi-sun"></i> Hoy</button>
+            <button class="btn btn-ghost" data-r="7d"><i class="bi bi-calendar2-week"></i> 7 días</button>
+            <button class="btn btn-ghost" data-r="30d"><i class="bi bi-calendar2-month"></i> 30 días</button>
+            <button class="btn btn-ghost" data-r="ytd"><i class="bi bi-calendar2-range"></i> Año</button>
           </div>
+        </div>
+
+        <div class="f" style="grid-column:span 4">
+          <label>Acciones</label>
+          <div class="quick">
+            <button class="btn btn-ghost" id="btnExport"><i class="bi bi-download"></i> Exportar CSV</button>
+            <button class="btn btn-ghost" id="btnPdf"><i class="bi bi-file-earmark-pdf"></i> Descargar PDF</button>
+            <button class="btn btn-ghost" id="btnImprimir"><i class="bi bi-printer"></i> Imprimir</button>
+            <button class="btn btn-danger hide" id="btnReset"><i class="bi bi-exclamation-triangle-fill"></i> Reset Contabilidad</button>
+          </div>
+          <small class="muted">Exporta el libro de movimientos o imprime el resumen del período.</small>
         </div>
       </div>
     </div>
 
-    <!-- KPIs -->
-    <div class="grid kpis" id="kpis" style="margin-top:12px"></div>
-
-    <!-- Gráficas principales -->
-    <div class="grid" style="grid-template-columns:repeat(2,1fr);margin-top:10px">
-      <div class="card">
-        <div class="legend" style="justify-content:space-between">
-          <h3 style="margin:0">Resultado del período</h3>
-          <div class="legend">
-            <span class="dot" style="background:var(--info)"></span><small class="muted">Ingresos/Gastos/Sueldos/Premios/Utilidad</small>
-          </div>
-        </div>
-        <canvas id="chResultado" height="170"></canvas>
-      </div>
-      <div class="card">
-        <div class="legend" style="justify-content:space-between">
-          <h3 style="margin:0">Boletos: Impresos / Vendidos / Devueltos</h3>
-          <div class="legend">
-            <span class="dot" style="background:var(--primary)"></span><small class="muted">Comparativo</small>
-          </div>
-        </div>
-        <canvas id="chBoletos" height="170"></canvas>
-      </div>
-      <div class="card">
-        <div class="legend" style="justify-content:space-between">
-          <h3 style="margin:0">Distribución de costos</h3>
-          <div class="legend">
-            <span class="dot" style="background:var(--danger)"></span><small class="muted">Gastos</small>
-            <span class="dot" style="background:var(--vio)"></span><small class="muted">Sueldos</small>
-          </div>
-        </div>
-        <canvas id="chCostos" height="170"></canvas>
-      </div>
-      <div class="card">
-        <div class="legend" style="justify-content:space-between">
-          <h3 style="margin:0">Ingresos vs Premios pagados</h3>
-        </div>
-        <canvas id="chIngPrem" height="170"></canvas>
-      </div>
+    <div class="tabs" style="margin-top:12px">
+      <button class="tab active" data-tab="resumen"><i class="bi bi-speedometer2"></i> Resumen</button>
+      <button class="tab" data-tab="movimientos"><i class="bi bi-journal-text"></i> Movimientos</button>
+      <button class="tab" data-tab="banco"><i class="bi bi-bank"></i> Banco</button>
+      <button class="tab" data-tab="gastos"><i class="bi bi-receipt"></i> Gastos</button>
+      <button class="tab hide" data-tab="auditoria" id="tabAuditoria"><i class="bi bi-fingerprint"></i> Auditoría</button>
     </div>
 
-    <!-- Vendedor: curvas -->
-    <div class="grid section" id="cardsVendedores" style="grid-template-columns:1fr 1fr">
-      <div class="card">
-        <div class="legend" style="justify-content:space-between">
-          <h3 style="margin:0">Curva: VENTAS por vendedor</h3>
-          <div class="legend">
-            <span class="dot" style="background:var(--accent)"></span><small class="muted">Vendidos</small>
-          </div>
-        </div>
-        <canvas id="chCurvaVentas" height="190"></canvas>
-      </div>
-      <div class="card">
-        <div class="legend" style="justify-content:space-between">
-          <h3 style="margin:0">Curva: DEVUELTOS por vendedor</h3>
-          <div class="legend">
-            <span class="dot" style="background:var(--danger)"></span><small class="muted">Devueltos</small>
-          </div>
-        </div>
-        <canvas id="chCurvaDevueltos" height="190"></canvas>
-      </div>
-    </div>
+    <section id="tab-resumen">
+      <div class="grid kpis" id="kpis" style="margin-top:12px"></div>
 
-    <!-- Banco -->
-    <div class="section">
-      <h3>Banco de la empresa</h3>
-      <div class="panel">
-        <form id="frmDeposito" enctype="multipart/form-data" class="grid" style="grid-template-columns:repeat(6,1fr)">
-          <div class="f" style="grid-column:span 2">
-            <label>Fecha depósito</label>
-            <input type="date" name="fecha" id="b-fecha">
+      <div class="grid" style="grid-template-columns:repeat(2,1fr);margin-top:10px">
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+            <h3 style="margin:0">Resultado del período</h3>
+            <small class="muted"><i class="bi bi-info-circle"></i> Ingresos / Costos / Utilidad</small>
           </div>
-          <div class="f" style="grid-column:span 2">
-            <label>Monto</label>
-            <input type="number" step="0.01" name="monto" id="b-monto" placeholder="0.00">
-          </div>
-          <div class="f" style="grid-column:span 2">
-            <label>Referencia</label>
-            <input type="text" name="referencia" placeholder="N° depósito / nota">
-          </div>
-          <div class="f" style="grid-column:span 3">
-            <label>Comprobante (PDF/JPG/PNG)</label>
-            <input type="file" name="comprobante" class="file" accept=".pdf,.jpg,.jpeg,.png,.webp">
-          </div>
-          <input type="hidden" name="cuenta" value="Empresa">
-          <input type="hidden" name="monto_comprobante" id="b-monto-confirm">
-          <div class="f" style="grid-column:1 / -1">
-            <button class="btn btn-primary" type="submit"><i class="bi bi-bank"></i> Registrar depósito (bloqueado)</button>
-          </div>
-        </form>
+          <canvas id="chResultado" height="170"></canvas>
+        </div>
 
-        <div style="margin-top:14px;overflow:auto">
-          <table>
-            <thead><tr><th>Fecha</th><th>Tipo</th><th>Monto</th><th>Referencia</th><th>Comprobante</th><th>Estado</th><th>Acción</th></tr></thead>
-            <tbody id="tbBanco"><tr><td colspan="7" class="muted">—</td></tr></tbody>
-          </table>
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+            <h3 style="margin:0">Boletos</h3>
+            <small class="muted">Impresos / Vendidos / Devueltos</small>
+          </div>
+          <canvas id="chBoletos" height="170"></canvas>
+        </div>
+
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+            <h3 style="margin:0">Distribución de costos</h3>
+            <small class="muted">Gastos / Sueldos</small>
+          </div>
+          <canvas id="chCostos" height="170"></canvas>
+        </div>
+
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+            <h3 style="margin:0">Ingresos vs Premios</h3>
+            <small class="muted">Comparativo</small>
+          </div>
+          <canvas id="chIngPrem" height="170"></canvas>
         </div>
       </div>
-    </div>
 
-    <!-- Gastos -->
-    <div class="section">
-      <h3>Gastos</h3>
-      <div class="panel">
-        <!-- Filtro de gastos por fechas -->
-        <div class="grid" style="grid-template-columns:repeat(6,1fr);margin-bottom:10px">
-          <div class="f" style="grid-column:span 2"><label>Gastos: desde</label><input type="date" id="gx-desde"></div>
-          <div class="f" style="grid-column:span 2"><label>Gastos: hasta</label><input type="date" id="gx-hasta"></div>
-          <div class="f" style="grid-column:span 2"><label>&nbsp;</label><button class="btn btn-ghost" id="btnGastosReload"><i class="bi bi-search"></i> Buscar gastos</button></div>
+      <div class="card" id="sellerHighlights" style="margin-top:14px"><div style="display:flex;gap:18px;flex-wrap:wrap"><div><b>Mejor vendedor:</b> <span id="bestSeller">—</span></div><div><b>Menor vendedor:</b> <span id="worstSeller">—</span></div><div><b>Premios por caducar:</b> <span id="premiosPendientes">0</span></div><div><b>Planillas no asignadas:</b> <span id="planillasPendientes">0</span></div></div></div>
+
+      <div class="grid section" id="cardsVendedores" style="grid-template-columns:1fr 1fr">
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+            <h3 style="margin:0">Vendedor: Vendidos</h3>
+            <small class="muted">Top del período</small>
+          </div>
+          <canvas id="chCurvaVentas" height="190"></canvas>
         </div>
-
-        <form id="frmGasto" enctype="multipart/form-data" class="grid" style="grid-template-columns:repeat(6,1fr)">
-          <div class="f" style="grid-column:span 2">
-            <label>Fecha (solo día actual)</label>
-            <input type="date" name="fecha" id="g-fecha">
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+            <h3 style="margin:0">Vendedor: Devueltos</h3>
+            <small class="muted">Top del período</small>
           </div>
-          <div class="f" style="grid-column:span 2">
-            <label>Categoría</label>
-            <input type="text" name="categoria" placeholder="Gasto / Sueldo / ...">
-          </div>
-          <div class="f" style="grid-column:span 2">
-            <label>Medio</label>
-            <select name="medio" id="g-medio">
-              <option value="caja">Caja</option>
-              <option value="banco">Banco</option>
-            </select>
-          </div>
-          <div class="f" style="grid-column:span 2">
-            <label>Monto</label>
-            <input type="number" step="0.01" name="monto" id="g-monto" placeholder="0.00">
-          </div>
-          <div class="f" style="grid-column:span 2">
-            <label>Descripción</label>
-            <input type="text" name="descripcion" placeholder="Detalle">
-          </div>
-          <div class="f" style="grid-column:span 2">
-            <label>Comprobante (PDF/JPG/PNG)</label>
-            <input type="file" name="comprobante" class="file" accept=".pdf,.jpg,.jpeg,.png,.webp">
-          </div>
-          <input type="hidden" name="monto_comprobante" id="g-monto-confirm">
-          <div class="f" style="grid-column:1 / -1">
-            <button class="btn btn-primary" type="submit"><i class="bi bi-receipt"></i> Registrar gasto</button>
-          </div>
-        </form>
-
-        <div style="margin-top:14px;overflow:auto">
-          <table>
-            <thead><tr><th>Fecha</th><th>Categoría</th><th>Medio</th><th>Monto</th><th>Descripción</th><th>Comprobante</th><th>Acción</th></tr></thead>
-            <tbody id="tbGastos"><tr><td colspan="7" class="muted">—</td></tr></tbody>
-          </table>
-        </div>
-
-        <div class="card" style="margin-top:12px">
-          <div class="legend" style="justify-content:space-between">
-            <h3 style="margin:0">Gastos por día (rango seleccionado)</h3>
-          </div>
-          <canvas id="chGastosDia" height="150"></canvas>
+          <canvas id="chCurvaDevueltos" height="190"></canvas>
         </div>
       </div>
-    </div>
+    </section>
+
+    <section id="tab-movimientos" class="hide">
+      <div class="section">
+        <h3>Libro de movimientos (Caja + Gastos + Banco)</h3>
+        <div class="panel">
+          <div class="grid" style="grid-template-columns:repeat(12,1fr);gap:10px;align-items:end">
+            <div class="f" style="grid-column:span 4">
+              <label>Buscar (vendedor, referencia, descripción)</label>
+              <input type="text" id="mv-q" placeholder="Ej: Vendedor JUAN / Arriendo / Depósito...">
+            </div>
+            <div class="f" style="grid-column:span 3">
+              <label>Tipo</label>
+              <select id="mv-tipo">
+                <option value="">Todos</option>
+                <option value="cobro">Cobros</option>
+                <option value="gasto">Gastos</option>
+                <option value="banco">Banco</option>
+              </select>
+            </div>
+            <div class="f" style="grid-column:span 3">
+              <label>Naturaleza</label>
+              <select id="mv-nat">
+                <option value="">Todas</option>
+                <option value="ingreso">Ingresos</option>
+                <option value="egreso">Egresos</option>
+              </select>
+            </div>
+            <div class="f" style="grid-column:span 2">
+              <label>&nbsp;</label>
+              <button class="btn btn-ghost" id="btnMovReload"><i class="bi bi-arrow-repeat"></i> Recargar</button>
+            </div>
+          </div>
+
+          <div style="margin-top:14px" class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Hora</th>
+                  <th>Tipo</th>
+                  <th>Naturaleza</th>
+                  <th>Medio</th>
+                  <th>Monto</th>
+                  <th style="text-align:left">Referencia / Detalle</th>
+                  <th>Creado por</th>
+                  <th>Rol</th>
+                  <th>IP</th>
+                  <th>Creado en</th>
+                  <th>Comp</th>
+                  <th class="hide" id="thAcc">Acción</th>
+                </tr>
+              </thead>
+              <tbody id="tbMov"><tr><td colspan="13" class="muted">—</td></tr></tbody>
+            </table>
+          </div>
+
+          <small class="muted" id="mvFoot" style="display:block;margin-top:10px"></small>
+        </div>
+      </div>
+    </section>
+
+    <section id="tab-banco" class="hide">
+      <div class="section">
+        <h3>Banco de la empresa</h3>
+        <div class="panel">
+          <form id="frmDeposito" enctype="multipart/form-data" class="grid" style="grid-template-columns:repeat(6,1fr)">
+            <div class="f" style="grid-column:span 2">
+              <label>Fecha depósito</label>
+              <input type="date" name="fecha" id="b-fecha">
+            </div>
+            <div class="f" style="grid-column:span 2">
+              <label>Monto</label>
+              <input type="number" step="0.01" name="monto" id="b-monto" placeholder="0.00">
+            </div>
+            <div class="f" style="grid-column:span 2">
+              <label>Referencia</label>
+              <input type="text" name="referencia" placeholder="N° depósito / nota">
+            </div>
+
+            <div class="f" style="grid-column:span 3">
+              <label>Comprobante</label>
+              <div class="toggle">
+                <input type="checkbox" id="b-hascomp">
+                <div>
+                  Adjuntar comprobante (opcional)
+                  <small>Si no lo tienes ahora, registra sin foto. Luego puedes guardar el comprobante cuando lo tengas.</small>
+                </div>
+              </div>
+              <div id="b-comp-wrap" class="hide" style="margin-top:10px">
+                <input type="file" name="comprobante" id="b-comp" class="file" accept=".pdf,.jpg,.jpeg,.png,.webp">
+                <small class="muted">Formatos: PDF/JPG/PNG/WebP. Recomendado: imagen clara.</small>
+              </div>
+            </div>
+
+            <input type="hidden" name="cuenta" value="Empresa">
+            <input type="hidden" name="monto_comprobante" id="b-monto-confirm">
+
+            <div class="f" style="grid-column:1 / -1">
+              <button class="btn btn-primary" type="submit"><i class="bi bi-bank"></i> Registrar depósito</button>
+              <small class="muted">Los depósitos pueden quedar bloqueados para auditoría.</small>
+            </div>
+          </form>
+
+          <div style="margin-top:14px" class="table-wrap">
+            <table>
+              <thead><tr><th>Fecha</th><th>Tipo</th><th>Monto</th><th>Referencia</th><th>Comprobante</th><th>Estado</th><th>Acción</th></tr></thead>
+              <tbody id="tbBanco"><tr><td colspan="7" class="muted">—</td></tr></tbody>
+            </table>
+          </div>
+
+          <small class="muted" id="bankHint" style="display:block;margin-top:10px"></small>
+        </div>
+      </div>
+    </section>
+
+    <section id="tab-gastos" class="hide">
+      <div class="section">
+        <h3>Gastos</h3>
+        <div class="panel">
+          <div class="grid" style="grid-template-columns:repeat(6,1fr);margin-bottom:10px">
+            <div class="f" style="grid-column:span 2"><label>Gastos: desde</label><input type="date" id="gx-desde"></div>
+            <div class="f" style="grid-column:span 2"><label>Gastos: hasta</label><input type="date" id="gx-hasta"></div>
+            <div class="f" style="grid-column:span 2">
+              <label>&nbsp;</label>
+              <button class="btn btn-ghost" id="btnGastosReload"><i class="bi bi-search"></i> Buscar gastos</button>
+            </div>
+          </div>
+
+          <form id="frmGasto" enctype="multipart/form-data" class="grid" style="grid-template-columns:repeat(6,1fr)">
+            <div class="f" style="grid-column:span 2">
+              <label>Fecha (solo día actual)</label>
+              <input type="date" name="fecha" id="g-fecha">
+            </div>
+
+            <div class="f" style="grid-column:span 2">
+              <label>Categoría</label>
+              <select id="g-cat-select">
+                <option value="Pago de Personal">Pago de Personal</option>
+                <option value="Arriendo">Arriendo</option>
+                <option value="Internet">Internet</option>
+                <option value="Café">Café</option>
+                <option value="Servicios Básicos">Servicios Básicos</option>
+                <option value="Otros">Otros (especificar)</option>
+              </select>
+              <input type="text" id="g-cat-otro" class="hide" placeholder="Escribe la categoría (ej: Transporte)">
+              <input type="hidden" name="categoria" id="g-categoria">
+            </div>
+
+            <div class="f" style="grid-column:span 2">
+              <label>Medio</label>
+              <select name="medio" id="g-medio">
+                <option value="caja">Caja</option>
+                <option value="banco">Banco</option>
+              </select>
+            </div>
+
+            <div class="f" style="grid-column:span 2">
+              <label>Monto</label>
+              <input type="number" step="0.01" name="monto" id="g-monto" placeholder="0.00">
+            </div>
+
+            <div class="f" style="grid-column:span 2">
+              <label>Descripción</label>
+              <input type="text" name="descripcion" placeholder="Detalle (quién / qué / por qué)">
+            </div>
+
+            <div class="f" style="grid-column:span 2">
+              <label>Comprobante</label>
+              <div class="toggle">
+                <input type="checkbox" id="g-hascomp">
+                <div>
+                  Adjuntar comprobante (opcional)
+                  <small>Si no lo tienes ahora, registra el gasto sin foto.</small>
+                </div>
+              </div>
+              <div id="g-comp-wrap" class="hide" style="margin-top:10px">
+                <input type="file" name="comprobante" id="g-comp" class="file" accept=".pdf,.jpg,.jpeg,.png,.webp">
+                <small class="muted">Formatos: PDF/JPG/PNG/WebP.</small>
+              </div>
+            </div>
+
+            <input type="hidden" name="monto_comprobante" id="g-monto-confirm">
+
+            <div class="f" style="grid-column:1 / -1">
+              <button class="btn btn-primary" type="submit"><i class="bi bi-receipt"></i> Registrar gasto</button>
+              <small class="muted">La foto es opcional. Puedes registrar sin comprobante.</small>
+            </div>
+          </form>
+
+          <div style="margin-top:14px" class="table-wrap">
+            <table>
+              <thead><tr><th>Fecha</th><th>Categoría</th><th>Medio</th><th>Monto</th><th style="text-align:left">Descripción</th><th>Comp</th><th>Acción</th></tr></thead>
+              <tbody id="tbGastos"><tr><td colspan="7" class="muted">—</td></tr></tbody>
+            </table>
+          </div>
+
+          <div class="card" style="margin-top:12px">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+              <h3 style="margin:0">Gastos por día</h3>
+              <small class="muted">Rango seleccionado</small>
+            </div>
+            <canvas id="chGastosDia" height="150"></canvas>
+          </div>
+
+          <small class="muted" id="gastosHint" style="display:block;margin-top:10px"></small>
+        </div>
+      </div>
+    </section>
+
+    <section id="tab-auditoria" class="hide">
+      <div class="section">
+        <h3>Auditoría (Super Administrador)</h3>
+        <div class="panel">
+          <div style="display:flex;justify-content:space-between;align-items:end;gap:10px;flex-wrap:wrap">
+            <div class="muted">Registro: quién, rol, IP, fecha/hora, acción y detalle.</div>
+            <button class="btn btn-ghost" id="btnAudReload"><i class="bi bi-arrow-repeat"></i> Recargar</button>
+          </div>
+
+          <div style="margin-top:14px" class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Hora</th>
+                  <th>Módulo</th>
+                  <th>Acción</th>
+                  <th>Ref</th>
+                  <th>Usuario</th>
+                  <th>Rol</th>
+                  <th>IP</th>
+                  <th style="text-align:left">Detalle</th>
+                </tr>
+              </thead>
+              <tbody id="tbAud"><tr><td colspan="9" class="muted">—</td></tr></tbody>
+            </table>
+          </div>
+
+          <small class="muted" id="audHint" style="display:block;margin-top:10px"></small>
+        </div>
+      </div>
+    </section>
 
   </main>
 </div>
 
-<!-- Modal genérico -->
 <div class="modal-back" id="mb">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="mtitle">
     <header>
@@ -336,13 +749,39 @@
   </div>
 </div>
 
+<div class="toast" id="toast">
+  <div class="t" id="toastT">Listo</div>
+  <div class="d" id="toastD">—</div>
+</div>
+
 <script>
 (function(){
   const $ = (q,ctx=document)=>ctx.querySelector(q);
   const $$ = (q,ctx=document)=>Array.from(ctx.querySelectorAll(q));
-  const today = new Date().toISOString().slice(0,10);
+  const body = document.body;
 
-  // Presets (30 días)
+  const role = (body.dataset.role || '').toLowerCase();
+  const user = (body.dataset.user || '').trim();
+  const isSuper = role.includes('super');
+  const isAdmin = isSuper || role.includes('admin');
+
+  if(isSuper){
+    $('#badgeSuper').classList.remove('hide');
+    $('#btnReset').classList.remove('hide');
+    $('#tabAuditoria').classList.remove('hide');
+  }
+
+  let toastTimer=null;
+  function toast(title, msg){
+    $('#toastT').textContent = title || 'Info';
+    $('#toastD').textContent = msg || '';
+    const el = $('#toast');
+    el.style.display='block';
+    clearTimeout(toastTimer);
+    toastTimer=setTimeout(()=>{ el.style.display='none'; }, 3200);
+  }
+
+  const today = new Date().toISOString().slice(0,10);
   (function defaults(){
     const now = new Date();
     const d1 = new Date(now.getTime()-30*86400000);
@@ -354,10 +793,19 @@
     $('#g-fecha').value = today;
   })();
 
-  // Rápidos
+  function showTab(name){
+    $$('.tab').forEach(b=>b.classList.toggle('active', b.dataset.tab===name));
+    ['resumen','movimientos','banco','gastos','auditoria'].forEach(t=>{
+      const el = $('#tab-'+t);
+      if(el) el.classList.toggle('hide', t!==name);
+    });
+  }
+  $$('.tab').forEach(b=>b.addEventListener('click', ()=>showTab(b.dataset.tab)));
+
   $$('#filtros [data-r]').forEach(b=>{
     b.onclick = ()=>{
-      const now = new Date(); let d1=new Date(now), d2=new Date(now);
+      const now = new Date();
+      let d1=new Date(now), d2=new Date(now);
       if(b.dataset.r==='7d') d1 = new Date(now.getTime()-7*86400000);
       else if(b.dataset.r==='30d') d1 = new Date(now.getTime()-30*86400000);
       else if(b.dataset.r==='ytd') d1 = new Date(now.getFullYear(),0,1);
@@ -368,305 +816,393 @@
       cargarTodo();
     };
   });
-  $('#btnActualizar').onclick = cargarTodo;
+
+  $('#btnActualizar').onclick = ()=>cargarTodo();
   $('#btnGastosReload').onclick = (e)=>{ e.preventDefault(); cargarGastos(); };
+  $('#btnMovReload').onclick = (e)=>{ e.preventDefault(); cargarMovimientos(); };
+  $('#btnAudReload') && ($('#btnAudReload').onclick = (e)=>{ e.preventDefault(); cargarAuditoria(); });
+
+  $('#btnExport').onclick = ()=>{
+    const desde=$('#f-desde').value, hasta=$('#f-hasta').value;
+    window.location.href = `/api/contabilidad/export.csv?desde=${encodeURIComponent(desde)}&hasta=${encodeURIComponent(hasta)}`;
+  };
+  $('#btnImprimir').onclick = ()=>window.print();
+
+  $('#btnReset').onclick = async ()=>{
+    if(!isSuper){ toast('Permiso', 'Solo Super Admin puede resetear.'); return; }
+    const confirmText = prompt('Esto borra contabilidad. Escribe BORRAR TODO para confirmar:');
+    if(!confirmText) return;
+    const payload = { confirm: String(confirmText).trim().toUpperCase(), scopes:["caja","gastos","banco","asignaciones"] };
+    try{
+      const r = await fetch('/api/superadmin/reset-contabilidad', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload)});
+      const j = await r.json();
+      if(j.ok){ toast('Reset OK','Contabilidad reiniciada. Backup creado.'); cargarTodo(); }
+      else toast('No se pudo', j.error || 'Error');
+    }catch(e){
+      toast('Error', 'No se pudo conectar al servidor');
+    }
+  };
+
+  function bindOptionalFile(cbSel, wrapSel, inputSel){
+    const cb = $(cbSel), wrap = $(wrapSel), inp = $(inputSel);
+    function sync(){
+      const on = !!cb.checked;
+      wrap.classList.toggle('hide', !on);
+      inp.disabled = !on;
+      if(!on) inp.value = '';
+    }
+    cb.addEventListener('change', sync);
+    cb.checked=false; inp.disabled=true; wrap.classList.add('hide');
+  }
+  bindOptionalFile('#b-hascomp', '#b-comp-wrap', '#b-comp');
+  bindOptionalFile('#g-hascomp', '#g-comp-wrap', '#g-comp');
 
   const money = n => Number(n||0).toLocaleString('es-EC',{style:'currency',currency:'USD'});
+  const safe = s => String(s||'').replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));
   const compLink = p => p ? `<a href="/static/${String(p).replace(/^\/?static\/?/,'')}" target="_blank">Ver</a>` : '—';
+  const pillMedio = m => `<span class="pill ${m}">${m}</span>`;
+  const pillNat = n => `<span class="pill ${n}">${n}</span>`;
 
-  // ===== Gráficas & caches =====
+  function syncCategoria(){
+    const v = $('#g-cat-select').value;
+    if(v === 'Otros'){
+      $('#g-cat-otro').classList.remove('hide');
+      $('#g-categoria').value = ($('#g-cat-otro').value || '').trim() || 'Otros';
+    }else{
+      $('#g-cat-otro').classList.add('hide');
+      $('#g-categoria').value = v;
+    }
+  }
+  $('#g-cat-select').addEventListener('change', syncCategoria);
+  $('#g-cat-otro').addEventListener('input', syncCategoria);
+  syncCategoria();
+
   let chRes=null, chBol=null, chCos=null, chIngPrem=null, chGastosDia=null, chCurvaVentas=null, chCurvaDevueltos=null;
   let resumenCache=null, gastosCache=[], bancoCache=[], premiosPagadosCache=[];
 
   async function cargarResumen(){
-    const qs = new URLSearchParams({desde:$('#f-desde').value,hasta:$('#f-hasta').value}).toString();
+    const desde=$('#f-desde').value, hasta=$('#f-hasta').value;
+    $('#badgePeriodo').innerHTML = `<i class="bi bi-calendar2-week"></i> ${desde} → ${hasta}`;
+    const qs = new URLSearchParams({desde,hasta}).toString();
     const r = await fetch('/api/contabilidad/resumen?'+qs);
     const j = await r.json();
-    if(!j.ok){ alert('No se pudo cargar el resumen'); return; }
+    if(!j.ok){ toast('Error', 'No se pudo cargar el resumen'); return; }
     resumenCache = j;
     premiosPagadosCache = j.premios_detalle || [];
 
-    // KPIs (clickables)
     const kpis = $('#kpis'); kpis.innerHTML='';
     const items = [
-      ['boletos_impresos','bi-grid-3x3-gap-fill','Boletos impresos', j.boletos_impresos],
-      ['boletos_vendidos','bi-bag-check-fill','Boletos vendidos', j.boletos_vendidos],
-      ['boletos_devueltos','bi-bag-x-fill','Boletos devueltos', j.boletos_devueltos],
-      ['ingresos_brutos','bi-cash-coin','Ingresos brutos', money(j.ingresos_brutos)],
-      ['ganancia_vendedores','bi-people-fill','Ganancia vendedores', money(j.ganancia_vendedores)],
-      ['ganancia_empresa','bi-building','Ganancia empresa', money(j.ganancia_empresa)],
-      ['premios_pagados_total','bi-trophy-fill','Premios pagados', money(j.premios_pagados_total)],
-      ['premios_por_caducar','bi-hourglass-split','Premios por caducar', j.premios_por_caducar],
-      ['premios_caducados','bi-hourglass-bottom','Premios caducados', j.premios_caducados],
-      ['gastos_total','bi-receipt','Gastos', money(j.gastos_total)],
-      ['sueldos_total','bi-person-badge-fill','Sueldos', money(j.sueldos_total)],
-      ['utilidad_neta','bi-clipboard-check-fill','Utilidad neta', money(j.utilidad_neta)],
-      ['efectivo_cobrado','bi-cash','Efectivo cobrado', money(j.efectivo_cobrado)],
-      ['transferencias_cobradas','bi-phone-flip','Transferencias cobradas', money(j.transferencias_cobradas)],
-      ['saldo_caja','bi-wallet2','Saldo en caja', money(j.saldo_caja)],
-      ['saldo_banco','bi-bank','Saldo en banco', money(j.saldo_banco)]
+      ['boletos_impresos','bi-grid-3x3-gap-fill','Boletos impresos', j.boletos_impresos, 'Total impresos'],
+      ['boletos_vendidos','bi-bag-check-fill','Boletos vendidos', j.boletos_vendidos, 'Total vendidos'],
+      ['boletos_devueltos','bi-bag-x-fill','Boletos devueltos', j.boletos_devueltos, 'Total devueltos'],
+      ['boletos_no_asignados','bi-box-seam','Boletos no asignados', j.boletos_no_asignados || 0, 'Impresos que no salieron a calle'],
+      ['planillas_asignadas','bi-journal-text','Planillas asignadas', j.planillas_asignadas || 0, 'Planillas entregadas'],
+      ['planillas_no_asignadas','bi-journal-x','Planillas no asignadas', j.planillas_no_asignadas || 0, 'Planillas en blanco'],
+      ['ingresos_brutos','bi-cash-coin','Ingresos brutos', money(j.ingresos_brutos), 'Ventas brutas'],
+      ['ganancia_vendedores','bi-people-fill','Ganancia vendedores', money(j.ganancia_vendedores), 'Comisiones'],
+      ['ganancia_empresa','bi-building','Ganancia empresa', money(j.ganancia_empresa), 'Ingreso neto empresa'],
+      ['premios_pagados_total','bi-trophy-fill','Premios pagados', money(j.premios_pagados_total), `${j.premios_pagados_cantidad || 0} premios registrados`],
+      ['premios_por_caducar','bi-alarm','Premios por caducar', j.premios_por_caducar || 0, 'Próximos a vencer'],
+      ['premios_caducados','bi-exclamation-octagon','Premios caducados', j.premios_caducados || 0, 'Vencidos'],
+      ['gastos_total','bi-receipt','Gastos', money(j.gastos_total), 'Egresos'],
+      ['sueldos_total','bi-person-badge-fill','Sueldos', money(j.sueldos_total), 'Egresos'],
+      ['utilidad_neta','bi-clipboard-check-fill','Utilidad neta', money(j.utilidad_neta), 'Resultado'],
+      ['saldo_caja','bi-wallet2','Saldo caja', money(j.saldo_caja), 'Estimado'],
+      ['saldo_banco','bi-bank','Saldo banco', money(j.saldo_banco), 'Estimado'],
     ];
-    items.forEach(([key,icon,label,val])=>{
-      const el = document.createElement('div');
+    $('#premiosPendientes').textContent = `${j.premios_por_caducar || 0} / caducados ${j.premios_caducados || 0}`;
+    $('#planillasPendientes').textContent = j.planillas_no_asignadas || 0;
+    items.forEach(([key,icon,label,val,sub])=>{
+      const el=document.createElement('div');
       el.className='card kpi'; el.dataset.key=key;
-      el.innerHTML=`<div class="h"><i class="bi ${icon}"></i> ${label}</div><div class="v">${val}</div>`;
-      el.addEventListener('click', ()=>openModalForKey(key));
+      el.innerHTML=`<div class="h"><i class="bi ${icon}"></i> ${label}</div><div class="v">${val}</div><div class="s">${sub}</div>`;
       kpis.appendChild(el);
     });
 
-    // Gráficas base
     chRes && chRes.destroy();
     chRes = new Chart($('#chResultado'), {type:'bar',
       data:{labels:['Ingresos','Gastos','Sueldos','Premios','Utilidad'],
             datasets:[{data:[j.ingresos_brutos,j.gastos_total,j.sueldos_total,j.premios_pagados_total,j.utilidad_neta]}]},
-      options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}} });
+      options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}}
+    });
 
     chBol && chBol.destroy();
     chBol = new Chart($('#chBoletos'), {type:'bar',
       data:{labels:['Impresos','Vendidos','Devueltos'],
             datasets:[{data:[j.boletos_impresos,j.boletos_vendidos,j.boletos_devueltos]}]},
-      options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}} });
+      options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}}
+    });
 
     chCos && chCos.destroy();
     chCos = new Chart($('#chCostos'), {type:'doughnut',
       data:{labels:['Gastos','Sueldos'],datasets:[{data:[j.gastos_total,j.sueldos_total]}]},
-      options:{responsive:true,plugins:{legend:{position:'bottom'}}} });
+      options:{responsive:true,plugins:{legend:{position:'bottom'}}}
+    });
 
     chIngPrem && chIngPrem.destroy();
     chIngPrem = new Chart($('#chIngPrem'), {type:'bar',
       data:{labels:['Ingresos','Premios pagados'],datasets:[{data:[j.ingresos_brutos,j.premios_pagados_total]}]},
-      options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}} });
+      options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}}
+    });
   }
 
-  // Banco
+  async function cargarCurvasVendedores(){
+    const qs = new URLSearchParams({desde:$('#f-desde').value,hasta:$('#f-hasta').value}).toString();
+    const r = await fetch('/api/contabilidad/vendedores_ranking?'+qs);
+    const j = await r.json().catch(()=>({ok:false, items:[]}));
+    const items = (j.items || []).slice(0, 15);
+    const labels = items.map(x=>x.vendedor || '—');
+    const vendidos = items.map(x=>Number(x.vendidos||0));
+    const devueltos = items.map(x=>Number(x.devueltos||0));
+    const best = items.length ? `${items[0].vendedor} (${items[0].vendidos})` : '—';
+    const worst = items.length ? `${items[items.length-1].vendedor} (${items[items.length-1].vendidos})` : '—';
+    $('#bestSeller').textContent = best;
+    $('#worstSeller').textContent = worst;
+
+    chCurvaVentas && chCurvaVentas.destroy();
+    chCurvaVentas = new Chart($('#chCurvaVentas'), {type:'line', data:{labels, datasets:[{label:'Vendidos', data:vendidos, fill:false, tension:.28}]}, options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}}});
+
+    chCurvaDevueltos && chCurvaDevueltos.destroy();
+    chCurvaDevueltos = new Chart($('#chCurvaDevueltos'), {type:'bar', data:{labels, datasets:[{label:'Devueltos', data:devueltos}]}, options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}}});
+  }
+
   async function cargarBanco(){
     const qs = new URLSearchParams({desde:$('#f-desde').value,hasta:$('#f-hasta').value}).toString();
     const r = await fetch('/api/banco/movimientos?'+qs);
     const j = await r.json();
     const tb = $('#tbBanco'); tb.innerHTML='';
     const items = j.items || []; bancoCache = items;
-    if(items.length===0){ tb.innerHTML='<tr><td colspan="7" class="muted">Sin movimientos en el período.</td></tr>'; return; }
+    if(items.length===0){
+      tb.innerHTML='<tr><td colspan="7" class="muted">Sin movimientos en el período.</td></tr>';
+      $('#bankHint').textContent = '—';
+      return;
+    }
+    $('#bankHint').textContent = isSuper ? 'Super Admin puede forzar borrado de bloqueados desde Movimientos.' : '—';
     items.forEach(m=>{
+      const locked = !!m.locked;
       const tr = document.createElement('tr');
       tr.innerHTML = `
-        <td>${m.fecha||''}</td>
-        <td>${(m.tipo||'').toUpperCase()}</td>
+        <td>${safe(m.fecha||'')}</td>
+        <td>${safe((m.tipo||'').toUpperCase())}</td>
         <td class="money">${money(m.monto)}</td>
-        <td style="text-align:left">${m.referencia||''}</td>
+        <td class="left">${safe(m.referencia||'')}</td>
         <td>${compLink(m.comprobante)}</td>
-        <td>${m.locked?'Bloqueado':'Editable'}</td>
-        <td>${m.locked?'—':`<button class="btn btn-ghost" data-delb="${m.id}"><i class="bi bi-trash"></i></button>`}</td>`;
+        <td>${locked?'<span class="pill lock">Bloqueado</span>':'<span class="pill banco">Editable</span>'}</td>
+        <td>${(!locked && isAdmin) ? `<button class="btn btn-ghost" data-delb="${safe(m.id)}" title="Eliminar"><i class="bi bi-trash"></i></button>` : '—'}</td>`;
       tb.appendChild(tr);
     });
+
     $$('button[data-delb]').forEach(b=>{
       b.onclick = async ()=>{
         if(!confirm('¿Eliminar movimiento del banco?')) return;
-        const r = await fetch('/api/banco/movimientos/'+b.dataset.delb,{method:'DELETE'});
+        const r = await fetch('/api/banco/movimientos/'+encodeURIComponent(b.dataset.delb),{method:'DELETE'});
         const x = await r.json();
-        if(x.ok) cargarBanco(); else alert(x.error||'No se pudo eliminar');
+        if(x.ok){ toast('Eliminado','Movimiento borrado'); cargarBanco(); cargarResumen(); }
+        else toast('No se pudo', x.error || 'Error');
       };
     });
   }
 
-  // Depósito
+  async function cargarGastos(){
+    const qs = new URLSearchParams({desde:$('#gx-desde').value,hasta:$('#gx-hasta').value}).toString();
+    const r = await fetch('/api/gastos?'+qs);
+    const j = await r.json();
+    const tb = $('#tbGastos'); tb.innerHTML='';
+    const items = j.items||[]; gastosCache = items;
+
+    if(items.length===0){
+      tb.innerHTML='<tr><td colspan="7" class="muted">Sin gastos en el rango.</td></tr>';
+    }else{
+      items.forEach(g=>{
+        const tr=document.createElement('tr');
+        const canDelete = isSuper;
+        tr.innerHTML = `
+          <td>${safe(g.fecha||'')}</td>
+          <td>${safe(g.categoria||'')}</td>
+          <td>${pillMedio(safe(g.medio||''))}</td>
+          <td class="money">${money(g.monto)}</td>
+          <td class="left">${safe(g.descripcion||'')}</td>
+          <td>${compLink(g.comprobante)}</td>
+          <td>${canDelete ? `<button class="btn btn-ghost" data-del="${safe(g.id)}" title="Eliminar"><i class="bi bi-trash"></i></button>` : '—'}</td>`;
+        tb.appendChild(tr);
+      });
+
+      $$('button[data-del]').forEach(b=>{
+        b.onclick = async ()=>{
+          if(!confirm('¿Eliminar gasto? (Solo Super Admin)')) return;
+          const r = await fetch('/api/gastos/'+encodeURIComponent(b.dataset.del),{method:'DELETE'});
+          const x = await r.json();
+          if(x.ok){ toast('Eliminado','Gasto borrado'); cargarGastos(); cargarResumen(); }
+          else toast('No se pudo', x.error || 'Error');
+        };
+      });
+    }
+
+    const map={};
+    items.forEach(x=>{
+      const f=x.fecha||'';
+      map[f]= (map[f]||0) + Number(x.monto||0);
+    });
+    const labels = Object.keys(map).sort();
+    const values = labels.map(k=>map[k]);
+
+    chGastosDia && chGastosDia.destroy();
+    chGastosDia = new Chart($('#chGastosDia'), {type:'bar',
+      data:{labels, datasets:[{data:values}]},
+      options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}}
+    });
+
+    $('#gastosHint').textContent = isSuper ? 'Puedes borrar gastos. Todo queda registrado en auditoría.' : 'Para borrar gastos se requiere Super Administrador.';
+  }
+
+  async function cargarMovimientos(){
+    // endpoint opcional: si no existe, no rompe la página
+    try{
+      const desde=$('#f-desde').value, hasta=$('#f-hasta').value;
+      const qs = new URLSearchParams({desde,hasta}).toString();
+      const r = await fetch('/api/contabilidad/movimientos?'+qs);
+      if(!r.ok) return;
+      const j = await r.json();
+      const tb = $('#tbMov'); tb.innerHTML='';
+      const items = j.items||[];
+
+      $('#thAcc').classList.toggle('hide', !isSuper);
+
+      const q = ($('#mv-q').value||'').trim().toLowerCase();
+      const tipo = $('#mv-tipo').value;
+      const nat = $('#mv-nat').value;
+
+      const filtered = items.filter(it=>{
+        if(tipo && it.tipo !== tipo) return false;
+        if(nat && it.naturaleza !== nat) return false;
+        if(q){
+          const s = `${it.referencia||''} ${JSON.stringify(it.detalle||{})} ${it.seudonimo||''}`.toLowerCase();
+          if(!s.includes(q)) return false;
+        }
+        return true;
+      });
+
+      if(filtered.length===0){
+        tb.innerHTML='<tr><td colspan="13" class="muted">Sin movimientos para el filtro.</td></tr>';
+        $('#mvFoot').textContent = `Rango: ${desde} → ${hasta}`;
+        return;
+      }
+
+      filtered.forEach(it=>{
+        const locked = !!it.locked;
+        const tr=document.createElement('tr');
+        const ref = it.referencia || '';
+        const det = it.detalle || {};
+        const detText = (it.tipo==='cobro')
+          ? `Vendedor: ${it.seudonimo||''} | Vendidos: ${det.vendidos||0} | Devueltos: ${det.devueltos||0}`
+          : (it.tipo==='gasto')
+            ? (det.descripcion||'')
+            : '';
+
+        tr.innerHTML = `
+          <td>${safe(it.fecha||'')}</td>
+          <td>${safe(it.hora||'')}</td>
+          <td><span class="pill">${safe(it.tipo||'')}</span></td>
+          <td>${pillNat(safe(it.naturaleza||''))}</td>
+          <td><span class="pill ${safe(it.medio||'')}">${safe(it.medio||'')}</span></td>
+          <td class="money">${money(it.monto)}</td>
+          <td class="left">${safe(ref)}<div class="muted" style="font-size:.78rem;margin-top:2px">${safe(detText)}</div></td>
+          <td>${safe(it.creado_por||'')}</td>
+          <td>${safe(it.creado_rol||'')}</td>
+          <td>${safe(it.creado_ip||'')}</td>
+          <td>${safe(it.creado_en||'')}</td>
+          <td>${compLink(it.comprobante)}</td>
+          <td class="${isSuper?'':'hide'}">${locked?'<span class="pill lock">LOCK</span>':''}</td>
+        `;
+        tb.appendChild(tr);
+      });
+
+      const totIng = filtered.filter(x=>x.naturaleza==='ingreso').reduce((s,x)=>s+Number(x.monto||0),0);
+      const totEgr = filtered.filter(x=>x.naturaleza==='egreso').reduce((s,x)=>s+Number(x.monto||0),0);
+      $('#mvFoot').textContent = `Rango: ${desde} → ${hasta} | Ingresos: ${money(totIng)} | Egresos: ${money(totEgr)} | Neto: ${money(totIng-totEgr)}`;
+    }catch(e){}
+  }
+
+  async function cargarAuditoria(){
+    if(!isSuper) return;
+    try{
+      const desde=$('#f-desde').value, hasta=$('#f-hasta').value;
+      const qs = new URLSearchParams({desde,hasta}).toString();
+      const r = await fetch('/api/superadmin/auditoria?'+qs);
+      if(!r.ok) return;
+      const j = await r.json();
+      const tb = $('#tbAud'); tb.innerHTML='';
+      const items = j.items||[];
+      if(!j.ok){
+        tb.innerHTML='<tr><td colspan="9" class="muted">No disponible.</td></tr>';
+        $('#audHint').textContent = j.error || '—';
+        return;
+      }
+      if(items.length===0){
+        tb.innerHTML='<tr><td colspan="9" class="muted">Sin eventos en el rango.</td></tr>';
+        $('#audHint').textContent = `Rango: ${desde} → ${hasta}`;
+        return;
+      }
+      items.forEach(a=>{
+        const tr=document.createElement('tr');
+        tr.innerHTML = `
+          <td>${safe(a.fecha||'')}</td>
+          <td>${safe(a.hora||'')}</td>
+          <td>${safe(a.modulo||'')}</td>
+          <td>${safe(a.accion||'')}</td>
+          <td>${safe(a.ref||'')}</td>
+          <td>${safe(a.usuario||'')}</td>
+          <td>${safe(a.rol||'')}</td>
+          <td>${safe(a.ip||'')}</td>
+          <td class="left">${safe((a.detalle||'')+'')}</td>
+        `;
+        tb.appendChild(tr);
+      });
+      $('#audHint').textContent = `Rango: ${desde} → ${hasta} | Eventos: ${items.length}`;
+    }catch(e){}
+  }
+
   $('#frmDeposito').addEventListener('submit', async (e)=>{
     e.preventDefault();
     $('#b-monto-confirm').value = $('#b-monto').value;
     const fd = new FormData(e.target);
     const r = await fetch('/api/banco/deposito', {method:'POST', body:fd});
     const j = await r.json();
-    if(j.ok){ e.target.reset(); $('#b-fecha').value=today; cargarBanco(); cargarResumen(); }
-    else{ alert(j.error || 'Error registrando el depósito'); }
+    if(j.ok){
+      e.target.reset(); $('#b-fecha').value=today;
+      $('#b-hascomp').checked=false; $('#b-comp').disabled=true; $('#b-comp-wrap').classList.add('hide');
+      toast('Depósito OK','Registrado');
+      cargarBanco(); cargarResumen(); cargarMovimientos();
+    }else toast('Error', j.error || 'No se pudo registrar el depósito');
   });
 
-  // Gastos
-  function agruparPorDia(items){
-    const map={}; items.forEach(x=>{ (map[x.fecha]=map[x.fecha]||[]).push(x); });
-    const order = Object.keys(map).sort();
-    return {labels:order,values:order.map(f=>map[f].reduce((s,g)=>s+Number(g.monto||0),0))};
-  }
-  async function cargarGastos(){
-    const qs = new URLSearchParams({desde:$('#gx-desde').value,hasta:$('#gx-hasta').value}).toString();
-    const r = await fetch('/api/gastos?'+qs); const j = await r.json();
-    const tb = $('#tbGastos'); tb.innerHTML=''; const items = j.items||[]; gastosCache = items;
-    if(items.length===0){ tb.innerHTML='<tr><td colspan="7" class="muted">Sin gastos en el rango.</td></tr>'; }
-    else{
-      items.forEach(g=>{
-        const tr=document.createElement('tr');
-        tr.innerHTML = `
-          <td>${g.fecha||''}</td>
-          <td>${g.categoria||''}</td>
-          <td><span class="pill ${g.medio}">${g.medio}</span></td>
-          <td class="money">${money(g.monto)}</td>
-          <td style="text-align:left">${g.descripcion||''}</td>
-          <td>${compLink(g.comprobante)}</td>
-          <td><button class="btn btn-ghost" data-del="${g.id}"><i class="bi bi-trash"></i></button></td>`;
-        tb.appendChild(tr);
-      });
-      $$('button[data-del]').forEach(b=>{
-        b.onclick = async ()=>{
-          if(!confirm('¿Eliminar gasto?')) return;
-          const r = await fetch('/api/gastos/'+b.dataset.del,{method:'DELETE'});
-          const x = await r.json();
-          if(x.ok){ cargarGastos(); cargarResumen(); }
-        };
-      });
-    }
-    const ag = agruparPorDia(items);
-    chGastosDia && chGastosDia.destroy();
-    chGastosDia = new Chart($('#chGastosDia'), {type:'bar',
-      data:{labels:ag.labels,datasets:[{data:ag.values}]},
-      options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}} });
-  }
-
-  // Alta de gasto (solo hoy)
   $('#frmGasto').addEventListener('submit', async (e)=>{
     e.preventDefault();
-    if($('#g-fecha').value !== today){ alert('Los gastos solo se pueden registrar el día actual.'); return; }
+    if($('#g-fecha').value !== today){
+      toast('Fecha inválida', 'Los gastos solo se pueden registrar el día actual.');
+      return;
+    }
+    syncCategoria();
     $('#g-monto-confirm').value = $('#g-monto').value;
     const fd = new FormData(e.target);
     const r = await fetch('/api/gastos', {method:'POST', body:fd});
     const j = await r.json();
-    if(j.ok){ e.target.reset(); $('#g-fecha').value=today; cargarGastos(); cargarResumen(); }
-    else{ alert(j.error || 'Error guardando gasto'); }
+    if(j.ok){
+      e.target.reset();
+      $('#g-fecha').value=today;
+      $('#g-cat-select').value='Pago de Personal';
+      $('#g-cat-otro').value='';
+      syncCategoria();
+      $('#g-hascomp').checked=false; $('#g-comp').disabled=true; $('#g-comp-wrap').classList.add('hide');
+      toast('Gasto OK','Registrado');
+      cargarGastos(); cargarResumen(); cargarMovimientos();
+    }else toast('Error', j.error || 'No se pudo guardar el gasto');
   });
 
-  // Vendedores: curvas
-  function lineChart(el, labels, data, color){
-    return new Chart(el,{type:'line',
-      data:{labels, datasets:[{data, borderColor:color, backgroundColor:color+'33', tension:.35, fill:true, pointRadius:3}]},
-      options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}}});
-  }
-  async function cargarVendedoresCurvas(){
-    const qs = new URLSearchParams({desde:$('#f-desde').value,hasta:$('#f-hasta').value}).toString();
-    let items=null;
-    try{ const rx=await fetch('/api/contabilidad/vendedores_ranking?'+qs); if(rx.ok){ const j=await rx.json(); items=j.items||null; } }catch{}
-    if(!items){
-      try{
-        const [rv,rd]=await Promise.all([fetch('/api/contabilidad/ventas-vendedores?'+qs),fetch('/api/contabilidad/devueltos-vendedores?'+qs)]);
-        if(rv.ok && rd.ok){
-          const jv=await rv.json(), jd=await rd.json(), map={};
-          (jv.items||[]).forEach(x=>{ map[x.vendedor]=map[x.vendedor]||{vendedor:x.vendedor,vendidos:0,devueltos:0}; map[x.vendedor].vendidos=+x.vendidos||0; });
-          (jd.items||[]).forEach(x=>{ map[x.vendedor]=map[x.vendedor]||{vendedor:x.vendedor,vendidos:0,devueltos:0}; map[x.vendedor].devueltos=+x.devueltos||0; });
-          items=Object.values(map);
-        }
-      }catch{}
-    }
-    if(!items || !items.length){ $('#cardsVendedores').style.display='none'; return; }
-    $('#cardsVendedores').style.display='grid';
-    const topV=[...items].sort((a,b)=>(b.vendidos||0)-(a.vendidos||0)).slice(0,12);
-    const topD=[...items].sort((a,b)=>(b.devueltos||0)-(a.devueltos||0)).slice(0,12);
-    chCurvaVentas && chCurvaVentas.destroy();
-    chCurvaDevueltos && chCurvaDevueltos.destroy();
-    chCurvaVentas   = lineChart($('#chCurvaVentas'),   topV.map(x=>x.vendedor), topV.map(x=>x.vendidos||0),  '#10b981');
-    chCurvaDevueltos= lineChart($('#chCurvaDevueltos'),topD.map(x=>x.vendedor), topD.map(x=>x.devueltos||0),'#ef4444');
-  }
-
-  // ===== Modal =====
-  const mb = $('#mb'), mtitle=$('#mtitle'), mbody=$('#mbody'), mfoot=$('#mfoot');
-  $('#mclose').onclick = ()=> mb.style.display='none';
-  mb.addEventListener('click', e=>{ if(e.target===mb) mb.style.display='none'; });
-
-  function openModal(title, html, foot=''){ mtitle.textContent=title; mbody.innerHTML=html; mfoot.textContent=foot||''; mb.style.display='flex'; }
-  function tabla(items, cols){
-    const th = cols.map(c=>`<th>${c[0]}</th>`).join('');
-    const rows = items.map(it=>'<tr>'+cols.map(([_,fn])=>`<td>${fn(it)}</td>`).join('')+'</tr>').join('');
-    return `<div style="overflow:auto"><table><thead><tr>${th}</tr></thead><tbody>${rows || `<tr><td colspan="${cols.length}" class="muted">Sin datos.</td></tr>`}</tbody></table></div>`;
-  }
-
-  async function openModalForKey(key){
-    const j = resumenCache||{}; if(!j.rango) return;
-    const rango = `Rango: ${j.rango.desde} → ${j.rango.hasta}`;
-
-    // --- GASTOS ---
-    if(key==='gastos_total' || key==='sueldos_total'){
-      if(!gastosCache.length){ await cargarGastos(); }
-      const soloSueldos = key==='sueldos_total';
-      const data = soloSueldos ? gastosCache.filter(x=>(x.categoria||'').toLowerCase()==='sueldo') : gastosCache;
-      const cols = [
-        ['Fecha', x=>x.fecha||''],
-        ['Categoría', x=>x.categoria||''],
-        ['Medio', x=>`<span class="pill ${x.medio}">${x.medio}</span>`],
-        ['Monto', x=>`<span class="money">${money(x.monto)}</span>`],
-        ['Descripción', x=>x.descripcion||''],
-        ['Comp', x=>compLink(x.comprobante)]
-      ];
-      const tot = data.reduce((s,x)=>s+Number(x.monto||0),0);
-      openModal(soloSueldos?'Detalle de sueldos':'Detalle de gastos', tabla(data, cols),
-        `${rango} — Total: ${money(tot)}`);
-      return;
-    }
-
-    // --- PREMIOS ---
-    if(key==='premios_pagados_total'){
-      const items = premiosPagadosCache||[];
-      const cols = [
-        ['Fecha sorteo', x=>x.fecha_sorteo||''],
-        ['Figura', x=>x.figura||''],
-        ['Boleto', x=>x.boleto||''],
-        ['Ganador', x=>x.ganador||x.ganador_nombre||''],
-        ['Premio', x=>`<span class="money">${money(x.premio)}</span>`],
-        ['Pago', x=>x.fecha_pago||''],
-        ['Recibo', x=>x.recibo_id||'']
-      ];
-      openModal('Premios pagados', tabla(items, cols), `${rango} — Total pagado: ${money(j.premios_pagados_total)}`);
-      return;
-    }
-    if(key==='premios_por_caducar'){
-      try{
-        const qs = new URLSearchParams({desde:j.rango.desde,hasta:j.rango.hasta}).toString();
-        const r = await fetch('/api/premios/por-caducar?'+qs);
-        if(r.ok){
-          const x = await r.json();
-          const cols = [['Fecha sorteo',y=>y.fecha_sorteo||''],['Figura',y=>y.figura||''],['Boleto',y=>y.boleto||''],['Caduca',y=>y.fecha_caduca||''],['Premio',y=>`<span class="money">${money(y.premio)}</span>`]];
-          openModal('Premios por caducar', tabla(x.items||[], cols), `${rango} — Cantidad: ${(x.items||[]).length}`);
-          return;
-        }
-      }catch{}
-      openModal('Premios por caducar', `<p class="muted">No hay detalle disponible. KPI: <strong>${j.premios_por_caducar}</strong>.</p>`, rango);
-      return;
-    }
-
-    // --- SALDOS ---
-    if(key==='saldo_banco'){
-      const cols=[['Fecha',m=>m.fecha||''],['Tipo',m=>(m.tipo||'').toUpperCase()],['Monto',m=>`<span class="money">${money(m.monto)}</span>`],['Referencia',m=>m.referencia||''],['Comprobante',m=>compLink(m.comprobante)],['Estado',m=>m.locked?'Bloqueado':'Editable']];
-      openModal('Movimientos de banco', tabla(bancoCache, cols), `${rango} — Saldo banco: ${money(j.saldo_banco)}`);
-      return;
-    }
-    if(key==='saldo_caja'){
-      if(!gastosCache.length){ await cargarGastos(); }
-      const gastosCaja = gastosCache.filter(x=>x.medio==='caja').reduce((s,x)=>s+Number(x.monto||0),0);
-      const html = `
-        <p>Efectivo cobrado: <strong>${money(j.efectivo_cobrado)}</strong></p>
-        <p>Gastos pagados en caja (rango gastos): <strong>${money(gastosCaja)}</strong></p>
-        <hr>
-        <p><strong>Saldo estimado en caja = Efectivo cobrado − Gastos en caja</strong></p>
-        <h3 style="margin:6px 0">${money(j.efectivo_cobrado - gastosCaja)}</h3>`;
-      openModal('Detalle de saldo en caja', html, rango);
-      return;
-    }
-
-    // --- VENTAS / DEVUELTOS: ir a curvas ---
-    if(key==='boletos_vendidos' || key==='boletos_devueltos'){
-      $('#cardsVendedores').scrollIntoView({behavior:'smooth', block:'start'}); return;
-    }
-
-    // --- Otros KPIs: explicación y fórmula ---
-    const explicaciones = {
-      ingresos_brutos: `Suma de ventas brutas del período.`,
-      ganancia_vendedores: `Comisiones pagadas a vendedores (incluye extra-meta si aplica).`,
-      ganancia_empresa: `Ingresos brutos − Ganancia vendedores.`,
-      utilidad_neta: `Ganancia empresa − Premios pagados − Gastos − Sueldos.`,
-      boletos_impresos: `Total de boletos impresos dentro del rango.`,
-      premios_caducados: `Cantidad de premios caducados dentro del rango.`,
-      efectivo_cobrado: `Total cobrado en efectivo desde Caja.`,
-      transferencias_cobradas: `Total cobrado vía transferencia desde Caja.`
-    };
-    openModal('Detalle', `<p class="muted">${explicaciones[key]||'Valor del indicador'}.</p><p>Valor: <strong>${(typeof j[key]==='number')? money(j[key]): String(j[key])}</strong></p>`, rango);
-  }
-
   async function cargarTodo(){
-    await Promise.all([cargarResumen(), cargarBanco(), cargarGastos(), cargarVendedoresCurvas()]);
+    await Promise.all([cargarResumen(), cargarCurvasVendedores(), cargarBanco(), cargarGastos(), cargarMovimientos()]);
+    if(isSuper) cargarAuditoria();
+    toast('Actualizado', `Datos cargados (${user || 'usuario'})`);
   }
 
   cargarTodo();

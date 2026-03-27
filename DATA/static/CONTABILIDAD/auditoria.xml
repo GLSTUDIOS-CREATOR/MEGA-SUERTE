@@ -1,0 +1,18 @@
+<?xml version='1.0' encoding='utf-8'?>
+<auditoria>
+  <evento id="1772996629868">
+    <fecha>2026-03-08</fecha>
+    <hora>14:03:49</hora>
+    <timestamp>2026-03-08T14:03:49</timestamp>
+    <usuario>GLSTUDIOS</usuario>
+    <rol>Super Administrador</rol>
+    <ip>127.0.0.1</ip>
+    <modulo>sistema</modulo>
+    <accion>reset_contabilidad</accion>
+    <ref />
+    <detalle>
+      <d k="scopes">caja,gastos,banco,asignaciones</d>
+      <d k="backup_dir">D:\Documents\sist\GOLPEDESUERTE.EC\DATA\static\CONTABILIDAD\backups\reset_20260308_140349</d>
+    </detalle>
+  </evento>
+</auditoria>

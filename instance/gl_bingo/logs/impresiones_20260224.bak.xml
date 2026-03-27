@@ -1,0 +1,1000 @@
+<?xml version='1.0' encoding='utf-8'?>
+<impresiones>
+  <impresion id="1" fecha_hora="2025-09-08 10:29:41" usuario="DMANQUILLO" tipo="boletos" serie_archivo="Srs_Manila.xlsx" desde="1" hasta="3600">
+    <valor>0.50</valor>
+    <telefono />
+    <fecha_sorteo>2025-09-10</fecha_sorteo>
+    <reintegro_especial>AMBULANCIA.png</reintegro_especial>
+    <cant_reintegro_especial>20</cant_reintegro_especial>
+    <incluir_aleatorio>1</incluir_aleatorio>
+    <total_boletos>3600</total_boletos>
+    <total_planillas>180</total_planillas>
+    <excedente>0</excedente>
+    <lote />
+  </impresion>
+  <impresion id="2" fecha_hora="2025-09-08 10:30:50" usuario="DMANQUILLO" tipo="planilla" serie_archivo="Srs_Manila.xlsx" desde="1" hasta="3600">
+    <fecha_planilla>2025-09-10</fecha_planilla>
+    <excedente>0</excedente>
+    <lote>1-3600</lote>
+    <total_boletos>3600</total_boletos>
+    <total_planillas>90</total_planillas>
+  </impresion>
+  <impresion id="3" fecha_hora="2025-09-13 17:24:10" usuario="GLSTUDIOS" tipo="boletos" serie_archivo="Srs_Manila.xlsx" desde="1" hasta="40">
+    <valor>1.00</valor>
+    <telefono />
+    <fecha_sorteo>2025-09-13</fecha_sorteo>
+    <reintegro_especial>ACUARELA.png</reintegro_especial>
+    <cant_reintegro_especial>1</cant_reintegro_especial>
+    <incluir_aleatorio>1</incluir_aleatorio>
+    <total_boletos>40</total_boletos>
+    <total_planillas>2</total_planillas>
+    <excedente>0</excedente>
+    <lote />
+  </impresion>
+  <impresion id="4" fecha_hora="2025-09-13 17:28:27" usuario="GLSTUDIOS" tipo="boletos" serie_archivo="Srs_Manila.xlsx" desde="1" hasta="40">
+    <valor>1.00</valor>
+    <telefono />
+    <fecha_sorteo>2025-09-13</fecha_sorteo>
+    <reintegro_especial>ACUARELA.png</reintegro_especial>
+    <cant_reintegro_especial>1</cant_reintegro_especial>
+    <incluir_aleatorio>1</incluir_aleatorio>
+    <total_boletos>40</total_boletos>
+    <total_planillas>2</total_planillas>
+    <excedente>0</excedente>
+    <lote />
+  </impresion>
+  <impresion id="5" fecha_hora="2025-09-13 17:29:53" usuario="GLSTUDIOS" tipo="boletos" serie_archivo="Srs_Manila.xlsx" desde="1" hasta="40">
+    <valor>1.00</valor>
+    <telefono />
+    <fecha_sorteo>2025-09-13</fecha_sorteo>
+    <reintegro_especial>ACUARELA.png</reintegro_especial>
+    <cant_reintegro_especial>1</cant_reintegro_especial>
+    <incluir_aleatorio>1</incluir_aleatorio>
+    <total_boletos>40</total_boletos>
+    <total_planillas>2</total_planillas>
+    <excedente>0</excedente>
+    <lote />
+  </impresion>
+  <impresion id="6" fecha_hora="2025-09-13 17:33:50" usuario="GLSTUDIOS" tipo="boletos" serie_archivo="Srs_Manila.xlsx" desde="1" hasta="40">
+    <valor>1.00</valor>
+    <telefono />
+    <fecha_sorteo>2025-09-13</fecha_sorteo>
+    <reintegro_especial>ACUARELA.png</reintegro_especial>
+    <cant_reintegro_especial>1</cant_reintegro_especial>
+    <incluir_aleatorio>1</incluir_aleatorio>
+    <total_boletos>40</total_boletos>
+    <total_planillas>2</total_planillas>
+    <excedente>0</excedente>
+    <lote />
+  </impresion>
+  <impresion id="7" fecha_hora="2025-09-13 17:34:33" usuario="GLSTUDIOS" tipo="boletos" serie_archivo="Srs_Manila.xlsx" desde="1" hasta="40">
+    <valor>1.00</valor>
+    <telefono />
+    <fecha_sorteo>2025-09-13</fecha_sorteo>
+    <reintegro_especial>ACUARELA.png</reintegro_especial>
+    <cant_reintegro_especial>1</cant_reintegro_especial>
+    <incluir_aleatorio>1</incluir_aleatorio>
+    <total_boletos>40</total_boletos>
+    <total_planillas>2</total_planillas>
+    <excedente>0</excedente>
+    <lote />
+  </impresion>
+  <impresion id="8" fecha_hora="2025-09-13 17:35:38" usuario="GLSTUDIOS" tipo="boletos" serie_archivo="Srs_Manila.xlsx" desde="1" hasta="40">
+    <valor>1.00</valor>
+    <telefono />
+    <fecha_sorteo>2025-09-13</fecha_sorteo>
+    <reintegro_especial>ACUARELA.png</reintegro_especial>
+    <cant_reintegro_especial>1</cant_reintegro_especial>
+    <incluir_aleatorio>1</incluir_aleatorio>
+    <total_boletos>40</total_boletos>
+    <total_planillas>2</total_planillas>
+    <excedente>0</excedente>
+    <lote />
+  </impresion>
+  <impresion id="9" fecha_hora="2025-09-13 17:38:18" usuario="GLSTUDIOS" tipo="boletos" serie_archivo="Srs_Manila.xlsx" desde="1" hasta="40">
+    <valor>1.00</valor>
+    <telefono />
+    <fecha_sorteo>2025-09-13</fecha_sorteo>
+    <reintegro_especial>ACUARELA.png</reintegro_especial>
+    <cant_reintegro_especial>1</cant_reintegro_especial>
+    <incluir_aleatorio>1</incluir_aleatorio>
+    <total_boletos>40</total_boletos>
+    <total_planillas>2</total_planillas>
+    <excedente>0</excedente>
+    <lote />
+  </impresion>
+  <impresion id="10" fecha_hora="2025-09-13 17:39:54" usuario="GLSTUDIOS" tipo="boletos" serie_archivo="Srs_Manila.xlsx" desde="1" hasta="40">
+    <valor>1.00</valor>
+    <telefono />
+    <fecha_sorteo>2025-09-13</fecha_sorteo>
+    <reintegro_especial>ACUARELA.png</reintegro_especial>
+    <cant_reintegro_especial>1</cant_reintegro_especial>
+    <incluir_aleatorio>1</incluir_aleatorio>
+    <total_boletos>40</total_boletos>
+    <total_planillas>2</total_planillas>
+    <excedente>0</excedente>
+    <lote />
+  </impresion>
+  <impresion id="11" fecha_hora="2025-09-13 17:42:37" usuario="GLSTUDIOS" tipo="boletos" serie_archivo="Srs_Manila.xlsx" desde="1" hasta="40">
+    <valor>1.00</valor>
+    <telefono />
+    <fecha_sorteo>2025-09-13</fecha_sorteo>
+    <reintegro_especial>ACUARELA.png</reintegro_especial>
+    <cant_reintegro_especial>1</cant_reintegro_especial>
+    <incluir_aleatorio>1</incluir_aleatorio>
+    <total_boletos>40</total_boletos>
+    <total_planillas>2</total_planillas>
+    <excedente>0</excedente>
+    <lote />
+  </impresion>
+  <impresion id="12" fecha_hora="2025-09-13 17:43:40" usuario="GLSTUDIOS" tipo="boletos" serie_archivo="Srs_Manila.xlsx" desde="1" hasta="40">
+    <valor>0.50</valor>
+    <telefono />
+    <fecha_sorteo>2025-09-13</fecha_sorteo>
+    <reintegro_especial>ACUARELA.png</reintegro_especial>
+    <cant_reintegro_especial>1</cant_reintegro_especial>
+    <incluir_aleatorio>1</incluir_aleatorio>
+    <total_boletos>40</total_boletos>
+    <total_planillas>2</total_planillas>
+    <excedente>0</excedente>
+    <lote />
+  </impresion>
+  <impresion id="13" fecha_hora="2025-09-13 17:44:37" usuario="GLSTUDIOS" tipo="boletos" serie_archivo="Srs_Manila.xlsx" desde="1" hasta="40">
+    <valor>0.50</valor>
+    <telefono />
+    <fecha_sorteo>2025-09-13</fecha_sorteo>
+    <reintegro_especial>ACUARELA.png</reintegro_especial>
+    <cant_reintegro_especial>1</cant_reintegro_especial>
+    <incluir_aleatorio>1</incluir_aleatorio>
+    <total_boletos>40</total_boletos>
+    <total_planillas>2</total_planillas>
+    <excedente>0</excedente>
+    <lote />
+  </impresion>
+  <impresion id="14" fecha_hora="2025-09-13 17:47:12" usuario="GLSTUDIOS" tipo="boletos" serie_archivo="Srs_Manila.xlsx" desde="1" hasta="40">
+    <valor>0.50</valor>
+    <telefono />
+    <fecha_sorteo>2025-09-13</fecha_sorteo>
+    <reintegro_especial>ACUARELA.png</reintegro_especial>
+    <cant_reintegro_especial>1</cant_reintegro_especial>
+    <incluir_aleatorio>1</incluir_aleatorio>
+    <total_boletos>40</total_boletos>
+    <total_planillas>2</total_planillas>
+    <excedente>0</excedente>
+    <lote />
+  </impresion>
+  <impresion id="15" fecha_hora="2025-09-13 17:50:24" usuario="GLSTUDIOS" tipo="boletos" serie_archivo="Srs_Manila.xlsx" desde="1" hasta="40">
+    <valor>0.50</valor>
+    <telefono />
+    <fecha_sorteo>2025-09-13</fecha_sorteo>
+    <reintegro_especial>ACUARELA.png</reintegro_especial>
+    <cant_reintegro_especial>1</cant_reintegro_especial>
+    <incluir_aleatorio>1</incluir_aleatorio>
+    <total_boletos>40</total_boletos>
+    <total_planillas>2</total_planillas>
+    <excedente>0</excedente>
+    <lote />
+  </impresion>
+  <impresion id="16" fecha_hora="2025-09-13 17:53:28" usuario="GLSTUDIOS" tipo="boletos" serie_archivo="Srs_Manila.xlsx" desde="1" hasta="40">
+    <valor>0.50</valor>
+    <telefono />
+    <fecha_sorteo>2025-09-13</fecha_sorteo>
+    <reintegro_especial>ACUARELA.png</reintegro_especial>
+    <cant_reintegro_especial>1</cant_reintegro_especial>
+    <incluir_aleatorio>1</incluir_aleatorio>
+    <total_boletos>40</total_boletos>
+    <total_planillas>2</total_planillas>
+    <excedente>0</excedente>
+    <lote />
+  </impresion>
+  <impresion id="17" fecha_hora="2025-09-13 17:56:42" usuario="GLSTUDIOS" tipo="boletos" serie_archivo="Srs_Manila.xlsx" desde="1" hasta="40">
+    <valor>0.50</valor>
+    <telefono />
+    <fecha_sorteo>2025-09-13</fecha_sorteo>
+    <reintegro_especial>ACUARELA.png</reintegro_especial>
+    <cant_reintegro_especial>1</cant_reintegro_especial>
+    <incluir_aleatorio>1</incluir_aleatorio>
+    <total_boletos>40</total_boletos>
+    <total_planillas>2</total_planillas>
+    <excedente>0</excedente>
+    <lote />
+  </impresion>
+  <impresion id="18" fecha_hora="2025-09-13 18:02:29" usuario="GLSTUDIOS" tipo="boletos" serie_archivo="Srs_Manila.xlsx" desde="1" hasta="40">
+    <valor>0.50</valor>
+    <telefono />
+    <fecha_sorteo>2025-09-13</fecha_sorteo>
+    <reintegro_especial>ACUARELA.png</reintegro_especial>
+    <cant_reintegro_especial>1</cant_reintegro_especial>
+    <incluir_aleatorio>1</incluir_aleatorio>
+    <total_boletos>40</total_boletos>
+    <total_planillas>2</total_planillas>
+    <excedente>0</excedente>
+    <lote />
+  </impresion>
+  <impresion id="19" fecha_hora="2025-09-13 18:08:02" usuario="GLSTUDIOS" tipo="boletos" serie_archivo="Srs_Manila.xlsx" desde="1" hasta="40">
+    <valor>0.50</valor>
+    <telefono />
+    <fecha_sorteo>2025-09-13</fecha_sorteo>
+    <reintegro_especial>ACUARELA.png</reintegro_especial>
+    <cant_reintegro_especial>1</cant_reintegro_especial>
+    <incluir_aleatorio>1</incluir_aleatorio>
+    <total_boletos>40</total_boletos>
+    <total_planillas>2</total_planillas>
+    <excedente>0</excedente>
+    <lote />
+  </impresion>
+  <impresion id="20" fecha_hora="2025-09-13 18:10:59" usuario="GLSTUDIOS" tipo="boletos" serie_archivo="Srs_Manila.xlsx" desde="1" hasta="40">
+    <valor>0.50</valor>
+    <telefono />
+    <fecha_sorteo>2025-09-13</fecha_sorteo>
+    <reintegro_especial>ACUARELA.png</reintegro_especial>
+    <cant_reintegro_especial>1</cant_reintegro_especial>
+    <incluir_aleatorio>1</incluir_aleatorio>
+    <total_boletos>40</total_boletos>
+    <total_planillas>2</total_planillas>
+    <excedente>0</excedente>
+    <lote />
+  </impresion>
+  <impresion id="21" fecha_hora="2025-09-13 18:14:18" usuario="GLSTUDIOS" tipo="boletos" serie_archivo="Srs_Manila.xlsx" desde="1" hasta="40">
+    <valor>0.50</valor>
+    <telefono />
+    <fecha_sorteo>2025-09-13</fecha_sorteo>
+    <reintegro_especial>ACUARELA.png</reintegro_especial>
+    <cant_reintegro_especial>1</cant_reintegro_especial>
+    <incluir_aleatorio>1</incluir_aleatorio>
+    <total_boletos>40</total_boletos>
+    <total_planillas>2</total_planillas>
+    <excedente>0</excedente>
+    <lote />
+  </impresion>
+  <impresion id="22" fecha_hora="2025-09-13 18:17:03" usuario="GLSTUDIOS" tipo="boletos" serie_archivo="Srs_Manila.xlsx" desde="1" hasta="40">
+    <valor>0.50</valor>
+    <telefono />
+    <fecha_sorteo>2025-09-13</fecha_sorteo>
+    <reintegro_especial>ACUARELA.png</reintegro_especial>
+    <cant_reintegro_especial>1</cant_reintegro_especial>
+    <incluir_aleatorio>1</incluir_aleatorio>
+    <total_boletos>40</total_boletos>
+    <total_planillas>2</total_planillas>
+    <excedente>0</excedente>
+    <lote />
+  </impresion>
+  <impresion id="23" fecha_hora="2025-09-13 18:19:44" usuario="GLSTUDIOS" tipo="boletos" serie_archivo="Srs_Manila.xlsx" desde="1" hasta="40">
+    <valor>0.50</valor>
+    <telefono />
+    <fecha_sorteo>2025-09-13</fecha_sorteo>
+    <reintegro_especial>ACUARELA.png</reintegro_especial>
+    <cant_reintegro_especial>1</cant_reintegro_especial>
+    <incluir_aleatorio>1</incluir_aleatorio>
+    <total_boletos>40</total_boletos>
+    <total_planillas>2</total_planillas>
+    <excedente>0</excedente>
+    <lote />
+  </impresion>
+  <impresion id="24" fecha_hora="2025-09-13 18:22:14" usuario="GLSTUDIOS" tipo="boletos" serie_archivo="Srs_Manila.xlsx" desde="1" hasta="40">
+    <valor>0.50</valor>
+    <telefono />
+    <fecha_sorteo>2025-09-13</fecha_sorteo>
+    <reintegro_especial>ACUARELA.png</reintegro_especial>
+    <cant_reintegro_especial>1</cant_reintegro_especial>
+    <incluir_aleatorio>1</incluir_aleatorio>
+    <total_boletos>40</total_boletos>
+    <total_planillas>2</total_planillas>
+    <excedente>0</excedente>
+    <lote />
+  </impresion>
+  <impresion id="25" fecha_hora="2025-09-13 18:24:08" usuario="GLSTUDIOS" tipo="boletos" serie_archivo="Srs_ib2.xlsx" desde="1" hasta="3000">
+    <valor>1.00</valor>
+    <telefono />
+    <fecha_sorteo>2025-09-15</fecha_sorteo>
+    <reintegro_especial>RADIACION.png</reintegro_especial>
+    <cant_reintegro_especial>20</cant_reintegro_especial>
+    <incluir_aleatorio>1</incluir_aleatorio>
+    <total_boletos>3000</total_boletos>
+    <total_planillas>150</total_planillas>
+    <excedente>0</excedente>
+    <lote />
+  </impresion>
+  <impresion id="26" fecha_hora="2025-09-13 18:25:07" usuario="GLSTUDIOS" tipo="boletos" serie_archivo="Srs_ib2.xlsx" desde="1" hasta="3000">
+    <valor>0.50</valor>
+    <telefono />
+    <fecha_sorteo>2025-09-15</fecha_sorteo>
+    <reintegro_especial>RADIACION.png</reintegro_especial>
+    <cant_reintegro_especial>20</cant_reintegro_especial>
+    <incluir_aleatorio>1</incluir_aleatorio>
+    <total_boletos>3000</total_boletos>
+    <total_planillas>150</total_planillas>
+    <excedente>0</excedente>
+    <lote />
+  </impresion>
+  <impresion id="27" fecha_hora="2025-09-13 18:25:59" usuario="GLSTUDIOS" tipo="boletos" serie_archivo="Srs_ib2.xlsx" desde="1" hasta="3000">
+    <valor>0.50</valor>
+    <telefono />
+    <fecha_sorteo>2025-09-15</fecha_sorteo>
+    <reintegro_especial>RADIACION.png</reintegro_especial>
+    <cant_reintegro_especial>10</cant_reintegro_especial>
+    <incluir_aleatorio>1</incluir_aleatorio>
+    <total_boletos>3000</total_boletos>
+    <total_planillas>150</total_planillas>
+    <excedente>0</excedente>
+    <lote />
+  </impresion>
+  <impresion id="28" fecha_hora="2025-09-15 00:20:22" usuario="GLSTUDIOS" tipo="boletos" serie_archivo="Srs_ib2.xlsx" desde="1" hasta="40">
+    <valor>1.00</valor>
+    <telefono />
+    <fecha_sorteo>2025-09-14</fecha_sorteo>
+    <reintegro_especial>RADIACION.png</reintegro_especial>
+    <cant_reintegro_especial>0</cant_reintegro_especial>
+    <incluir_aleatorio>1</incluir_aleatorio>
+    <total_boletos>40</total_boletos>
+    <total_planillas>2</total_planillas>
+    <excedente>0</excedente>
+    <lote />
+  </impresion>
+  <impresion id="29" fecha_hora="2025-09-15 00:21:55" usuario="GLSTUDIOS" tipo="boletos" serie_archivo="Srs_ib2.xlsx" desde="1" hasta="40">
+    <valor>1.00</valor>
+    <telefono />
+    <fecha_sorteo>2025-09-14</fecha_sorteo>
+    <reintegro_especial>RADIACION.png</reintegro_especial>
+    <cant_reintegro_especial>0</cant_reintegro_especial>
+    <incluir_aleatorio>1</incluir_aleatorio>
+    <total_boletos>40</total_boletos>
+    <total_planillas>2</total_planillas>
+    <excedente>0</excedente>
+    <lote />
+  </impresion>
+  <impresion id="30" fecha_hora="2025-09-16 15:51:17" usuario="GLSTUDIOS" tipo="boletos" serie_archivo="Srs_Manila.xlsx" desde="3001" hasta="3008">
+    <valor>1.00</valor>
+    <telefono />
+    <fecha_sorteo>2025-09-16</fecha_sorteo>
+    <reintegro_especial>GPS.png</reintegro_especial>
+    <cant_reintegro_especial>0</cant_reintegro_especial>
+    <incluir_aleatorio>1</incluir_aleatorio>
+    <total_boletos>8</total_boletos>
+    <total_planillas>1</total_planillas>
+    <excedente>0</excedente>
+    <lote />
+  </impresion>
+  <impresion id="31" fecha_hora="2025-09-16 15:51:58" usuario="GLSTUDIOS" tipo="boletos" serie_archivo="Srs_Manila.xlsx" desde="3001" hasta="3008">
+    <valor>1.00</valor>
+    <telefono />
+    <fecha_sorteo>2025-09-16</fecha_sorteo>
+    <reintegro_especial>GPS.png</reintegro_especial>
+    <cant_reintegro_especial>0</cant_reintegro_especial>
+    <incluir_aleatorio>1</incluir_aleatorio>
+    <total_boletos>8</total_boletos>
+    <total_planillas>1</total_planillas>
+    <excedente>0</excedente>
+    <lote />
+  </impresion>
+  <impresion id="32" fecha_hora="2025-09-16 15:58:31" usuario="GLSTUDIOS" tipo="boletos" serie_archivo="Srs_Manila.xlsx" desde="3009" hasta="3016">
+    <valor>1.00</valor>
+    <telefono />
+    <fecha_sorteo>2025-09-16</fecha_sorteo>
+    <reintegro_especial>GPS.png</reintegro_especial>
+    <cant_reintegro_especial>0</cant_reintegro_especial>
+    <incluir_aleatorio>1</incluir_aleatorio>
+    <total_boletos>8</total_boletos>
+    <total_planillas>1</total_planillas>
+    <excedente>0</excedente>
+    <lote />
+  </impresion>
+  <impresion id="33" fecha_hora="2025-09-16 15:59:39" usuario="GLSTUDIOS" tipo="boletos" serie_archivo="Srs_Manila.xlsx" desde="3009" hasta="3016">
+    <valor>1.00</valor>
+    <telefono />
+    <fecha_sorteo>2025-09-16</fecha_sorteo>
+    <reintegro_especial>GPS.png</reintegro_especial>
+    <cant_reintegro_especial>0</cant_reintegro_especial>
+    <incluir_aleatorio>1</incluir_aleatorio>
+    <total_boletos>8</total_boletos>
+    <total_planillas>1</total_planillas>
+    <excedente>0</excedente>
+    <lote />
+  </impresion>
+  <impresion id="34" fecha_hora="2025-09-16 16:02:33" usuario="GLSTUDIOS" tipo="boletos" serie_archivo="Srs_Manila.xlsx" desde="3009" hasta="3016">
+    <valor>1.00</valor>
+    <telefono />
+    <fecha_sorteo>2025-09-16</fecha_sorteo>
+    <reintegro_especial>GPS.png</reintegro_especial>
+    <cant_reintegro_especial>0</cant_reintegro_especial>
+    <incluir_aleatorio>1</incluir_aleatorio>
+    <total_boletos>8</total_boletos>
+    <total_planillas>1</total_planillas>
+    <excedente>0</excedente>
+    <lote />
+  </impresion>
+  <impresion id="35" fecha_hora="2025-09-16 16:03:43" usuario="GLSTUDIOS" tipo="boletos" serie_archivo="Srs_Manila.xlsx" desde="3009" hasta="3016">
+    <valor>1.00</valor>
+    <telefono />
+    <fecha_sorteo>2025-09-16</fecha_sorteo>
+    <reintegro_especial>GPS.png</reintegro_especial>
+    <cant_reintegro_especial>0</cant_reintegro_especial>
+    <incluir_aleatorio>1</incluir_aleatorio>
+    <total_boletos>8</total_boletos>
+    <total_planillas>1</total_planillas>
+    <excedente>0</excedente>
+    <lote />
+  </impresion>
+  <impresion id="36" fecha_hora="2025-09-16 16:09:10" usuario="GLSTUDIOS" tipo="boletos" serie_archivo="Srs_Manila.xlsx" desde="3009" hasta="3016">
+    <valor>1.00</valor>
+    <telefono />
+    <fecha_sorteo>2025-09-16</fecha_sorteo>
+    <reintegro_especial>GPS.png</reintegro_especial>
+    <cant_reintegro_especial>0</cant_reintegro_especial>
+    <incluir_aleatorio>1</incluir_aleatorio>
+    <total_boletos>8</total_boletos>
+    <total_planillas>1</total_planillas>
+    <excedente>0</excedente>
+    <lote />
+  </impresion>
+  <impresion id="37" fecha_hora="2025-09-16 16:13:56" usuario="GLSTUDIOS" tipo="boletos" serie_archivo="Srs_Manila.xlsx" desde="3009" hasta="3016">
+    <valor>1.00</valor>
+    <telefono />
+    <fecha_sorteo>2025-09-16</fecha_sorteo>
+    <reintegro_especial>GPS.png</reintegro_especial>
+    <cant_reintegro_especial>0</cant_reintegro_especial>
+    <incluir_aleatorio>1</incluir_aleatorio>
+    <total_boletos>8</total_boletos>
+    <total_planillas>1</total_planillas>
+    <excedente>0</excedente>
+    <lote />
+  </impresion>
+  <impresion id="38" fecha_hora="2025-09-16 16:17:14" usuario="GLSTUDIOS" tipo="boletos" serie_archivo="Srs_Manila.xlsx" desde="3009" hasta="3016">
+    <valor>1.00</valor>
+    <telefono />
+    <fecha_sorteo>2025-09-16</fecha_sorteo>
+    <reintegro_especial>GPS.png</reintegro_especial>
+    <cant_reintegro_especial>0</cant_reintegro_especial>
+    <incluir_aleatorio>1</incluir_aleatorio>
+    <total_boletos>8</total_boletos>
+    <total_planillas>1</total_planillas>
+    <excedente>0</excedente>
+    <lote />
+  </impresion>
+  <impresion id="39" fecha_hora="2025-09-16 16:18:36" usuario="GLSTUDIOS" tipo="boletos" serie_archivo="Srs_Manila.xlsx" desde="3009" hasta="3016">
+    <valor>1.00</valor>
+    <telefono />
+    <fecha_sorteo>2025-09-16</fecha_sorteo>
+    <reintegro_especial>GPS.png</reintegro_especial>
+    <cant_reintegro_especial>0</cant_reintegro_especial>
+    <incluir_aleatorio>1</incluir_aleatorio>
+    <total_boletos>8</total_boletos>
+    <total_planillas>1</total_planillas>
+    <excedente>0</excedente>
+    <lote />
+  </impresion>
+  <impresion id="40" fecha_hora="2025-10-18 17:31:01" usuario="Impresion" tipo="boletos" serie_archivo="Srs_Manila.xlsx" desde="1" hasta="90">
+    <valor>1.00</valor>
+    <telefono />
+    <fecha_sorteo>2025-10-18</fecha_sorteo>
+    <reintegro_especial>AJUSTES.png</reintegro_especial>
+    <cant_reintegro_especial>0</cant_reintegro_especial>
+    <incluir_aleatorio>1</incluir_aleatorio>
+    <total_boletos>90</total_boletos>
+    <total_planillas>5</total_planillas>
+    <excedente>0</excedente>
+    <lote />
+  </impresion>
+  <impresion id="41" fecha_hora="2025-10-18 17:44:47" usuario="Impresion" tipo="boletos" serie_archivo="Srs_Manila.xlsx" desde="91" hasta="120">
+    <valor>1.00</valor>
+    <telefono />
+    <fecha_sorteo>2025-10-18</fecha_sorteo>
+    <reintegro_especial>AJUSTES.png</reintegro_especial>
+    <cant_reintegro_especial>0</cant_reintegro_especial>
+    <incluir_aleatorio>1</incluir_aleatorio>
+    <total_boletos>30</total_boletos>
+    <total_planillas>2</total_planillas>
+    <excedente>0</excedente>
+    <lote />
+  </impresion>
+  <impresion id="42" fecha_hora="2025-10-18 17:58:26" usuario="Impresion" tipo="boletos" serie_archivo="Srs_Manila.xlsx" desde="121" hasta="150">
+    <valor>1.00</valor>
+    <telefono />
+    <fecha_sorteo>2025-10-18</fecha_sorteo>
+    <reintegro_especial>AJUSTES.png</reintegro_especial>
+    <cant_reintegro_especial>0</cant_reintegro_especial>
+    <incluir_aleatorio>1</incluir_aleatorio>
+    <total_boletos>30</total_boletos>
+    <total_planillas>2</total_planillas>
+    <excedente>0</excedente>
+    <lote />
+    <bonus_enabled>1</bonus_enabled>
+    <bonus_code>BNS-20251018-175826-7065</bonus_code>
+    <bonus_numbers>9,19,23,30,40</bonus_numbers>
+    <bonus_winners>5:[];4:[125,148,133];3:[124,137];2:[127,146];1:[149,150,136,135,139]</bonus_winners>
+    <bonus code="BNS-20251018-175826-7065" feasible="1">
+      <numbers>9,19,23,30,40</numbers>
+      <requested>{"5": 0, "4": 3, "3": 2, "2": 2, "1": 5}</requested>
+      <k5 />
+      <k4>125,148,133</k4>
+      <k3>124,137</k3>
+      <k2>127,146</k2>
+      <k1>149,150,136,135,139</k1>
+    </bonus>
+  </impresion>
+  <impresion id="43" fecha_hora="2025-10-18 18:20:57" usuario="Impresion" tipo="boletos" serie_archivo="Srs_Manila.xlsx" desde="151" hasta="2000">
+    <valor>1.00</valor>
+    <telefono />
+    <fecha_sorteo>2025-10-18</fecha_sorteo>
+    <reintegro_especial>AJUSTES.png</reintegro_especial>
+    <cant_reintegro_especial>0</cant_reintegro_especial>
+    <incluir_aleatorio>1</incluir_aleatorio>
+    <total_boletos>1850</total_boletos>
+    <total_planillas>93</total_planillas>
+    <excedente>0</excedente>
+    <lote />
+    <bonus_enabled>1</bonus_enabled>
+    <bonus_code>BNS-20251018-182057-1678</bonus_code>
+    <bonus_numbers>26,29,57,68,72</bonus_numbers>
+    <bonus_winners>5:[];4:[570];3:[296,1614];2:[195,847,786];1:[386,1906,576,1736]</bonus_winners>
+    <bonus code="BNS-20251018-182057-1678" feasible="1">
+      <numbers>26,29,57,68,72</numbers>
+      <requested>{"5": 0, "4": 1, "3": 2, "2": 3, "1": 4}</requested>
+      <k5 />
+      <k4>570</k4>
+      <k3>296,1614</k3>
+      <k2>195,847,786</k2>
+      <k1>386,1906,576,1736</k1>
+    </bonus>
+  </impresion>
+  <impresion id="44" fecha_hora="2025-10-19 12:00:36" usuario="Impresion" tipo="boletos" serie_archivo="Srs_Manila.xlsx" desde="1" hasta="120">
+    <valor>1.00</valor>
+    <telefono />
+    <fecha_sorteo>2025-10-19</fecha_sorteo>
+    <reintegro_especial>ACUARELA.png</reintegro_especial>
+    <cant_reintegro_especial>10</cant_reintegro_especial>
+    <incluir_aleatorio>1</incluir_aleatorio>
+    <total_boletos>120</total_boletos>
+    <total_planillas>6</total_planillas>
+    <excedente>0</excedente>
+    <lote />
+    <bonus_enabled>1</bonus_enabled>
+    <bonus_code>BNS-20251019-120036-5561</bonus_code>
+    <bonus_numbers />
+    <bonus_winners>5:[79,65,117,94,97];4:[56,113];3:[77,24,57,30];2:[88,120];1:[34,43,8,54,69]</bonus_winners>
+    <bonus code="BNS-20251019-120036-5561" feasible="1">
+      <numbers />
+      <requested>{"5": 5, "4": 2, "3": 4, "2": 2, "1": 5}</requested>
+      <k5>79,65,117,94,97</k5>
+      <k4>56,113</k4>
+      <k3>77,24,57,30</k3>
+      <k2>88,120</k2>
+      <k1>34,43,8,54,69</k1>
+    </bonus>
+  </impresion>
+  <impresion id="45" fecha_hora="2025-10-19 12:32:52" usuario="Impresion" tipo="boletos" serie_archivo="Srs_Manila.xlsx" desde="121" hasta="200">
+    <valor>1.00</valor>
+    <telefono />
+    <fecha_sorteo>2025-10-19</fecha_sorteo>
+    <reintegro_especial>ACUARELA.png</reintegro_especial>
+    <cant_reintegro_especial>0</cant_reintegro_especial>
+    <incluir_aleatorio>1</incluir_aleatorio>
+    <total_boletos>80</total_boletos>
+    <total_planillas>4</total_planillas>
+    <excedente>0</excedente>
+    <lote />
+  </impresion>
+  <impresion id="46" fecha_hora="2025-10-19 12:33:19" usuario="Impresion" tipo="boletos" serie_archivo="Srs_Manila.xlsx" desde="121" hasta="200">
+    <valor>1.00</valor>
+    <telefono />
+    <fecha_sorteo>2025-10-19</fecha_sorteo>
+    <reintegro_especial>ACUARELA.png</reintegro_especial>
+    <cant_reintegro_especial>0</cant_reintegro_especial>
+    <incluir_aleatorio>1</incluir_aleatorio>
+    <total_boletos>80</total_boletos>
+    <total_planillas>4</total_planillas>
+    <excedente>0</excedente>
+    <lote />
+    <bonus_enabled>1</bonus_enabled>
+    <bonus_code>BNS-20251019-123319-3920</bonus_code>
+    <bonus_numbers />
+    <bonus_winners>5:[184,189];4:[124];3:[169];2:[171];1:[198]</bonus_winners>
+    <bonus code="BNS-20251019-123319-3920" feasible="1">
+      <numbers />
+      <requested>{"5": 2, "4": 1, "3": 1, "2": 1, "1": 1}</requested>
+      <k5>184,189</k5>
+      <k4>124</k4>
+      <k3>169</k3>
+      <k2>171</k2>
+      <k1>198</k1>
+    </bonus>
+  </impresion>
+  <impresion id="47" fecha_hora="2025-10-19 12:49:48" usuario="Impresion" tipo="boletos" serie_archivo="Srs_Manila.xlsx" desde="201" hasta="400">
+    <valor>1.00</valor>
+    <telefono />
+    <fecha_sorteo>2025-10-19</fecha_sorteo>
+    <reintegro_especial>ACUARELA.png</reintegro_especial>
+    <cant_reintegro_especial>0</cant_reintegro_especial>
+    <incluir_aleatorio>1</incluir_aleatorio>
+    <total_boletos>200</total_boletos>
+    <total_planillas>10</total_planillas>
+    <excedente>0</excedente>
+    <lote />
+  </impresion>
+  <impresion id="48" fecha_hora="2025-10-19 12:50:16" usuario="Impresion" tipo="boletos" serie_archivo="Srs_Manila.xlsx" desde="201" hasta="400">
+    <valor>1.00</valor>
+    <telefono />
+    <fecha_sorteo>2025-10-19</fecha_sorteo>
+    <reintegro_especial>ACUARELA.png</reintegro_especial>
+    <cant_reintegro_especial>0</cant_reintegro_especial>
+    <incluir_aleatorio>1</incluir_aleatorio>
+    <total_boletos>200</total_boletos>
+    <total_planillas>10</total_planillas>
+    <excedente>0</excedente>
+    <lote />
+  </impresion>
+  <impresion id="49" fecha_hora="2025-10-19 12:50:20" usuario="Impresion" tipo="boletos" serie_archivo="Srs_Manila.xlsx" desde="201" hasta="400">
+    <valor>1.00</valor>
+    <telefono />
+    <fecha_sorteo>2025-10-19</fecha_sorteo>
+    <reintegro_especial>ACUARELA.png</reintegro_especial>
+    <cant_reintegro_especial>0</cant_reintegro_especial>
+    <incluir_aleatorio>1</incluir_aleatorio>
+    <total_boletos>200</total_boletos>
+    <total_planillas>10</total_planillas>
+    <excedente>0</excedente>
+    <lote />
+    <bonus_enabled>1</bonus_enabled>
+    <bonus_code>BNS-20251019-125020-4344</bonus_code>
+    <bonus_numbers />
+    <bonus_winners>5:[];4:[332,318,281,336];3:[371];2:[219];1:[275]</bonus_winners>
+    <bonus code="BNS-20251019-125020-4344" feasible="1">
+      <numbers />
+      <requested>{"5": 0, "4": 4, "3": 1, "2": 1, "1": 1}</requested>
+      <k5 />
+      <k4>332,318,281,336</k4>
+      <k3>371</k3>
+      <k2>219</k2>
+      <k1>275</k1>
+    </bonus>
+  </impresion>
+  <impresion id="50" fecha_hora="2025-10-19 13:18:20" usuario="Impresion" tipo="boletos" serie_archivo="Srs_Manila.xlsx" desde="401" hasta="401">
+    <valor>1.00</valor>
+    <telefono />
+    <fecha_sorteo>2025-10-19</fecha_sorteo>
+    <reintegro_especial>ACUARELA.png</reintegro_especial>
+    <cant_reintegro_especial>0</cant_reintegro_especial>
+    <incluir_aleatorio>1</incluir_aleatorio>
+    <total_boletos>1</total_boletos>
+    <total_planillas>1</total_planillas>
+    <excedente>0</excedente>
+    <lote />
+    <bonus_enabled>1</bonus_enabled>
+    <bonus_code>BNS-20251019-131820-1055</bonus_code>
+    <bonus_numbers />
+    <bonus_winners>5:[];4:[];3:[];2:[401];1:[]</bonus_winners>
+    <bonus code="BNS-20251019-131820-1055" feasible="0">
+      <numbers />
+      <requested>{"5": 0, "4": 0, "3": 0, "2": 2, "1": 4}</requested>
+      <k5 />
+      <k4 />
+      <k3 />
+      <k2>401</k2>
+      <k1 />
+      <shortages>{"2": 1, "1": 4}</shortages>
+    </bonus>
+  </impresion>
+  <impresion id="51" fecha_hora="2025-10-19 13:18:44" usuario="Impresion" tipo="boletos" serie_archivo="Srs_Manila.xlsx" desde="401" hasta="500">
+    <valor>1.00</valor>
+    <telefono />
+    <fecha_sorteo>2025-10-19</fecha_sorteo>
+    <reintegro_especial>ACUARELA.png</reintegro_especial>
+    <cant_reintegro_especial>0</cant_reintegro_especial>
+    <incluir_aleatorio>1</incluir_aleatorio>
+    <total_boletos>100</total_boletos>
+    <total_planillas>5</total_planillas>
+    <excedente>0</excedente>
+    <lote />
+    <bonus_enabled>1</bonus_enabled>
+    <bonus_code>BNS-20251019-131844-5838</bonus_code>
+    <bonus_numbers />
+    <bonus_winners>5:[];4:[];3:[];2:[472,476];1:[457,419,413,465]</bonus_winners>
+    <bonus code="BNS-20251019-131844-5838" feasible="1">
+      <numbers />
+      <requested>{"5": 0, "4": 0, "3": 0, "2": 2, "1": 4}</requested>
+      <k5 />
+      <k4 />
+      <k3 />
+      <k2>472,476</k2>
+      <k1>457,419,413,465</k1>
+    </bonus>
+  </impresion>
+  <impresion id="52" fecha_hora="2025-10-19 13:57:16" usuario="Impresion" tipo="boletos" serie_archivo="Srs_Manila.xlsx" desde="501" hasta="700">
+    <valor>1.00</valor>
+    <telefono />
+    <fecha_sorteo>2025-10-19</fecha_sorteo>
+    <reintegro_especial>ACUARELA.png</reintegro_especial>
+    <cant_reintegro_especial>10</cant_reintegro_especial>
+    <incluir_aleatorio>1</incluir_aleatorio>
+    <total_boletos>200</total_boletos>
+    <total_planillas>10</total_planillas>
+    <excedente>0</excedente>
+    <lote />
+    <bonus_enabled>1</bonus_enabled>
+    <bonus_code>BNS-20251019-135716-2472</bonus_code>
+    <bonus_numbers />
+    <bonus_winners>5:[];4:[];3:[];2:[];1:[606]</bonus_winners>
+    <bonus code="BNS-20251019-135716-2472" feasible="1">
+      <numbers />
+      <requested>{"5": 0, "4": 0, "3": 0, "2": 0, "1": 1}</requested>
+      <k5 />
+      <k4 />
+      <k3 />
+      <k2 />
+      <k1>606</k1>
+    </bonus>
+  </impresion>
+  <impresion id="53" fecha_hora="2025-10-19 14:05:58" usuario="Impresion" tipo="boletos" serie_archivo="Srs_Manila.xlsx" desde="701" hasta="900">
+    <valor>1.00</valor>
+    <telefono />
+    <fecha_sorteo>2025-10-19</fecha_sorteo>
+    <reintegro_especial>ACUARELA.png</reintegro_especial>
+    <cant_reintegro_especial>0</cant_reintegro_especial>
+    <incluir_aleatorio>1</incluir_aleatorio>
+    <total_boletos>200</total_boletos>
+    <total_planillas>10</total_planillas>
+    <excedente>0</excedente>
+    <lote />
+  </impresion>
+  <impresion id="54" fecha_hora="2025-10-19 14:06:02" usuario="Impresion" tipo="boletos" serie_archivo="Srs_Manila.xlsx" desde="701" hasta="900">
+    <valor>1.00</valor>
+    <telefono />
+    <fecha_sorteo>2025-10-19</fecha_sorteo>
+    <reintegro_especial>ACUARELA.png</reintegro_especial>
+    <cant_reintegro_especial>0</cant_reintegro_especial>
+    <incluir_aleatorio>1</incluir_aleatorio>
+    <total_boletos>200</total_boletos>
+    <total_planillas>10</total_planillas>
+    <excedente>0</excedente>
+    <lote />
+    <bonus_enabled>1</bonus_enabled>
+    <bonus_code>BNS-20251019-140602-6533</bonus_code>
+    <bonus_numbers />
+    <bonus_winners>5:[865];4:[806,751,761];3:[716,815];2:[832,809,818,782,884];1:[835,876,765,801,817,840,746,703,796,731]</bonus_winners>
+    <bonus code="BNS-20251019-140602-6533" feasible="1">
+      <numbers />
+      <requested>{"5": 1, "4": 3, "3": 2, "2": 5, "1": 10}</requested>
+      <k5>865</k5>
+      <k4>806,751,761</k4>
+      <k3>716,815</k3>
+      <k2>832,809,818,782,884</k2>
+      <k1>835,876,765,801,817,840,746,703,796,731</k1>
+    </bonus>
+  </impresion>
+  <impresion id="55" fecha_hora="2025-10-19 15:37:44" usuario="Impresion" tipo="boletos" serie_archivo="Srs_Manila.xlsx" desde="901" hasta="1500">
+    <valor>1.00</valor>
+    <telefono />
+    <fecha_sorteo>2025-10-19</fecha_sorteo>
+    <reintegro_especial>ACUARELA.png</reintegro_especial>
+    <cant_reintegro_especial>0</cant_reintegro_especial>
+    <incluir_aleatorio>1</incluir_aleatorio>
+    <total_boletos>600</total_boletos>
+    <total_planillas>30</total_planillas>
+    <excedente>0</excedente>
+    <lote />
+    <bonus_enabled>1</bonus_enabled>
+    <bonus_code>BNS-20251019-153744-8442</bonus_code>
+    <bonus_numbers>17,45,46,47,51</bonus_numbers>
+    <bonus_winners>5:[925,1034];4:[979,988,1033,1040,1119,1165,1217,1243,1261,1280,1385,1395,1437,1447];3:[903,909,911,912,918,923,924,952,953,954,960,964,970,975,986,993,997,999,1005,1020,1025,1027,1045,1047,1058,1059,1063,1077,1080,1084,1102,1114,1133,1148,1155,1156,1157,1158,1161,1170,1176,1179,1186,1199,1208,1215,1230,1242,1251,1253,1254,1256,1268,1285,1292,1303,1304,1312,1316,1318,1333,1352,1355,1357,1359,1364,1371,1378,1383,1386,1402,1410,1413,1415,1429,1441,1446,1449,1452,1459,1464,1468,1469,1477,1478,1479,1484,1495,1497];2:[901,907,914,917,926,928,929,931,932,935,936,937,938,939,947,948,951,955,958,961,962,965,966,967,973,974,977,981,983,984,985,987,991,1000,1001,1004,1006,1007,1008,1010,1012,1013,1014,1015,1018,1022,1024,1026,1029,1030,1046,1048,1051,1052,1055,1061,1062,1067,1070,1071,1076,1081,1083,1087,1091,1094,1099,1101,1103,1105,1107,1110,1111,1112,1117,1121,1126,1128,1129,1131,1132,1140,1141,1142,1143,1144,1151,1159,1160,1163,1164,1166,1167,1184,1189,1191,1192,1194,1195,1202,1207,1209,1220,1223,1224,1227,1228,1231,1233,1238,1239,1245,1247,1248,1249,1252,1255,1257,1259,1262,1264,1269,1270,1271,1278,1279,1282,1283,1286,1287,1288,1289,1290,1293,1295,1296,1298,1300,1309,1313,1314,1315,1317,1320,1321,1322,1325,1326,1327,1328,1331,1335,1336,1338,1347,1353,1356,1368,1369,1373,1375,1376,1379,1380,1381,1382,1388,1389,1391,1393,1396,1398,1399,1400,1407,1412,1414,1419,1420,1421,1422,1424,1426,1427,1438,1445,1453,1460,1465,1467,1472,1476,1480,1481,1482,1487,1488,1489,1490,1491,1493,1494,1498,1499];1:[902,904,905,906,908,910,915,916,922,927,930,933,934,940,941,942,943,944,945,949,950,956,957,963,969,971,972,976,978,980,990,992,994,995,1003,1009,1016,1019,1021,1028,1031,1035,1037,1038,1041,1043,1050,1053,1054,1056,1057,1064,1065,1066,1068,1069,1072,1075,1078,1079,1082,1085,1089,1090,1092,1093,1095,1096,1097,1104,1108,1109,1113,1115,1116,1118,1120,1122,1123,1124,1125,1127,1130,1134,1137,1139,1145,1146,1149,1150,1152,1153,1154,1162,1168,1172,1173,1175,1177,1178,1181,1182,1185,1187,1188,1190,1196,1198,1200,1201,1204,1210,1211,1212,1213,1214,1216,1218,1222,1225,1226,1232,1234,1235,1237,1240,1241,1244,1246,1250,1260,1266,1267,1272,1273,1274,1275,1276,1277,1281,1284,1291,1294,1297,1299,1301,1302,1305,1306,1308,1310,1311,1319,1323,1324,1329,1330,1332,1337,1339,1340,1341,1342,1343,1344,1345,1349,1354,1358,1360,1363,1366,1367,1370,1372,1374,1384,1387,1390,1392,1394,1401,1405,1406,1408,1409,1411,1416,1417,1425,1428,1430,1431,1433,1434,1436,1440,1442,1444,1450,1451,1455,1457,1458,1461,1462,1466,1471,1473,1474,1475,1483,1485,1492]</bonus_winners>
+    <bonus code="BNS-20251019-153744-8442" feasible="1">
+      <numbers>17,45,46,47,51</numbers>
+      <requested>{"5": 1, "4": 2, "3": 3, "2": 4, "1": 5}</requested>
+      <k5>925,1034</k5>
+      <k4>979,988,1033,1040,1119,1165,1217,1243,1261,1280,1385,1395,1437,1447</k4>
+      <k3>903,909,911,912,918,923,924,952,953,954,960,964,970,975,986,993,997,999,1005,1020,1025,1027,1045,1047,1058,1059,1063,1077,1080,1084,1102,1114,1133,1148,1155,1156,1157,1158,1161,1170,1176,1179,1186,1199,1208,1215,1230,1242,1251,1253,1254,1256,1268,1285,1292,1303,1304,1312,1316,1318,1333,1352,1355,1357,1359,1364,1371,1378,1383,1386,1402,1410,1413,1415,1429,1441,1446,1449,1452,1459,1464,1468,1469,1477,1478,1479,1484,1495,1497</k3>
+      <k2>901,907,914,917,926,928,929,931,932,935,936,937,938,939,947,948,951,955,958,961,962,965,966,967,973,974,977,981,983,984,985,987,991,1000,1001,1004,1006,1007,1008,1010,1012,1013,1014,1015,1018,1022,1024,1026,1029,1030,1046,1048,1051,1052,1055,1061,1062,1067,1070,1071,1076,1081,1083,1087,1091,1094,1099,1101,1103,1105,1107,1110,1111,1112,1117,1121,1126,1128,1129,1131,1132,1140,1141,1142,1143,1144,1151,1159,1160,1163,1164,1166,1167,1184,1189,1191,1192,1194,1195,1202,1207,1209,1220,1223,1224,1227,1228,1231,1233,1238,1239,1245,1247,1248,1249,1252,1255,1257,1259,1262,1264,1269,1270,1271,1278,1279,1282,1283,1286,1287,1288,1289,1290,1293,1295,1296,1298,1300,1309,1313,1314,1315,1317,1320,1321,1322,1325,1326,1327,1328,1331,1335,1336,1338,1347,1353,1356,1368,1369,1373,1375,1376,1379,1380,1381,1382,1388,1389,1391,1393,1396,1398,1399,1400,1407,1412,1414,1419,1420,1421,1422,1424,1426,1427,1438,1445,1453,1460,1465,1467,1472,1476,1480,1481,1482,1487,1488,1489,1490,1491,1493,1494,1498,1499</k2>
+      <k1>902,904,905,906,908,910,915,916,922,927,930,933,934,940,941,942,943,944,945,949,950,956,957,963,969,971,972,976,978,980,990,992,994,995,1003,1009,1016,1019,1021,1028,1031,1035,1037,1038,1041,1043,1050,1053,1054,1056,1057,1064,1065,1066,1068,1069,1072,1075,1078,1079,1082,1085,1089,1090,1092,1093,1095,1096,1097,1104,1108,1109,1113,1115,1116,1118,1120,1122,1123,1124,1125,1127,1130,1134,1137,1139,1145,1146,1149,1150,1152,1153,1154,1162,1168,1172,1173,1175,1177,1178,1181,1182,1185,1187,1188,1190,1196,1198,1200,1201,1204,1210,1211,1212,1213,1214,1216,1218,1222,1225,1226,1232,1234,1235,1237,1240,1241,1244,1246,1250,1260,1266,1267,1272,1273,1274,1275,1276,1277,1281,1284,1291,1294,1297,1299,1301,1302,1305,1306,1308,1310,1311,1319,1323,1324,1329,1330,1332,1337,1339,1340,1341,1342,1343,1344,1345,1349,1354,1358,1360,1363,1366,1367,1370,1372,1374,1384,1387,1390,1392,1394,1401,1405,1406,1408,1409,1411,1416,1417,1425,1428,1430,1431,1433,1434,1436,1440,1442,1444,1450,1451,1455,1457,1458,1461,1462,1466,1471,1473,1474,1475,1483,1485,1492</k1>
+    </bonus>
+  </impresion>
+  <impresion id="56" fecha_hora="2025-10-19 19:49:19" usuario="Impresion" tipo="boletos" serie_archivo="Srs_Manila.xlsx" desde="1501" hasta="2000">
+    <valor>1.00</valor>
+    <telefono />
+    <fecha_sorteo>2025-10-19</fecha_sorteo>
+    <reintegro_especial>ACUARELA.png</reintegro_especial>
+    <cant_reintegro_especial>0</cant_reintegro_especial>
+    <incluir_aleatorio>1</incluir_aleatorio>
+    <total_boletos>500</total_boletos>
+    <total_planillas>25</total_planillas>
+    <excedente>0</excedente>
+    <lote />
+    <bonus_enabled>1</bonus_enabled>
+    <bonus_code>BNS-20251019-194919-3868</bonus_code>
+    <bonus_numbers />
+    <bonus_winners>5:[1577];4:[1507,1544];3:[1501,1995,1963];2:[1611,1924,1950,1873];1:[1978,1528,1935,1855,1803]</bonus_winners>
+    <bonus code="BNS-20251019-194919-3868" feasible="1">
+      <numbers />
+      <requested>{"5": 1, "4": 2, "3": 3, "2": 4, "1": 5}</requested>
+      <k5>1577</k5>
+      <k4>1507,1544</k4>
+      <k3>1501,1995,1963</k3>
+      <k2>1611,1924,1950,1873</k2>
+      <k1>1978,1528,1935,1855,1803</k1>
+    </bonus>
+  </impresion>
+  <impresion id="57" fecha_hora="2026-02-04 15:43:06" usuario="GLSTUDIOS" tipo="boletos" serie_archivo="Srs_Manila.xlsx" desde="1" hasta="760">
+    <valor>1.00</valor>
+    <telefono />
+    <fecha_sorteo>2026-02-04</fecha_sorteo>
+    <reintegro_especial>ACUARELA.png</reintegro_especial>
+    <cant_reintegro_especial>0</cant_reintegro_especial>
+    <incluir_aleatorio>1</incluir_aleatorio>
+    <total_boletos>760</total_boletos>
+    <total_planillas>38</total_planillas>
+    <excedente>0</excedente>
+    <lote />
+  </impresion>
+  <impresion id="58" fecha_hora="2026-02-04 15:43:47" usuario="GLSTUDIOS" tipo="planilla" serie_archivo="Srs_Manila.xlsx" desde="1" hasta="760">
+    <fecha_planilla>2026-02-04</fecha_planilla>
+    <excedente>0</excedente>
+    <lote>1-760</lote>
+    <total_boletos>760</total_boletos>
+    <total_planillas>38</total_planillas>
+  </impresion>
+  <impresion id="59" fecha_hora="2026-02-05 00:03:22" usuario="GLSTUDIOS" tipo="boletos" serie_archivo="Srs_ib2.xlsx" desde="1" hasta="760">
+    <valor>1.00</valor>
+    <telefono />
+    <fecha_sorteo>2026-02-05</fecha_sorteo>
+    <reintegro_especial>ACUARELA.png</reintegro_especial>
+    <cant_reintegro_especial>10</cant_reintegro_especial>
+    <incluir_aleatorio>1</incluir_aleatorio>
+    <total_boletos>760</total_boletos>
+    <total_planillas>38</total_planillas>
+    <excedente>0</excedente>
+    <lote />
+  </impresion>
+  <impresion id="60" fecha_hora="2026-02-05 00:03:48" usuario="GLSTUDIOS" tipo="planilla" serie_archivo="Srs_ib2.xlsx" desde="1" hasta="760">
+    <fecha_planilla>2026-02-05</fecha_planilla>
+    <excedente>0</excedente>
+    <lote>1-760</lote>
+    <total_boletos>760</total_boletos>
+    <total_planillas>38</total_planillas>
+  </impresion>
+  <impresion id="61" fecha_hora="2026-02-06 12:40:13" usuario="GLSTUDIOS" tipo="boletos" serie_archivo="Srs_ib3.xlsx" desde="1" hasta="500">
+    <valor>1.00</valor>
+    <telefono />
+    <fecha_sorteo>2026-02-06</fecha_sorteo>
+    <reintegro_especial>AJUSTES.png</reintegro_especial>
+    <cant_reintegro_especial>10</cant_reintegro_especial>
+    <incluir_aleatorio>1</incluir_aleatorio>
+    <total_boletos>500</total_boletos>
+    <total_planillas>25</total_planillas>
+    <excedente>0</excedente>
+    <lote />
+  </impresion>
+  <impresion id="62" fecha_hora="2026-02-06 12:40:42" usuario="GLSTUDIOS" tipo="planilla" serie_archivo="Srs_ib3.xlsx" desde="1" hasta="500">
+    <fecha_planilla>2026-02-06</fecha_planilla>
+    <excedente>0</excedente>
+    <lote>1-500</lote>
+    <total_boletos>500</total_boletos>
+    <total_planillas>25</total_planillas>
+  </impresion>
+  <impresion id="63" fecha_hora="2026-02-07 19:27:45" usuario="GLSTUDIOS" tipo="boletos" serie_archivo="Srs_Manila.xlsx" desde="1" hasta="750">
+    <valor>1.00</valor>
+    <telefono />
+    <fecha_sorteo>2026-02-07</fecha_sorteo>
+    <reintegro_especial>ACUARELA.png</reintegro_especial>
+    <cant_reintegro_especial>10</cant_reintegro_especial>
+    <incluir_aleatorio>1</incluir_aleatorio>
+    <total_boletos>750</total_boletos>
+    <total_planillas>38</total_planillas>
+    <excedente>0</excedente>
+    <lote />
+  </impresion>
+  <impresion id="64" fecha_hora="2026-02-07 19:28:53" usuario="GLSTUDIOS" tipo="planilla" serie_archivo="Srs_Manila.xlsx" desde="1" hasta="750">
+    <fecha_planilla>2026-02-07</fecha_planilla>
+    <excedente>1</excedente>
+    <lote>1-750</lote>
+    <total_boletos>750</total_boletos>
+    <total_planillas>38</total_planillas>
+  </impresion>
+  <impresion id="65" fecha_hora="2026-02-07 19:29:02" usuario="GLSTUDIOS" tipo="planilla" serie_archivo="Srs_Manila.xlsx" desde="1" hasta="750">
+    <fecha_planilla>2026-02-07</fecha_planilla>
+    <excedente>1</excedente>
+    <lote>1-750</lote>
+    <total_boletos>750</total_boletos>
+    <total_planillas>38</total_planillas>
+  </impresion>
+  <impresion id="66" fecha_hora="2026-02-08 02:01:27" usuario="GLSTUDIOS" tipo="boletos" serie_archivo="Srs_Manila.xlsx" desde="1" hasta="900">
+    <valor>1.00</valor>
+    <telefono />
+    <fecha_sorteo>2026-02-08</fecha_sorteo>
+    <reintegro_especial />
+    <cant_reintegro_especial>0</cant_reintegro_especial>
+    <incluir_aleatorio>1</incluir_aleatorio>
+    <total_boletos>900</total_boletos>
+    <total_planillas>45</total_planillas>
+    <excedente>0</excedente>
+    <lote />
+  </impresion>
+  <impresion id="67" fecha_hora="2026-02-12 02:52:30" usuario="GLSTUDIOS" tipo="boletos" serie_archivo="Srs_Manila.xlsx" desde="1" hasta="900">
+    <valor>1.00</valor>
+    <telefono />
+    <fecha_sorteo>2026-02-12</fecha_sorteo>
+    <reintegro_especial>AJUSTES.png</reintegro_especial>
+    <cant_reintegro_especial>0</cant_reintegro_especial>
+    <incluir_aleatorio>1</incluir_aleatorio>
+    <total_boletos>900</total_boletos>
+    <total_planillas>45</total_planillas>
+    <excedente>0</excedente>
+    <lote />
+  </impresion>
+  <impresion id="68" fecha_hora="2026-02-13 02:02:50" usuario="GLSTUDIOS" tipo="boletos" serie_archivo="Srs_Manila.xlsx" desde="1" hasta="850">
+    <valor>1.00</valor>
+    <telefono />
+    <fecha_sorteo>2026-02-13</fecha_sorteo>
+    <reintegro_especial />
+    <cant_reintegro_especial>0</cant_reintegro_especial>
+    <incluir_aleatorio>1</incluir_aleatorio>
+    <total_boletos>850</total_boletos>
+    <total_planillas>43</total_planillas>
+    <excedente>0</excedente>
+    <lote />
+  </impresion>
+  <impresion id="69" fecha_hora="2026-02-15 02:00:08" usuario="GLSTUDIOS" tipo="boletos" serie_archivo="Srs_Manila.xlsx" desde="1" hasta="600">
+    <valor>1.00</valor>
+    <telefono />
+    <fecha_sorteo>2026-02-15</fecha_sorteo>
+    <reintegro_especial />
+    <cant_reintegro_especial>0</cant_reintegro_especial>
+    <incluir_aleatorio>1</incluir_aleatorio>
+    <total_boletos>600</total_boletos>
+    <total_planillas>30</total_planillas>
+    <excedente>0</excedente>
+    <lote />
+  </impresion>
+  <impresion id="70" fecha_hora="2026-02-16 00:51:38" usuario="GLSTUDIOS" tipo="boletos" serie_archivo="Srs_Manila.xlsx" desde="1" hasta="1200">
+    <valor>1.00</valor>
+    <telefono />
+    <fecha_sorteo>2026-02-16</fecha_sorteo>
+    <reintegro_especial />
+    <cant_reintegro_especial>0</cant_reintegro_especial>
+    <incluir_aleatorio>1</incluir_aleatorio>
+    <total_boletos>1200</total_boletos>
+    <total_planillas>60</total_planillas>
+    <excedente>0</excedente>
+    <lote />
+  </impresion>
+  <impresion id="71" fecha_hora="2026-02-19 10:11:05" usuario="GLSTUDIOS" tipo="boletos" serie_archivo="Srs_ib1.xlsx" desde="1" hasta="1800">
+    <valor>1.00</valor>
+    <telefono />
+    <fecha_sorteo>2026-02-19</fecha_sorteo>
+    <reintegro_especial />
+    <cant_reintegro_especial>0</cant_reintegro_especial>
+    <incluir_aleatorio>1</incluir_aleatorio>
+    <total_boletos>1800</total_boletos>
+    <total_planillas>90</total_planillas>
+    <excedente>0</excedente>
+    <lote />
+  </impresion>
+  <impresion id="72" fecha_hora="2026-02-20 04:49:33" usuario="GLSTUDIOS" tipo="boletos" serie_archivo="Srs_ib1.xlsx" desde="1" hasta="600">
+    <valor>1.00</valor>
+    <telefono />
+    <fecha_sorteo>2026-02-20</fecha_sorteo>
+    <reintegro_especial />
+    <cant_reintegro_especial>0</cant_reintegro_especial>
+    <incluir_aleatorio>1</incluir_aleatorio>
+    <total_boletos>600</total_boletos>
+    <total_planillas>30</total_planillas>
+    <excedente>0</excedente>
+    <lote />
+  </impresion>
+  <impresion id="73" fecha_hora="2026-02-20 04:50:12" usuario="GLSTUDIOS" tipo="planilla" serie_archivo="Srs_ib1.xlsx" desde="1" hasta="600">
+    <fecha_planilla>2026-02-20</fecha_planilla>
+    <excedente>0</excedente>
+    <lote>1-600</lote>
+    <total_boletos>600</total_boletos>
+    <total_planillas>30</total_planillas>
+  </impresion>
+  <impresion id="74" fecha_hora="2026-02-21 01:07:11" usuario="GLSTUDIOS" tipo="boletos" serie_archivo="Srs_Manila.xlsx" desde="1" hasta="600">
+    <valor>1.00</valor>
+    <telefono />
+    <fecha_sorteo>2026-02-21</fecha_sorteo>
+    <reintegro_especial />
+    <cant_reintegro_especial>0</cant_reintegro_especial>
+    <incluir_aleatorio>1</incluir_aleatorio>
+    <total_boletos>600</total_boletos>
+    <total_planillas>30</total_planillas>
+    <excedente>0</excedente>
+    <lote />
+  </impresion>
+<impresion id="75" fecha_hora="2026-02-23 21:26:01" usuario="GLSTUDIOS" tipo="boletos" serie_archivo="Srs_Manila.xlsx" desde="1" hasta="3200"><valor>1.00</valor><telefono /><fecha_sorteo>2026-02-23</fecha_sorteo><reintegro_especial /><cant_reintegro_especial>0</cant_reintegro_especial><incluir_aleatorio>1</incluir_aleatorio><total_boletos>3200</total_boletos><total_planillas>160</total_planillas><excedente>0</excedente><lote /></impresion><impresion id="76" fecha_hora="2026-02-23 21:27:48" usuario="GLSTUDIOS" tipo="planilla" serie_archivo="Srs_Manila.xlsx" desde="1" hasta="3200"><fecha_planilla>2026-02-23</fecha_planilla><excedente>0</excedente><lote>1-3200</lote><total_boletos>3200</total_boletos><total_planillas>160</total_planillas></impresion></impresiones>

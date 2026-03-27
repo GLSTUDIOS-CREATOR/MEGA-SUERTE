@@ -27,45 +27,45 @@
       </div>
     </div>
     <nav class="p-3 space-y-1 text-[15px] overflow-y-auto">
-      <a href="/dashboard" class="flex items-center gap-3 px-4 py-2 rounded-xl transition hover:bg-white/10 text-white/90 hover:text-white">
+      {% if can('dashboard') %}<a href="/dashboard" class="flex items-center gap-3 px-4 py-2 rounded-xl transition hover:bg-white/10 text-white/90 hover:text-white">
         <span>🏠</span> <span class="truncate">Dashboard</span>
-      </a>
-      <a href="/usuarios" class="flex items-center gap-3 px-4 py-2 rounded-xl bg-white/20 text-white font-extrabold">
+      </a>{% endif %}
+      {% if can('usuarios') %}<a href="/usuarios" class="flex items-center gap-3 px-4 py-2 rounded-xl bg-white/20 text-white font-extrabold">
         <span>🧑‍💼</span> <span class="truncate">Usuarios</span>
-      </a>
-      <a href="/juego" class="flex items-center gap-3 px-4 py-2 rounded-xl transition hover:bg-white/10 text-white/90 hover:text-white">
+      </a>{% endif %}
+      {% if can('juego') %}<a href="/juego" class="flex items-center gap-3 px-4 py-2 rounded-xl transition hover:bg-white/10 text-white/90 hover:text-white">
         <span>🎲</span> <span class="truncate">Juego</span>
-      </a>
-      <a href="/contabilidad" class="flex items-center gap-3 px-4 py-2 rounded-xl transition hover:bg-white/10 text-white/90 hover:text-white">
+      </a>{% endif %}
+      {% if can('contabilidad') %}<a href="/contabilidad" class="flex items-center gap-3 px-4 py-2 rounded-xl transition hover:bg-white/10 text-white/90 hover:text-white">
         <span>📊</span> <span class="truncate">Contabilidad</span>
-      </a>
-      <a href="/vendedores" class="flex items-center gap-3 px-4 py-2 rounded-xl transition hover:bg-white/10 text-white/90 hover:text-white">
+      </a>{% endif %}
+      {% if can('vendedores') %}<a href="/vendedores" class="flex items-center gap-3 px-4 py-2 rounded-xl transition hover:bg-white/10 text-white/90 hover:text-white">
         <span>🧾</span> <span class="truncate">Vendedores</span>
-      </a>
-      <a href="/asignar-planillas" class="flex items-center gap-3 px-4 py-2 rounded-xl transition hover:bg-white/10 text-white/90 hover:text-white">
+      </a>{% endif %}
+      {% if can('asignar_planillas') %}<a href="/asignar-planillas" class="flex items-center gap-3 px-4 py-2 rounded-xl transition hover:bg-white/10 text-white/90 hover:text-white">
         <span>📑</span> <span class="truncate">Asignar Planillas</span>
-      </a>
-      <a href="/impresion" class="flex items-center gap-3 px-4 py-2 rounded-xl transition hover:bg-white/10 text-white/90 hover:text-white">
+      </a>{% endif %}
+      {% if can('impresion') %}<a href="/impresion" class="flex items-center gap-3 px-4 py-2 rounded-xl transition hover:bg-white/10 text-white/90 hover:text-white">
         <span>🖨️</span> <span class="truncate">Impresión de Boletos</span>
-      </a>
-      <a href="/cobro" class="flex items-center gap-3 px-4 py-2 rounded-xl transition hover:bg-white/10 text-white/90 hover:text-white">
+      </a>{% endif %}
+      {% if can('cobro') %}<a href="/cobro" class="flex items-center gap-3 px-4 py-2 rounded-xl transition hover:bg-white/10 text-white/90 hover:text-white">
         <span>💵</span> <span class="truncate">Cobro de Caja</span>
-      </a>
-      <a href="/pago-premios" class="flex items-center gap-3 px-4 py-2 rounded-xl transition hover:bg-white/10 text-white/90 hover:text-white">
+      </a>{% endif %}
+      {% if can('pago_premios') %}<a href="/pago-premios" class="flex items-center gap-3 px-4 py-2 rounded-xl transition hover:bg-white/10 text-white/90 hover:text-white">
         <span>🏅</span> <span class="truncate">Pago de Premios</span>
-      </a>
-      <a href="/sorteo" class="flex items-center gap-3 px-4 py-2 rounded-xl transition hover:bg-white/10 text-white/90 hover:text-white">
+      </a>{% endif %}
+      {% if can('sorteo') %}<a href="/sorteo" class="flex items-center gap-3 px-4 py-2 rounded-xl transition hover:bg-white/10 text-white/90 hover:text-white">
         <span>🎟️</span> <span class="truncate">Sorteo</span>
-      </a>
-      <a href="/crear-figuras" class="flex items-center gap-3 px-4 py-2 rounded-xl transition hover:bg-white/10 text-white/90 hover:text-white">
+      </a>{% endif %}
+      {% if can('crear_figuras') %}<a href="/crear-figuras" class="flex items-center gap-3 px-4 py-2 rounded-xl transition hover:bg-white/10 text-white/90 hover:text-white">
         <span>🟩</span> <span class="truncate">Crear Figuras</span>
-      </a>
-      <a href="/escoger-figuras" class="flex items-center gap-3 px-4 py-2 rounded-xl transition hover:bg-white/10 text-white/90 hover:text-white">
+      </a>{% endif %}
+      {% if can('escoger_figuras') %}<a href="/escoger-figuras" class="flex items-center gap-3 px-4 py-2 rounded-xl transition hover:bg-white/10 text-white/90 hover:text-white">
         <span>🟦</span> <span class="truncate">Escoger Figuras</span>
-      </a>
-      <a href="/boletin" class="flex items-center gap-3 px-4 py-2 rounded-xl transition hover:bg-white/10 text-white/90 hover:text-white">
+      </a>{% endif %}
+      {% if can('boletin') %}<a href="/boletin" class="flex items-center gap-3 px-4 py-2 rounded-xl transition hover:bg-white/10 text-white/90 hover:text-white">
         <span>📋</span> <span class="truncate">Boletín</span>
-      </a>
+      </a>{% endif %}
     </nav>
     <div class="mt-auto p-3 border-t border-white/10">
       <a href="{{ url_for('logout') }}"
@@ -132,6 +132,23 @@
             </select>
           </div>
 
+          <div class="mb-3 rounded-xl border border-blue-100 bg-blue-50 p-4">
+            <div class="flex items-center justify-between gap-3 mb-2">
+              <label class="block text-gray-700 font-bold mb-0">Módulos permitidos</label>
+              <button type="button" onclick="toggleAllPermisos(this)" data-mode="all" class="text-xs font-bold text-blue-700 hover:text-blue-900">Marcar todos</button>
+            </div>
+            <p class="text-xs text-gray-600 mb-3">Si un botón no está marcado, el usuario no lo verá ni podrá entrar directo por URL.</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
+              {% set permisos_user = user.permisos or [] %}
+              {% for key, label, path in modulos_permisos %}
+              <label class="flex items-center gap-2 rounded-lg bg-white px-3 py-2 border border-blue-100">
+                <input type="checkbox" name="permisos" value="{{ key }}" {% if key in permisos_user %}checked{% endif %} class="rounded border-gray-300 text-blue-600">
+                <span>{{ label }}</span>
+              </label>
+              {% endfor %}
+            </div>
+          </div>
+
           <div class="mb-3">
             <label class="block text-gray-700 font-bold">Contraseña</label>
             <div class="flex relative">
@@ -178,6 +195,15 @@
         passInput.type = "password";
         eye.className = "bi bi-eye";
       }
+    }
+
+    function toggleAllPermisos(btn) {
+      const form = btn.closest('form');
+      const checks = form ? form.querySelectorAll('input[name="permisos"]') : [];
+      const markAll = (btn.dataset.mode || 'all') === 'all';
+      checks.forEach(ch => ch.checked = markAll);
+      btn.dataset.mode = markAll ? 'none' : 'all';
+      btn.textContent = markAll ? 'Quitar todos' : 'Marcar todos';
     }
   </script>
 </body>

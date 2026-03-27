@@ -212,16 +212,18 @@
       </div>
       <ul class="menu">
         <li><a href="/dashboard">🏠 Dashboard</a></li>
-        <li><a href="/usuarios">🧑‍💼 Usuarios</a></li>
-        <li><a href="/juego">🎲 Juego</a></li>
-        <li><a href="/contabilidad">📊 Contabilidad</a></li>
-        <li><a href="/vendedores">🧾 Vendedores</a></li>
-        <li><a href="/asignar-planillas">📑 Asignar Planillas</a></li>
-        <li><a href="/impresion">🖨️ Impresión de Boletos</a></li>
-        <li><a href="/cobro">💵 Cobro de Caja</a></li>
-        <li><a href="/sorteo">🎟️ Sorteo</a></li>
-        <li><a href="/crear-figuras">🟩 Crear Figuras</a></li>
-        <li><a href="/escoger-figuras">🟦 Escoger Figuras</a></li>
+        
+        {% if can('admin_sistema') %}<li><a href="/admin/sistema">🛠️ Sistema</a></li>{% endif %}
+{% if can('usuarios') %}<li><a href="/usuarios">🧑‍💼 Usuarios</a></li>{% endif %}
+        {% if can('juego') %}<li><a href="/juego">🎲 Juego</a></li>{% endif %}
+        {% if can('contabilidad') %}<li><a href="/contabilidad">📊 Contabilidad</a></li>{% endif %}
+        {% if can('vendedores') %}<li><a href="/vendedores">🧾 Vendedores</a></li>{% endif %}
+        {% if can('asignar_planillas') %}<li><a href="/asignar-planillas">📑 Asignar Planillas</a></li>{% endif %}
+        {% if can('impresion') %}<li><a href="/impresion">🖨️ Impresión de Boletos</a></li>{% endif %}
+        {% if can('cobro') %}<li><a href="/cobro">💵 Cobro de Caja</a></li>{% endif %}
+        {% if can('sorteo') %}<li><a href="/sorteo">🎟️ Sorteo</a></li>{% endif %}
+        {% if can('crear_figuras') %}<li><a href="/crear-figuras">🟩 Crear Figuras</a></li>{% endif %}
+        {% if can('escoger_figuras') %}<li><a href="/escoger-figuras">🟦 Escoger Figuras</a></li>{% endif %}
         <li><a class="active" href="/boletin">📋 Boletín</a></li>
       </ul>
       <a href="{{ url_for('logout') }}" class="logout-btn">Cerrar sesión</a>
@@ -533,7 +535,6 @@
     function collectResultados(){
       const items = Array.from(document.querySelectorAll('.block')).map(bl=>{
         const figura = bl.dataset.fig || '';
-        the
         const ganadores = Array.from(bl.querySelectorAll('.rows tr')).map(tr=>{
           const ins=tr.querySelectorAll('input');
           return {boleto:(ins[0]?.value||'').trim(), nombre:(ins[1]?.value||'').trim(), vendedor:(ins[2]?.value||'').trim(), sector:(ins[3]?.value||'').trim(), premio:Number(ins[4]?.value||0)}
@@ -545,17 +546,45 @@
     }
 
     async function guardar(){
-      const fd=new FormData(); fd.append('fecha', FECHA);
-      const {items, extras}=collectResultados(); fd.append('resultados', JSON.stringify(items)); fd.append('extras', JSON.stringify(extras));
-      const r=await fetch('/boletin/guardar',{method:'POST',body:fd}); const j=await r.json().catch(()=>({ok:false}));
-      toast(j.ok?'Resultados guardados. ✅':'Error al guardar ❌', j.ok);
+      try{
+        const fd=new FormData();
+        fd.append('fecha', FECHA);
+        const {items, extras}=collectResultados();
+        fd.append('resultados', JSON.stringify(items));
+        fd.append('extras', JSON.stringify(extras));
+
+        const r=await fetch('/boletin/guardar',{method:'POST',body:fd,cache:'no-store'});
+        const j=await r.json().catch(()=>({ok:false,error:'respuesta inválida del servidor'}));
+        if(!r.ok || !j.ok){
+          throw new Error(j.error || 'no se pudo guardar');
+        }
+        toast('Resultados guardados. ✅', true);
+        return true;
+      }catch(err){
+        console.error('Error guardando boletín:', err);
+        toast('Error: ' + (err?.message || 'no se pudo guardar') + ' ❌', false);
+        return false;
+      }
     }
 
     function setLinks(){
-      $('#btnPdf').onclick=()=>window.open(`/boletin/pdf?fecha=${encodeURIComponent(FECHA)}`,'_blank');
-      $('#aPdfLink').href = `/boletin/pdf?fecha=${encodeURIComponent(FECHA)}`;
-      $('#aDesigner').href = `/disenador-boletin?fecha=${encodeURIComponent(FECHA)}`;
-    }
+  const pdfUrl = `/boletin/pdf?fecha=${encodeURIComponent(FECHA)}`;
+  $('#aPdfLink').href = pdfUrl;
+  $('#aDesigner').href = `/disenador-boletin?fecha=${encodeURIComponent(FECHA)}`;
+
+  // IMPORTANTE: antes de abrir el PDF, guardar lo que escribiste (para que no salga en blanco)
+  $('#btnPdf').onclick = async () => {
+    const ok = await guardar();
+    if(ok) window.open(pdfUrl, '_blank');
+  };
+
+  // Si dan clic en "Abrir PDF" también guarda primero
+  $('#aPdfLink').onclick = async (e) => {
+    e.preventDefault();
+    const ok = await guardar();
+    if(ok) window.open(pdfUrl, '_blank');
+  };
+}
 
     async function cargarTodo(){
       FECHA=$('#fecha').value; setLinks();
@@ -589,9 +618,13 @@
     $('#btnCollapseAll').addEventListener('click', ()=>document.querySelectorAll('.block').forEach(b=>b.setAttribute('data-collapsed','1')));
 
     // Atajos
-    document.addEventListener('keydown', (e)=>{
-      if(e.ctrlKey && e.key.toLowerCase()==='s'){ e.preventDefault(); guardar(); }
-      if(e.ctrlKey && e.key.toLowerCase()==='p'){ e.preventDefault(); window.open(`/boletin/pdf?fecha=${encodeURIComponent(FECHA)}`,'_blank'); }
+    document.addEventListener('keydown', async (e)=>{
+      if(e.ctrlKey && e.key.toLowerCase()==='s'){ e.preventDefault(); await guardar(); }
+      if(e.ctrlKey && e.key.toLowerCase()==='p'){
+        e.preventDefault();
+        const ok = await guardar();
+        if(ok) window.open(`/boletin/pdf?fecha=${encodeURIComponent(FECHA)}`,'_blank');
+      }
       if(e.altKey  && (e.key.toLowerCase()==='a')){ e.preventDefault();
         const bl = ACTIVE_BLOCK || document.querySelector('.block'); if(!bl) return;
         bl.querySelector('.rows').insertAdjacentHTML('beforeend',ganadorRowHTML({})); recalcBlock(bl);

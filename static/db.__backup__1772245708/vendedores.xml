@@ -1,0 +1,23 @@
+<?xml version='1.0' encoding='utf-8'?>
+<vendedores>
+  <vendedor>
+    <nombre>DIEGO</nombre>
+    <apellido>MANQUILLO</apellido>
+    <seudonimo>PAPI PAPI DE PEPE</seudonimo>
+  </vendedor>
+  <vendedor>
+    <nombre>GIOVANNY</nombre>
+    <apellido>LARA</apellido>
+    <seudonimo>MR. GIO</seudonimo>
+  </vendedor>
+  <vendedor>
+    <nombre>JULIO</nombre>
+    <apellido>URRESTO</apellido>
+    <seudonimo>JULIO</seudonimo>
+  </vendedor>
+  <vendedor>
+    <nombre>SKARLETH</nombre>
+    <apellido>AVILES</apellido>
+    <seudonimo>PRESENTADORA</seudonimo>
+  </vendedor>
+</vendedores>

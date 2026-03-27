@@ -7,38 +7,41 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1"></script>
   <style>
     :root{
-      --bg:#f7f9fc; --card:#ffffff; --ink:#15233b; --muted:#6b7a99;
-      --brand:#4460ff; --ok:#27c498; --warn:#ffb020; --bad:#ef4b4b;
-      --ring: rgba(68,96,255,.15);
+      --bg:#f7f9fc; --card:#ffffff; --ink:#15233b; --muted:#6b7a99; --brand:#4460ff;
+      --ok:#27c498; --warn:#ffb020; --bad:#ef4b4b; --line:#eef1f6; --shadow:0 10px 24px -18px rgba(68,96,255,.35);
     }
-    *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial}
+    *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;overflow-x:hidden}
     .layout{display:grid;grid-template-columns:260px 1fr;min-height:100vh}
-    nav{background:#fff;border-right:1px solid #eef1f6}
-    nav .brand{display:flex;align-items:center;gap:10px;padding:16px 18px;border-bottom:1px solid #eef1f6}
-    nav .brand img{width:34px;height:34px;border-radius:8px}
-    nav .brand .t{font-weight:800}
-    nav ul{list-style:none;margin:0;padding:8px}
-    nav li a{display:flex;align-items:center;gap:10px;padding:10px 16px;margin:4px 10px;border-radius:10px;color:var(--ink);text-decoration:none}
-    nav li a:hover{background:#f0f3ff}
-    .logout{display:block;margin:12px 10px 18px;padding:10px 14px;border-radius:10px;background:#fff3f3;color:#b22727;text-decoration:none;border:1px solid #ffe0e0}
-    header{display:flex;align-items:center;justify-content:space-between;padding:18px 22px}
-    .hdr-left{display:flex;align-items:center;gap:10px}
-    .chip{font-size:13px;background:#eef2ff;color:#2b3e8f;border-radius:999px;padding:6px 10px}
-    .datebar{display:flex;gap:8px;align-items:center}
+    nav{background:#fff;border-right:1px solid var(--line);position:sticky;top:0;height:100vh;overflow:auto}
+    nav .brand{display:flex;align-items:center;gap:10px;padding:16px 18px;border-bottom:1px solid var(--line)}
+    nav .brand img{width:34px;height:34px;border-radius:8px} nav .brand .t{font-weight:800}
+    nav ul{list-style:none;margin:0;padding:8px} nav li a{display:flex;align-items:center;gap:10px;padding:10px 16px;margin:4px 10px;border-radius:10px;color:var(--ink);text-decoration:none;font-weight:600;transition:.18s ease}
+    nav li a:hover,nav li a.active{background:#eef2ff;color:#233c9b}
+    .logout{display:block;margin:12px 10px 18px;padding:10px 14px;border-radius:10px;background:#fff3f3;color:#b22727;text-decoration:none;border:1px solid #ffe0e0;font-weight:700}
+    main{min-width:0}
+    header{display:flex;align-items:flex-start;justify-content:space-between;padding:18px 22px 12px;gap:14px;flex-wrap:wrap}
+    .hdr-left{display:flex;flex-direction:column;gap:10px}
+    .hdr-title{display:flex;align-items:center;gap:10px;flex-wrap:wrap} .hdr-title h2{margin:0;font-size:2rem;line-height:1.1}
+    .chips{display:flex;gap:8px;flex-wrap:wrap} .chip{font-size:13px;background:#eef2ff;color:#2b3e8f;border-radius:999px;padding:6px 10px;font-weight:700}
+    .datebar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
     .datebar input{background:#fff;border:1px solid #e6ebf3;border-radius:10px;padding:10px 12px;color:var(--ink)}
-    .btn{border:0;background:var(--brand);color:#fff;border-radius:10px;padding:10px 14px;font-weight:600;cursor:pointer}
-    .btn.ghost{background:#eef2ff;color:#2b3e8f}
-    .who{display:flex;align-items:center;gap:10px}
-    .who img{width:34px;height:34px;border-radius:999px}
+    .btn{border:0;background:var(--brand);color:#fff;border-radius:10px;padding:10px 14px;font-weight:700;cursor:pointer;box-shadow:0 8px 20px -16px rgba(68,96,255,.9)}
+    .btn.ghost{background:#eef2ff;color:#2b3e8f;box-shadow:none} .btn:hover{filter:brightness(.98)}
+    .who{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end} .who img{width:34px;height:34px;border-radius:999px;object-fit:cover}
     .wrap{padding:0 22px 28px}
+    .statusbar{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:14px}
+    .statusbox,.card,.panel{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow)}
+    .statusbox{padding:12px 14px} .statusbox h5,.card h5{margin:0 0 6px;color:var(--muted);font-size:12px;font-weight:800;letter-spacing:.2px} .statusbox .v,.card .v{font-size:28px;font-weight:900}
     .cards{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:14px}
-    .card{background:var(--card);border:1px solid #eef1f6;border-radius:16px;padding:12px 14px;box-shadow:0 6px 16px -10px var(--ring)}
-    .card h5{margin:0 0 6px;color:var(--muted);font-size:13px;font-weight:800;letter-spacing:.2px}
-    .card .v{font-size:22px;font-weight:900}
-    .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
-    .panel{background:var(--card);border:1px solid #eef1f6;border-radius:16px;padding:14px;box-shadow:0 6px 16px -10px var(--ring)}
-    .panel h4{margin:0 0 8px}
-    @media (max-width:1200px){.cards{grid-template-columns:repeat(3,1fr)} .grid{grid-template-columns:1fr}}
+    .card{padding:12px 14px;min-height:92px} .card .v{font-size:22px}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px;align-items:start}
+    .panel{padding:14px;overflow:hidden} .panel h4{margin:0 0 10px;font-size:18px} .panel small{color:var(--muted)}
+    .chart-wrap{position:relative;height:320px;min-height:320px;max-height:320px;width:100%} .chart-wrap.tall{height:340px;min-height:340px;max-height:340px}
+    canvas{display:block;width:100% !important;height:100% !important}
+    .empty-note{padding:16px;border:1px dashed #dbe3f0;border-radius:12px;color:var(--muted);text-align:center;font-size:14px;margin-top:10px;background:#fbfcff}
+    @media (max-width:1450px){.cards{grid-template-columns:repeat(3,minmax(0,1fr))}.statusbar{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media (max-width:1150px){.layout{grid-template-columns:1fr} nav{position:static;height:auto}.grid{grid-template-columns:1fr}}
+    @media (max-width:760px){.cards,.statusbar{grid-template-columns:1fr} header{padding:16px} .wrap{padding:0 16px 24px} .chart-wrap,.chart-wrap.tall{height:280px;min-height:280px;max-height:280px}}
   </style>
 </head>
 <body>
@@ -49,19 +52,19 @@
         <div class="t">GL Bingo</div>
       </div>
       <ul>
-        <li><a href="/dashboard">🏠 Dashboard</a></li>
-        <li><a href="/usuarios">🧑‍💼 Usuarios</a></li>
-        <li><a href="/juego">🎲 Juego</a></li>
-        <li><a href="/contabilidad">📊 Contabilidad</a></li>
-        <li><a href="/vendedores">🧾 Vendedores</a></li>
-        <li><a href="/asignar-planillas">📑 Asignar Planillas</a></li>
-        <li><a href="/impresion">🖨️ Impresión de Boletos</a></li>
-        <li><a href="/cobro">💵 Cobro de Caja</a></li>
-        <li><a href="/pago-premios">🏅 Pago de Premios</a></li>
-        <li><a href="/sorteo">🎟️ Sorteo</a></li>
-        <li><a href="/crear-figuras">🟩 Crear Figuras</a></li>
-        <li><a href="/escoger-figuras">🟦 Escoger Figuras</a></li>
-        <li><a href="/boletin">📋 Boletín</a></li>
+        {% if can('dashboard') %}<li><a href="/dashboard" class="active">🏠 Dashboard</a></li>{% endif %}
+        {% if can('usuarios') %}<li><a href="/usuarios">🧑‍💼 Usuarios</a></li>{% endif %}
+        {% if can('juego') %}<li><a href="/juego">🎲 Juego</a></li>{% endif %}
+        {% if can('contabilidad') %}<li><a href="/contabilidad">📊 Contabilidad</a></li>{% endif %}
+        {% if can('vendedores') %}<li><a href="/vendedores">🧾 Vendedores</a></li>{% endif %}
+        {% if can('asignar_planillas') %}<li><a href="/asignar-planillas">📑 Asignar Planillas</a></li>{% endif %}
+        {% if can('impresion') %}<li><a href="/impresion">🖨️ Impresión de Boletos</a></li>{% endif %}
+        {% if can('cobro') %}<li><a href="/cobro">💵 Cobro de Caja</a></li>{% endif %}
+        {% if can('pago_premios') %}<li><a href="/pago-premios">🏅 Pago de Premios</a></li>{% endif %}
+        {% if can('sorteo') %}<li><a href="/sorteo">🎟️ Sorteo</a></li>{% endif %}
+        {% if can('crear_figuras') %}<li><a href="/crear-figuras">🟩 Crear Figuras</a></li>{% endif %}
+        {% if can('escoger_figuras') %}<li><a href="/escoger-figuras">🟦 Escoger Figuras</a></li>{% endif %}
+        {% if can('boletin') %}<li><a href="/boletin">📋 Boletín</a></li>{% endif %}
       </ul>
       <a class="logout" href="{{ url_for('logout') }}">⏻ Cerrar sesión</a>
     </nav>
@@ -69,10 +72,16 @@
     <main>
       <header>
         <div class="hdr-left">
-          <h2 style="margin:0">Dashboard</h2>
-          <span class="chip" id="chipValor">Valor boleto: —</span>
-          <span class="chip" id="chipComision">Comisión base: —</span>
-          <span class="chip" id="chipMeta">Meta: —</span>
+          <div class="hdr-title">
+            <h2>Dashboard</h2>
+            <span class="chip" id="chipFecha">Fecha: —</span>
+            <span class="chip" id="chipHora">Actualizado: —</span>
+          </div>
+          <div class="chips">
+            <span class="chip" id="chipValor">Valor boleto: —</span>
+            <span class="chip" id="chipComision">Comisión base: —</span>
+            <span class="chip" id="chipMeta">Meta: —</span>
+          </div>
         </div>
         <div class="who">
           <div class="datebar">
@@ -81,15 +90,21 @@
             <button class="btn ghost" id="todayBtn">☀ Hoy</button>
             <button class="btn ghost" id="nextBtn">+1 día ▶</button>
             <button class="btn" id="refreshBtn">⟳ Actualizar</button>
-            <label style="color:#6b7a99;font-size:13px"><input type="checkbox" id="autoRefresh"> Auto-refresh (60s)</label>
+            <label style="color:#6b7a99;font-size:13px;font-weight:700"><input type="checkbox" id="autoRefresh"> Auto-refresh (60s)</label>
           </div>
           <img src="{{ url_for('static', filename='avatars/' + avatar) }}" alt="">
-          <div style="font-weight:700">{{ usuario }}</div>
+          <div style="font-weight:800">{{ usuario }}</div>
         </div>
       </header>
 
       <div class="wrap">
-        <!-- TARJETAS -->
+        <section class="statusbar">
+          <div class="statusbox"><h5>💳 Cobros pagados</h5><div class="v" id="vCobros">0</div></div>
+          <div class="statusbox"><h5>🧑‍🤝‍🧑 Vendedores activos</h5><div class="v" id="vActivos">0</div></div>
+          <div class="statusbox"><h5>🎫 Boletos pendientes</h5><div class="v" id="vPendientes">0</div></div>
+          <div class="statusbox"><h5>📈 Cobertura planillas</h5><div class="v" id="vCobertura">0%</div></div>
+        </section>
+
         <section class="cards">
           <div class="card"><h5>💰 Total recaudado</h5><div class="v" id="vRecaudado">$0.00</div></div>
           <div class="card"><h5>🏢 Ganancia empresa</h5><div class="v" id="vGanEmp">$0.00</div></div>
@@ -100,30 +115,29 @@
 
           <div class="card"><h5>🟩 Boletos vendidos</h5><div class="v" id="vVend">0</div></div>
           <div class="card"><h5>🟥 Boletos devueltos</h5><div class="v" id="vDev">0</div></div>
-
           <div class="card"><h5>🧾 Planillas impresas</h5><div class="v" id="vPlImp">0</div></div>
           <div class="card"><h5>📦 Planillas asignadas</h5><div class="v" id="vPlAsig">0</div></div>
           <div class="card"><h5>↩ Planillas devueltas</h5><div class="v" id="vPlDev">0</div></div>
           <div class="card"><h5>🕳 Planillas en blanco</h5><div class="v" id="vPlBlanco">0</div></div>
         </section>
 
-        <!-- GRÁFICAS -->
         <section class="grid">
           <div class="panel">
-            <h4>Contabilidad del día <small style="color:var(--muted)">Recaudado, Ganancias, Medios de pago</small></h4>
-            <canvas id="chartContabilidad" height="140"></canvas>
+            <h4>Contabilidad del día <small>Recaudado, ganancias y medios de pago</small></h4>
+            <div class="chart-wrap"><canvas id="chartContabilidad"></canvas></div>
           </div>
           <div class="panel">
-            <h4>Boletos del día <small style="color:var(--muted)">Impresos / Vendidos / Devueltos</small></h4>
-            <canvas id="chartBoletos" height="140"></canvas>
+            <h4>Boletos del día <small>Impresos, vendidos, devueltos y pendientes</small></h4>
+            <div class="chart-wrap"><canvas id="chartBoletos"></canvas></div>
           </div>
           <div class="panel">
-            <h4>Vendedores (curva)</h4>
-            <canvas id="chartVendedores" height="160"></canvas>
+            <h4>Vendedores <small>Curva de vendidos y devueltos</small></h4>
+            <div class="chart-wrap tall"><canvas id="chartVendedores"></canvas></div>
+            <div class="empty-note" id="noteVendedores" style="display:none;">Aún no hay vendedores con movimiento en la fecha seleccionada.</div>
           </div>
           <div class="panel">
-            <h4>Planillas del día</h4>
-            <canvas id="chartPlanillas" height="140"></canvas>
+            <h4>Planillas del día <small>Impresas, asignadas, devueltas y en blanco</small></h4>
+            <div class="chart-wrap"><canvas id="chartPlanillas"></canvas></div>
           </div>
         </section>
       </div>
@@ -131,105 +145,140 @@
   </div>
 
   <script>
-    const fmtMoney = n => new Intl.NumberFormat('es-EC',{style:'currency',currency:'USD'}).format(Number(n||0));
-    let cContab, cBoletos, cVend, cPlan;
+    const $ = (id) => document.getElementById(id);
+    const fmtMoney = (n) => new Intl.NumberFormat('es-EC',{style:'currency',currency:'USD'}).format(Number(n||0));
+    const fmtInt = (n) => Number(n || 0).toLocaleString('es-EC');
+    const fmtPct = (n) => `${Number(n || 0).toFixed(Number(n || 0) % 1 ? 2 : 0)}%`;
+    const safeNum = (n) => Number.isFinite(Number(n)) ? Number(n) : 0;
+    const safeList = (v) => Array.isArray(v) ? v : [];
 
-    function kill(c){ if(c){ c.destroy(); } }
+    let cContab = null, cBoletos = null, cVend = null, cPlan = null;
 
-    function setChips(cfg){
-      document.getElementById('chipValor').textContent   = `Valor boleto: ${fmtMoney(cfg.valor_boleto||0)}`;
-      document.getElementById('chipComision').textContent= `Comisión base: ${(cfg.comision_vendedor||0)}%`;
-      document.getElementById('chipMeta').textContent    = `Meta: ${cfg.meta_boletos||0} (+${cfg.comision_extra_meta||0}% extra)`;
+    function kill(chart){ if(chart){ chart.destroy(); } }
+    function setText(id, value){ const el = $(id); if(el) el.textContent = value; }
+
+    function setChips(j){
+      const cfg = j.config || {};
+      setText('chipFecha', `Fecha: ${j.fecha || '—'}`);
+      setText('chipHora', `Actualizado: ${new Date().toLocaleTimeString('es-EC')}`);
+      setText('chipValor', `Valor boleto: ${fmtMoney(cfg.valor_boleto || 0)}`);
+      setText('chipComision', `Comisión base: ${safeNum(cfg.comision_vendedor || 0)}%`);
+      setText('chipMeta', `Meta: ${fmtInt(cfg.meta_boletos || 0)} (+${safeNum(cfg.comision_extra_meta || 0)}% extra)`);
     }
 
     function setCards(d){
-      vRecaudado.textContent = fmtMoney(d.ingresos_brutos);
-      vGanEmp.textContent    = fmtMoney(d.ganancia_empresa);
-      vGanVend.textContent   = fmtMoney(d.ganancia_vendedores);
-      vEfectivo.textContent  = fmtMoney(d.efectivo);
-      vTransfer.textContent  = fmtMoney(d.transferencia);
-      vImp.textContent       = d.boletos_impresos;
-      vVend.textContent      = d.vendidos_total;
-      vDev.textContent       = d.devueltos_total;
-      vPlImp.textContent     = d.planillas_impresas;
-      vPlAsig.textContent    = d.planillas_asignadas;
-      vPlDev.textContent     = d.planillas_devueltas;
-      vPlBlanco.textContent  = d.planillas_blanco;
+      setText('vCobros', fmtInt(d.cobros_pagados));
+      setText('vActivos', fmtInt(d.vendedores_activos));
+      setText('vPendientes', fmtInt(d.boletos_pendientes));
+      setText('vCobertura', fmtPct(d.cobertura_planillas));
+      setText('vRecaudado', fmtMoney(d.ingresos_brutos));
+      setText('vGanEmp', fmtMoney(d.ganancia_empresa));
+      setText('vGanVend', fmtMoney(d.ganancia_vendedores));
+      setText('vEfectivo', fmtMoney(d.efectivo));
+      setText('vTransfer', fmtMoney(d.transferencia));
+      setText('vImp', fmtInt(d.boletos_impresos));
+      setText('vVend', fmtInt(d.vendidos_total));
+      setText('vDev', fmtInt(d.devueltos_total));
+      setText('vPlImp', fmtInt(d.planillas_impresas));
+      setText('vPlAsig', fmtInt(d.planillas_asignadas));
+      setText('vPlDev', fmtInt(d.planillas_devueltas));
+      setText('vPlBlanco', fmtInt(d.planillas_blanco));
+    }
+
+    function axisMax(values){
+      const top = Math.max(0, ...values.map(safeNum));
+      if(top <= 0) return 5;
+      return Math.ceil(top * 1.15);
+    }
+
+    function baseOptions(values, money=false){
+      return {
+        responsive:true,
+        maintainAspectRatio:false,
+        animation:false,
+        plugins:{ legend:{display:false} },
+        scales:{
+          x:{ grid:{display:false}, ticks:{color:'#5c6b8a', font:{weight:'600'}} },
+          y:{ beginAtZero:true, suggestedMax:axisMax(values), ticks:{ color:'#6b7a99', callback:(v)=> money ? new Intl.NumberFormat('es-EC',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(v) : v }, grid:{color:'rgba(107,122,153,.12)'} }
+        }
+      };
     }
 
     function setCharts(d){
       kill(cContab); kill(cBoletos); kill(cVend); kill(cPlan);
-
-      cContab = new Chart(chartContabilidad, {
+      const contab = [safeNum(d.ingresos_brutos), safeNum(d.ganancia_empresa), safeNum(d.ganancia_vendedores), safeNum(d.efectivo), safeNum(d.transferencia)];
+      cContab = new Chart($('chartContabilidad'), {
         type:'bar',
-        data:{labels:['Recaudado','Gan. Empresa','Gan. Vendedores','Efectivo','Transferencia'],
-          datasets:[{data:[d.ingresos_brutos,d.ganancia_empresa,d.ganancia_vendedores,d.efectivo,d.transferencia],
-            backgroundColor:'#dfe6ff', borderColor:'#4460ff', borderWidth:1}]},
-        options:{responsive:true, scales:{y:{beginAtZero:true}}}
+        data:{labels:['Recaudado','Gan. Empresa','Gan. Vendedores','Efectivo','Transferencia'], datasets:[{data:contab, backgroundColor:['#dfe6ff','#d8ebff','#d9f7ef','#e6f4ea','#eef2ff'], borderColor:['#4460ff','#2f73ff','#27c498','#18a164','#6478ff'], borderWidth:1, borderRadius:8, maxBarThickness:52}]},
+        options:baseOptions(contab, true)
       });
 
-      cBoletos = new Chart(chartBoletos, {
+      const boletos = [safeNum(d.boletos_impresos), safeNum(d.vendidos_total), safeNum(d.devueltos_total), safeNum(d.boletos_pendientes)];
+      cBoletos = new Chart($('chartBoletos'), {
         type:'bar',
-        data:{labels:['Impresos','Vendidos','Devueltos'],
-          datasets:[{data:[d.boletos_impresos,d.vendidos_total,d.devueltos_total],
-            backgroundColor:['#edf2ff','#d7f7ee','#ffe3e3'],
-            borderColor:['#4460ff','#27c498','#ef4b4b'], borderWidth:1}]},
-        options:{responsive:true, scales:{y:{beginAtZero:true}}}
+        data:{labels:['Impresos','Vendidos','Devueltos','Pendientes'], datasets:[{data:boletos, backgroundColor:['#edf2ff','#d7f7ee','#ffe3e3','#fff1c9'], borderColor:['#4460ff','#27c498','#ef4b4b','#ffb020'], borderWidth:1, borderRadius:8, maxBarThickness:58}]},
+        options:baseOptions(boletos, false)
       });
 
-      const names = d.vendedores.map(x=>x.vendedor);
-      cVend = new Chart(chartVendedores, {
+      const vendedores = safeList(d.vendedores);
+      const labelsVend = vendedores.length ? vendedores.map(x => x.vendedor || '—') : ['Sin datos'];
+      const vendidos = vendedores.length ? vendedores.map(x => safeNum(x.vendidos)) : [0];
+      const devueltos = vendedores.length ? vendedores.map(x => safeNum(x.devueltos)) : [0];
+      $('noteVendedores').style.display = vendedores.length ? 'none' : 'block';
+      cVend = new Chart($('chartVendedores'), {
         type:'line',
-        data:{labels:names, datasets:[
-          {label:'Vendidos', data:d.vendedores.map(x=>x.vendidos),  borderColor:'#27c498', fill:false, tension:.3},
-          {label:'Devueltos',data:d.vendedores.map(x=>x.devueltos), borderColor:'#ef4b4b', fill:false, tension:.3}
+        data:{labels:labelsVend, datasets:[
+          {label:'Vendidos', data:vendidos, borderColor:'#27c498', backgroundColor:'rgba(39,196,152,.08)', tension:.28, fill:false, borderWidth:3, pointRadius:3},
+          {label:'Devueltos', data:devueltos, borderColor:'#ef4b4b', backgroundColor:'rgba(239,75,75,.08)', tension:.28, fill:false, borderWidth:3, pointRadius:3}
         ]},
-        options:{responsive:true, scales:{y:{beginAtZero:true}}}
+        options:{ responsive:true, maintainAspectRatio:false, animation:false, plugins:{ legend:{display:true, labels:{boxWidth:12, usePointStyle:true}} }, scales:{ x:{ grid:{display:false}, ticks:{color:'#5c6b8a'} }, y:{ beginAtZero:true, suggestedMax:axisMax(vendidos.concat(devueltos)), ticks:{color:'#6b7a99'}, grid:{color:'rgba(107,122,153,.12)'} } } }
       });
 
-      cPlan = new Chart(chartPlanillas, {
+      const planillas = [safeNum(d.planillas_impresas), safeNum(d.planillas_asignadas), safeNum(d.planillas_devueltas), safeNum(d.planillas_blanco)];
+      cPlan = new Chart($('chartPlanillas'), {
         type:'bar',
-        data:{labels:['Impresas','Asignadas','Devueltas','En blanco'],
-          datasets:[{data:[d.planillas_impresas,d.planillas_asignadas,d.planillas_devueltas,d.planillas_blanco],
-            backgroundColor:['#edf2ff','#e7f5ed','#ffe8cc','#f2f4f7'],
-            borderColor:['#4460ff','#27c498','#ffb020','#6b7a99'], borderWidth:1}]},
-        options:{responsive:true, scales:{y:{beginAtZero:true}}}
+        data:{labels:['Impresas','Asignadas','Devueltas','En blanco'], datasets:[{data:planillas, backgroundColor:['#edf2ff','#e7f5ed','#ffe8cc','#f2f4f7'], borderColor:['#4460ff','#27c498','#ffb020','#6b7a99'], borderWidth:1, borderRadius:8, maxBarThickness:58}]},
+        options:baseOptions(planillas, false)
       });
     }
 
     async function load(iso){
-      const r = await fetch(`/api/dashboard/hoy?fecha=${iso}`);
-      const j = await r.json();
-      if(!j.ok) return;
-      setChips(j.config||{});
-      setCards(j);
-      setCharts(j);
+      try{
+        const r = await fetch(`/api/dashboard/hoy?fecha=${encodeURIComponent(iso)}`);
+        const j = await r.json();
+        if(!j.ok) throw new Error(j.error || 'No se pudo cargar el dashboard');
+        setChips(j);
+        setCards(j);
+        setCharts(j);
+      }catch(err){
+        console.error(err);
+      }
     }
 
-    // ===== Navegación por fecha y auto-refresh =====
-    const pick = document.getElementById('fechaPick');
-    const prev = document.getElementById('prevBtn');
-    const next = document.getElementById('nextBtn');
-    const today= document.getElementById('todayBtn');
-    const btnR = document.getElementById('refreshBtn');
-    const chkA = document.getElementById('autoRefresh');
+    const pick = $('fechaPick');
+    const prev = $('prevBtn');
+    const next = $('nextBtn');
+    const today= $('todayBtn');
+    const btnR = $('refreshBtn');
+    const chkA = $('autoRefresh');
     let timer = null;
 
     function iso(d){ return d.toISOString().slice(0,10); }
-    function toDate(s){ const [y,m,dd]=s.split('-').map(Number); return new Date(y,m-1,dd); }
-    function startAuto(){ stopAuto(); if(chkA.checked){ timer=setInterval(()=>load(pick.value),60000); } }
-    function stopAuto(){ if(timer){ clearInterval(timer); timer=null; } }
+    function toDate(s){ const [y,m,dd]=String(s).split('-').map(Number); return new Date(y,m-1,dd); }
+    function startAuto(){ stopAuto(); if(chkA.checked){ timer = setInterval(()=>load(pick.value), 60000); } }
+    function stopAuto(){ if(timer){ clearInterval(timer); timer = null; } }
 
     document.addEventListener('DOMContentLoaded', ()=>{
       pick.value = new Date().toISOString().slice(0,10);
       load(pick.value);
       startAuto();
     });
+
     pick.addEventListener('change', ()=>load(pick.value));
     btnR.addEventListener('click', ()=>load(pick.value));
-    prev.addEventListener('click', ()=>{ const d=toDate(pick.value); d.setDate(d.getDate()-1); pick.value=iso(d); load(pick.value); });
-    next.addEventListener('click', ()=>{ const d=toDate(pick.value); d.setDate(d.getDate()+1); pick.value=iso(d); load(pick.value); });
-    today.addEventListener('click', ()=>{ pick.value=new Date().toISOString().slice(0,10); load(pick.value); });
+    prev.addEventListener('click', ()=>{ const d = toDate(pick.value); d.setDate(d.getDate()-1); pick.value = iso(d); load(pick.value); });
+    next.addEventListener('click', ()=>{ const d = toDate(pick.value); d.setDate(d.getDate()+1); pick.value = iso(d); load(pick.value); });
+    today.addEventListener('click', ()=>{ pick.value = new Date().toISOString().slice(0,10); load(pick.value); });
     chkA.addEventListener('change', startAuto);
   </script>
 </body>

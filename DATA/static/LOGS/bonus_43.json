@@ -1,0 +1,216 @@
+{
+  "enabled": true,
+  "mode": "global_positional",
+  "code": "BNS-20260307-235129-3509",
+  "numbers": [
+    34,
+    40,
+    32,
+    66,
+    54
+  ],
+  "requested": {
+    "5": 0,
+    "4": 0,
+    "3": 0,
+    "2": 0,
+    "1": 2
+  },
+  "winners": {
+    "5": [],
+    "4": [],
+    "3": [],
+    "2": [],
+    "1": [
+      "50",
+      "48"
+    ]
+  },
+  "feasible": true,
+  "shortages": {},
+  "pattern": "left_to_right",
+  "layout": {
+    "offset_x": 0.0,
+    "offset_y": 0.0,
+    "scale": 1.0,
+    "font_size": 9.0,
+    "gap": 3.5,
+    "slot_w": 8.5
+  },
+  "log_id": 43,
+  "serie_archivo": "Srs_Manila.xlsx",
+  "desde": "44",
+  "hasta": "52",
+  "fecha_sorteo": "2026-03-06",
+  "tickets_detalle": [
+    {
+      "boleto": "44",
+      "bonus_boleto": [
+        73,
+        75,
+        4,
+        39,
+        37
+      ],
+      "coincidencias_posicion": 0,
+      "coincidencias_numeros": 0,
+      "cambian_posiciones": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ]
+    },
+    {
+      "boleto": "45",
+      "bonus_boleto": [
+        10,
+        71,
+        55,
+        15,
+        62
+      ],
+      "coincidencias_posicion": 0,
+      "coincidencias_numeros": 0,
+      "cambian_posiciones": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ]
+    },
+    {
+      "boleto": "46",
+      "bonus_boleto": [
+        50,
+        68,
+        25,
+        28,
+        70
+      ],
+      "coincidencias_posicion": 0,
+      "coincidencias_numeros": 0,
+      "cambian_posiciones": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ]
+    },
+    {
+      "boleto": "47",
+      "bonus_boleto": [
+        70,
+        17,
+        69,
+        29,
+        2
+      ],
+      "coincidencias_posicion": 0,
+      "coincidencias_numeros": 0,
+      "cambian_posiciones": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ]
+    },
+    {
+      "boleto": "48",
+      "bonus_boleto": [
+        9,
+        20,
+        63,
+        60,
+        54
+      ],
+      "coincidencias_posicion": 1,
+      "coincidencias_numeros": 1,
+      "cambian_posiciones": [
+        1,
+        2,
+        3,
+        4
+      ]
+    },
+    {
+      "boleto": "49",
+      "bonus_boleto": [
+        25,
+        36,
+        69,
+        5,
+        51
+      ],
+      "coincidencias_posicion": 0,
+      "coincidencias_numeros": 0,
+      "cambian_posiciones": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ]
+    },
+    {
+      "boleto": "50",
+      "bonus_boleto": [
+        33,
+        52,
+        11,
+        56,
+        54
+      ],
+      "coincidencias_posicion": 1,
+      "coincidencias_numeros": 1,
+      "cambian_posiciones": [
+        1,
+        2,
+        3,
+        4
+      ]
+    },
+    {
+      "boleto": "51",
+      "bonus_boleto": [
+        59,
+        13,
+        29,
+        55,
+        16
+      ],
+      "coincidencias_posicion": 0,
+      "coincidencias_numeros": 0,
+      "cambian_posiciones": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ]
+    },
+    {
+      "boleto": "52",
+      "bonus_boleto": [
+        22,
+        11,
+        57,
+        18,
+        45
+      ],
+      "coincidencias_posicion": 0,
+      "coincidencias_numeros": 0,
+      "cambian_posiciones": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ]
+    }
+  ]
+}

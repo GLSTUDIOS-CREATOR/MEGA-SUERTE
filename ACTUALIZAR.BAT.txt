@@ -1,0 +1,97 @@
+@echo off
+chcp 65001 >nul
+setlocal EnableExtensions EnableDelayedExpansion
+
+REM ======================================================
+REM  SUBIR CAMBIOS A GITHUB - GOLPEDESUERTE.EC
+REM  Ruta: D:\Documents\SISTEMA\GOLPE DE SUERTE\GOLPEDESUERTE.EC
+REM ======================================================
+
+set "REPO_DIR=D:\Documents\SISTEMA\GOLPE DE SUERTE\GOLPEDESUERTE.EC"
+
+echo.
+echo ==========================================
+echo   GIT PUSH - GOLPEDESUERTE.EC (CMD)
+echo ==========================================
+echo.
+
+REM 1) Entrar a la carpeta
+if not exist "%REPO_DIR%" (
+  echo [ERROR] No existe la carpeta:
+  echo "%REPO_DIR%"
+  goto :FAIL
+)
+
+cd /d "%REPO_DIR%" || goto :FAIL
+
+REM 2) Verificar que Git exista
+where git >nul 2>&1
+if errorlevel 1 (
+  echo [ERROR] Git no esta instalado o no esta en el PATH.
+  echo Instala Git y vuelve a ejecutar este archivo.
+  goto :FAIL
+)
+
+REM 3) Verificar que sea un repo git
+if not exist ".git" (
+  echo [ERROR] Esta carpeta NO es un repositorio Git (no existe .git).
+  echo Si este proyecto SI debe ser repo, inicializa con: git init
+  goto :FAIL
+)
+
+REM 4) Mostrar estado
+echo.
+echo [INFO] Estado actual:
+git status
+echo.
+
+REM 5) Agregar cambios
+echo [INFO] Agregando cambios (git add .)...
+git add .
+if errorlevel 1 goto :FAIL
+
+REM 6) Commit con mensaje automatico (fecha/hora)
+for /f "delims=" %%T in ('powershell -NoProfile -Command "Get-Date -Format ''yyyy-MM-dd HH:mm:ss''"') do set "NOW=%%T"
+set "MSG=Actualizacion %NOW%"
+
+REM Si no hay cambios para commitear, no falla el script
+git diff --cached --quiet
+if %errorlevel%==0 (
+  echo [INFO] No hay cambios nuevos para commit.
+) else (
+  echo [INFO] Creando commit: "%MSG%"
+  git commit -m "%MSG%"
+)
+
+REM 7) Detectar rama actual (main/master/otra)
+for /f "delims=" %%B in ('git rev-parse --abbrev-ref HEAD') do set "BRANCH=%%B"
+echo.
+echo [INFO] Rama detectada: %BRANCH%
+
+REM 8) Subir a GitHub
+echo.
+echo [INFO] Subiendo a GitHub: origin %BRANCH% ...
+git push origin %BRANCH%
+if errorlevel 1 (
+  echo.
+  echo [ERROR] Fallo el push.
+  echo - Si te pide login, completa el inicio de sesion y vuelve a ejecutar.
+  echo - Si dice "no upstream", ejecuta:
+  echo   git push -u origin %BRANCH%
+  goto :FAIL
+)
+
+echo.
+echo ✅ LISTO: Cambios subidos correctamente a GitHub.
+goto :OK
+
+:FAIL
+echo.
+echo ❌ Proceso terminado con errores.
+pause
+exit /b 1
+
+:OK
+echo.
+pause
+exit /b 0

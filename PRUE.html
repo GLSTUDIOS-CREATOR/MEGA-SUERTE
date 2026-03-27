@@ -1,0 +1,184 @@
+    html = """
+    <!doctype html>
+    <html lang="es">
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <title>Boleto {{ boleto_publico }}</title>
+      <style>
+        *{box-sizing:border-box}
+        body{margin:0;font-family:Inter,Arial,sans-serif;background:#eef2f7;color:#1f2937}
+        .wrap{max-width:480px;margin:0 auto;min-height:100vh;background:#eef2f7}
+        .hero{background:linear-gradient(180deg,#ffcc00 0%, #ff5a00 42%, #942ad6 100%);color:#fff;padding:22px 18px 26px;border-bottom-left-radius:36px;border-bottom-right-radius:36px;box-shadow:0 10px 30px rgba(0,0,0,.12)}
+        .logo{display:flex;justify-content:center;align-items:center;margin-bottom:10px}
+        .logo img{max-width:190px;max-height:80px;object-fit:contain;display:block}
+        .logo-text{font-size:34px;font-weight:900;letter-spacing:.5px;text-align:center;text-shadow:0 2px 8px rgba(0,0,0,.25)}
+        .sub{font-size:14px;text-align:center;opacity:.95;margin-top:2px}
+        .hero-grid{margin-top:14px;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+        .hero-item{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.35);backdrop-filter:blur(6px);border-radius:12px;padding:10px 12px;text-align:center}
+        .hero-item .k{font-size:12px;opacity:.9}
+        .hero-item .v{font-size:20px;font-weight:800;line-height:1.1}
+        .panel{background:#eef2f7;margin-top:-16px;border-top-left-radius:28px;border-top-right-radius:28px;padding:14px 14px 20px;min-height:50vh}
+        .card{background:#fff;border-radius:16px;padding:14px;box-shadow:0 4px 14px rgba(15,23,42,.08);margin-bottom:12px;border:1px solid #e4eaf3}
+        .row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 2px;border-bottom:1px solid #e8edf5}
+        .row:last-child{border-bottom:none}
+        .l{display:flex;align-items:center;gap:10px;color:#6b7280;font-weight:600}
+        .ico{width:22px;height:22px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;background:#f3f4f6;color:#6b7280;font-size:13px}
+        .rv{font-weight:800;color:#111827}
+        .rv.blue{color:#3349d0}
+        .muted{color:#6b7280;font-size:12px}
+        .split{border-top:1px solid #d6dbe6;margin:10px 0}
+        .chips{display:flex;gap:8px;flex-wrap:wrap}
+        .chip{border-radius:999px;padding:6px 10px;font-weight:700;font-size:12px;border:1px solid}
+        .chip.ok{background:#ecfdf3;color:#027a48;border-color:#a6f4c5}
+        .chip.no{background:#fff1f2;color:#b42318;border-color:#f3b3b3}
+        .chip.mode{background:#eef4ff;color:#1d4ed8;border-color:#bfd3ff}
+        .chip.mode2{background:#f3f4f6;color:#4b5563;border-color:#d1d5db}
+        .title2{font-size:13px;color:#4b5563;font-weight:800;text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px}
+        .msg{padding:10px 12px;border-radius:12px;font-weight:700;font-size:13px;margin-bottom:8px}
+        .msg.ok{background:#ecfdf3;border:1px solid #a6f4c5;color:#027a48}
+        .msg.warn{background:#fff7ed;border:1px solid #fed7aa;color:#9a3412}
+        .msg.err{background:#fff1f2;border:1px solid #fecdd3;color:#b42318}
+        .formbox{background:#fff;border-radius:18px;padding:16px;box-shadow:0 4px 14px rgba(15,23,42,.08);border:1px solid #e4eaf3}
+        .field{width:100%;height:42px;border-radius:999px;border:1px solid #d4dbe7;background:#f8fafc;text-align:center;font-size:15px;padding:0 14px;margin:0 0 10px;color:#111827}
+        .field::placeholder{color:#9aa4b2}
+        .btn{width:100%;height:42px;border:none;border-radius:999px;background:linear-gradient(90deg,#7c3aed,#a855f7);color:#fff;font-size:15px;font-weight:800;cursor:pointer;box-shadow:0 6px 14px rgba(124,58,237,.28)}
+        .btn:active{transform:translateY(1px)}
+        .help{font-size:12px;color:#64748b;text-align:center;margin-top:8px}
+        .pillline{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border:1px solid #e5e7eb;border-radius:12px;background:#f8fafc;margin-bottom:8px}
+        .premios-list{display:grid;gap:6px;margin-top:8px}
+        .premio-item{background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:8px 10px;font-size:13px}
+        .center{text-align:center}
+        .small-note{font-size:11px;color:#64748b}
+      </style>
+    </head>
+    <body>
+      <div class="wrap">
+        <div class="hero">
+          <div class="logo">
+            <img src="/static/golpe_suerte_logo.png" alt="logo" onerror="if(!this.dataset.fallback){this.dataset.fallback=1;this.src='/static/data/logo_qr_cliente.png';}else{this.style.display='none'; this.nextElementSibling.style.display='block';}">
+            <div class="logo-text" style="display:none;">SHOW FAMILIAR</div>
+          </div>
+          <div class="sub">{{ 'Consulta tu boleto' if sorteo_finalizado else 'Registra tu boleto antes del sorteo' }}</div>
+          <div class="hero-grid">
+            <div class="hero-item">
+              <div class="k">Fecha</div>
+              <div class="v" style="font-size:16px">{{ fecha }}</div>
+            </div>
+            <div class="hero-item">
+              <div class="k">Boleto</div>
+              <div class="v">{{ boleto_publico }}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          {% if msg %}
+            <div class="msg {% if '✅' in msg %}ok{% elif '⛔' in msg %}err{% else %}warn{% endif %}">{{ msg }}</div>
+          {% endif %}
+
+          <div class="card">
+            <div class="chips" style="margin-bottom:10px;">
+              <span class="chip {{ 'ok' if vendido else 'no' }}">{{ 'VENDIDO' if vendido else 'NO REGISTRADO' }}</span>
+              {% if sorteo_finalizado %}
+                <span class="chip mode2">Modo consulta</span>
+              {% else %}
+                <span class="chip mode">Registro abierto</span>
+              {% endif %}
+            </div>
+          </div>
+
+          {% if not sorteo_finalizado %}
+            <div class="formbox">
+              <div class="title2 center">Bienvenido</div>
+              <div class="muted center" style="margin-bottom:10px">Registra tu boleto con nombre/cábala y sector o barrio.</div>
+              <form method="post">
+                <input type="hidden" name="serie" value="{{ serie }}">
+                <input type="hidden" name="boleto" value="{{ boleto }}">
+                <input type="hidden" name="fecha" value="{{ fecha }}">
+                <input type="hidden" name="sig" value="{{ sig }}">
+
+                <input class="field" name="cliente_nombre" value="{{ reg.get('cliente_nombre','') }}" placeholder="Nombre o Cábala" required>
+                <input class="field" name="celular" value="{{ reg.get('celular','') }}" placeholder="Teléfono">
+                <input class="field" name="sector" value="{{ reg.get('sector','') }}" placeholder="Barrio o Sector">
+                <button class="btn" type="submit">Registrar</button>
+              </form>
+              <div class="help">Puedes corregir los datos escaneando otra vez este mismo QR antes del sorteo.</div>
+            </div>
+          {% else %}
+            <div class="card">
+              <div class="title2">Resultado del boleto</div>
+              <div class="row">
+                <div class="l"><span class="ico">💵</span>Premio</div>
+                <div class="rv" style="color:{{ premio_color }}">{{ premio_principal }}</div>
+              </div>
+              <div class="row">
+                <div class="l"><span class="ico">🎟️</span>Boleto</div>
+                <div class="rv blue">{{ boleto_publico }}</div>
+              </div>
+              <div class="row">
+                <div class="l"><span class="ico">🎲</span>Sorteo</div>
+                <div class="rv blue">{{ fecha }}</div>
+              </div>
+              <div class="row">
+                <div class="l"><span class="ico">🧾</span>Venta</div>
+                <div class="rv">{{ 'Registrado' if vendido else 'No registrado' }}</div>
+              </div>
+              <div class="row">
+                <div class="l"><span class="ico">🎁</span>Premios especiales</div>
+                <div class="rv">{{ 'Sí' if premio_tiene else 'No' }}</div>
+              </div>
+
+              {% if vendido %}
+                <div class="split"></div>
+                <div class="muted" style="font-weight:700;color:#475467;">Cliente: {{ reg.get('cliente_nombre','—') }}</div>
+                <div class="muted">Teléfono: {{ reg.get('celular','—') }}</div>
+                <div class="muted">Barrio/Sector: {{ reg.get('sector','—') }}</div>
+              {% endif %}
+
+              {% if premio_tiene %}
+                <div class="split"></div>
+                <div class="title2" style="margin-bottom:6px">Detalle de premios</div>
+                <div class="premios-list">
+                  {% for p in premios_labels %}
+                    <div class="premio-item">🏆 {{ p }}</div>
+                  {% endfor %}
+                </div>
+              {% else %}
+                <div class="split"></div>
+                <div class="center small-note">Este boleto no tiene ganador registrado.</div>
+              {% endif %}
+            </div>
+          {% endif %}
+
+          {% if sorteo_finalizado and not vendido %}
+            <div class="card">
+              <div class="title2">Estado de venta</div>
+              <div class="msg err" style="margin:0">Este boleto no tiene registro de cliente. Se muestra como NO VENDIDO / NO REGISTRADO.</div>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </body>
+    </html>
+    """
+    return render_template_string(
+        html,
+        msg=msg,
+        serie=serie,
+        boleto=boleto,
+        fecha=fecha,
+        sig=sig,
+        vendedor=vendedor,
+        planilla=planilla,
+        reg=reg,
+        premios=premios,
+        premios_labels=premios_labels,
+        premio_principal=premio_principal,
+        premio_tiene=premio_tiene,
+        premio_color=premio_color,
+        boleto_publico=boleto_publico,
+        serie_cliente=serie_cliente,
+        sorteo_finalizado=sorteo_finalizado,
+        vendido=vendido,
+    )

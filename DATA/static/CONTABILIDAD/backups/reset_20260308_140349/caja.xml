@@ -1,0 +1,51 @@
+<?xml version='1.0' encoding='utf-8'?>
+<caja>
+  <dia fecha="2026-03-03">
+    <configuracion>
+      <valor_boleto>0.50</valor_boleto>
+      <comision_vendedor>30.0</comision_vendedor>
+      <comision_extra_meta>5.0</comision_extra_meta>
+      <meta_boletos>60</meta_boletos>
+    </configuracion>
+  </dia>
+  <dia fecha="2026-03-04">
+    <configuracion>
+      <valor_boleto>0.50</valor_boleto>
+      <comision_vendedor>30.0</comision_vendedor>
+      <comision_extra_meta>5.0</comision_extra_meta>
+      <meta_boletos>60</meta_boletos>
+    </configuracion>
+  </dia>
+  <dia fecha="2026-03-05">
+    <configuracion>
+      <valor_boleto>0.50</valor_boleto>
+      <comision_vendedor>30.0</comision_vendedor>
+      <comision_extra_meta>5.0</comision_extra_meta>
+      <meta_boletos>60</meta_boletos>
+    </configuracion>
+  </dia>
+  <dia fecha="2026-03-06">
+    <configuracion>
+      <valor_boleto>0.50</valor_boleto>
+      <comision_vendedor>30.0</comision_vendedor>
+      <comision_extra_meta>5.0</comision_extra_meta>
+      <meta_boletos>60</meta_boletos>
+    </configuracion>
+  </dia>
+  <dia fecha="2026-03-07">
+    <configuracion>
+      <valor_boleto>0.50</valor_boleto>
+      <comision_vendedor>30.0</comision_vendedor>
+      <comision_extra_meta>5.0</comision_extra_meta>
+      <meta_boletos>60</meta_boletos>
+    </configuracion>
+  </dia>
+  <dia fecha="2026-03-08">
+    <configuracion>
+      <valor_boleto>0.50</valor_boleto>
+      <comision_vendedor>30.0</comision_vendedor>
+      <comision_extra_meta>5.0</comision_extra_meta>
+      <meta_boletos>60</meta_boletos>
+    </configuracion>
+  </dia>
+</caja>

@@ -1,0 +1,19 @@
+{
+  "2026-02-28": {
+    "activo": true,
+    "serie_archivo": "Srs_ib1.xlsx",
+    "carton_id": "2",
+    "fig_code": "TL1",
+    "trigger_count": 1,
+    "gap_after_close": 2,
+    "base_after_close": 41,
+    "status": "listo",
+    "nota": "Auto desde sorteo 2026-02-28",
+    "last_fired_count": "",
+    "ticket_ok": true,
+    "saved_by": "sorteo_auto",
+    "tabla_real": "2",
+    "carton_solicitado": "2",
+    "updated_at": "2026-03-02 05:15:14"
+  }
+}

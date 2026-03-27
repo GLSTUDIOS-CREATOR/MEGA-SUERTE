@@ -99,18 +99,20 @@
     </div>
     <ul class="nav">
       <li><a href="/dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
-      <li><a href="/usuarios"><i class="bi bi-people-fill"></i> Usuarios</a></li>
-      <li><a href="/juego"><i class="bi bi-dice-5-fill"></i> Juego</a></li>
-      <li><a href="/contabilidad"><i class="bi bi-bar-chart-fill"></i> Contabilidad</a></li>
-      <li><a href="/vendedores"><i class="bi bi-person-badge-fill"></i> Vendedores</a></li>
-      <li><a href="/asignar-planillas"><i class="bi bi-journal-text"></i> Asignar Planillas</a></li>
+      
+      {% if can('admin_sistema') %}<li><a href="/admin/sistema">🛠️ Sistema</a></li>{% endif %}
+{% if can('usuarios') %}<li><a href="/usuarios"><i class="bi bi-people-fill"></i> Usuarios</a></li>{% endif %}
+      {% if can('juego') %}<li><a href="/juego"><i class="bi bi-dice-5-fill"></i> Juego</a></li>{% endif %}
+      {% if can('contabilidad') %}<li><a href="/contabilidad"><i class="bi bi-bar-chart-fill"></i> Contabilidad</a></li>{% endif %}
+      {% if can('vendedores') %}<li><a href="/vendedores"><i class="bi bi-person-badge-fill"></i> Vendedores</a></li>{% endif %}
+      {% if can('asignar_planillas') %}<li><a href="/asignar-planillas"><i class="bi bi-journal-text"></i> Asignar Planillas</a></li>{% endif %}
       <li><a class="active" href="/impresion"><i class="bi bi-printer-fill"></i> Impresión</a></li>
-      <li><a href="/cobro"><i class="bi bi-cash-coin"></i> Cobro de Caja</a></li>
-      <li><a href="/pago-premios"><i class="bi bi-trophy-fill"></i> Pago de Premios</a></li>
-      <li><a href="/sorteo"><i class="bi bi-ticket-perforated"></i> Sorteo</a></li>
-      <li><a href="/crear-figuras"><i class="bi bi-grid-3x3-gap-fill"></i> Crear Figuras</a></li>
-      <li><a href="/escoger-figuras"><i class="bi bi-grid"></i> Escoger Figuras</a></li>
-      <li><a href="/boletin"><i class="bi bi-clipboard2-check"></i> Boletín</a></li>
+      {% if can('cobro') %}<li><a href="/cobro"><i class="bi bi-cash-coin"></i> Cobro de Caja</a></li>{% endif %}
+      {% if can('pago_premios') %}<li><a href="/pago-premios"><i class="bi bi-trophy-fill"></i> Pago de Premios</a></li>{% endif %}
+      {% if can('sorteo') %}<li><a href="/sorteo"><i class="bi bi-ticket-perforated"></i> Sorteo</a></li>{% endif %}
+      {% if can('crear_figuras') %}<li><a href="/crear-figuras"><i class="bi bi-grid-3x3-gap-fill"></i> Crear Figuras</a></li>{% endif %}
+      {% if can('escoger_figuras') %}<li><a href="/escoger-figuras"><i class="bi bi-grid"></i> Escoger Figuras</a></li>{% endif %}
+      {% if can('boletin') %}<li><a href="/boletin"><i class="bi bi-clipboard2-check"></i> Boletín</a></li>{% endif %}
       <li><a href="/logs-impresion"><i class="bi bi-clock-history"></i> Logs Impresión</a></li>
     </ul>
     <a class="logout" href="{{ url_for('logout') }}"><i class="bi bi-box-arrow-right"></i> Cerrar sesión</a>

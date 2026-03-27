@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>vMix XML | GL Bingo</title>
+  <style>
+    :root{
+      --bg:#0b1220; --panel:#0f1b33; --panel2:#0d172b; --ink:#e8eef8; --muted:#b8c5dd;
+      --line:rgba(255,255,255,.10); --brand:#64b5ff; --ok:#23d18b; --warn:#ffd061;
+      --danger:#ff6b73; --shadow:0 12px 30px rgba(0,0,0,.28);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; color:var(--ink);
+      background:radial-gradient(90% 90% at 50% 0%, #16294f 0%, #0b1220 60%, #090f1a 100%);
+      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+    }
+    .layout{display:grid; grid-template-columns:240px 1fr; min-height:100vh}
+    nav{background:#0c1426;border-right:1px solid #0f1d36;color:#d6def0;display:flex;flex-direction:column;gap:12px}
+    .brand{display:flex;align-items:center;gap:10px;padding:16px 18px;border-bottom:1px solid #0f1d36}
+    .brand img{width:34px;height:34px;border-radius:8px}
+    .brand .t{font-weight:900;letter-spacing:.2px}
+    nav ul{list-style:none;margin:0;padding:8px}
+    nav li a{display:flex;align-items:center;gap:10px;color:#d6def0;text-decoration:none;padding:9px 12px;margin:4px 8px;border-radius:10px}
+    nav li a:hover{background:#111e39}
+    nav li a.active{background:#111e39;border-left:3px solid var(--brand);color:var(--brand)}
+    .logout{margin:8px;padding:9px 12px;border-radius:10px;text-decoration:none;text-align:center;color:#f3b4b4;background:#3a0e14;border:1px solid #611f29}
+
+    main{padding:18px}
+    .hero{
+      background:linear-gradient(180deg,#122440,#0f1b33);
+      border:1px solid var(--line);
+      border-radius:16px;
+      box-shadow:var(--shadow);
+      padding:16px;
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:14px;
+      flex-wrap:wrap;
+    }
+    .hero h1{margin:0 0 6px; font-size:22px}
+    .hero p{margin:0; color:var(--muted)}
+    .meta{display:flex; gap:10px; flex-wrap:wrap; margin-top:10px}
+    .chip{background:#0c182e; border:1px solid var(--line); border-radius:999px; padding:8px 12px; font-weight:700; color:#e9f0fb}
+    .hero-actions{display:flex; gap:8px; flex-wrap:wrap}
+    .btn{cursor:pointer; border:1px solid var(--line); background:#162542; color:#e8eef8; padding:9px 12px; border-radius:10px; font-weight:800; text-decoration:none; box-shadow:var(--shadow)}
+    .btn:hover{filter:brightness(1.05)}
+    .btn.brand{background:linear-gradient(180deg,#78c2ff,#4a9dff); color:#071426; border-color:#7ac4ff}
+
+    .grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(340px,1fr)); gap:14px; margin-top:14px}
+    .card{background:linear-gradient(180deg,var(--panel),var(--panel2)); border:1px solid var(--line); border-radius:16px; box-shadow:var(--shadow); overflow:hidden}
+    .card h2{margin:0; padding:12px 14px; border-bottom:1px solid var(--line); font-size:16px; letter-spacing:.2px}
+    .items{padding:10px; display:grid; gap:10px}
+    .item{border:1px solid rgba(255,255,255,.08); border-radius:12px; background:rgba(255,255,255,.02); padding:10px}
+    .row-top{display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap}
+    .name{font-weight:900}
+    .badge{font-size:12px; font-weight:900; border-radius:999px; padding:4px 8px; border:1px solid rgba(255,255,255,.15);}
+    .badge.ok{color:#032915;background:rgba(35,209,139,.18); border-color:rgba(35,209,139,.35)}
+    .badge.no{color:#351114;background:rgba(255,107,115,.16); border-color:rgba(255,107,115,.30)}
+    .kind{font-size:11px; opacity:.9; font-weight:800; letter-spacing:.4px; text-transform:uppercase}
+    .urlbox{margin-top:8px; background:#0a1324; border:1px solid rgba(255,255,255,.08); border-radius:10px; padding:8px}
+    .url{display:block; color:#a8d8ff; text-decoration:none; font-size:13px; line-height:1.35; word-break:break-all}
+    .url:hover{text-decoration:underline}
+    .path{margin-top:5px; color:#c9d6ef; font-size:12px; opacity:.95; word-break:break-all}
+    .note{margin-top:8px; color:var(--muted); font-size:12px; line-height:1.35}
+    .actions{margin-top:8px; display:flex; gap:8px; flex-wrap:wrap}
+    .xbtn{cursor:pointer; border:1px solid rgba(255,255,255,.12); background:#14233f; color:#e8eef8; padding:7px 10px; border-radius:10px; font-weight:800; font-size:12px}
+    .xbtn:hover{filter:brightness(1.05)}
+    .xbtn.ok{background:linear-gradient(180deg,#1fb871,#12945a); color:#072115; border-color:rgba(35,209,139,.35)}
+
+    .foot{margin-top:14px; background:rgba(255,255,255,.03); border:1px solid var(--line); border-radius:14px; padding:12px; color:var(--muted); line-height:1.45}
+    .foot b{color:#fff}
+    .small{font-size:12px}
+
+    @media (max-width: 980px){
+      .layout{grid-template-columns:1fr}
+      nav{position:static; border-right:0; border-bottom:1px solid #0f1d36}
+      nav ul{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:2px}
+      nav li a{margin:2px 4px}
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <nav>
+      <div class="brand">
+        <img src="{{ url_for('static', filename='img/logo.png') }}" alt="GL Bingo Logo" loading="lazy">
+        <div class="t">GL Bingo</div>
+      </div>
+      <ul>
+        <li><a href="/dashboard">🏠 Dashboard</a></li>
+        
+        {% if can('admin_sistema') %}<li><a href="/admin/sistema">🛠️ Sistema</a></li>{% endif %}
+<li><a href="/juego/">🎲 Juego</a></li>
+        <li><a href="/juego/vmix" class="active">🔗 vMix XML</a></li>
+        {% if can('sorteo') %}<li><a href="/sorteo">🎟️ Sorteo</a></li>{% endif %}
+        {% if can('boletin') %}<li><a href="/boletin">📋 Boletín</a></li>{% endif %}
+      </ul>
+      <a class="logout" href="{{ url_for('logout') }}">⏻ Cerrar sesión</a>
+    </nav>
+
+    <main>
+      <section class="hero">
+        <div>
+          <h1>Enlaces XML para vMix</h1>
+          <p>Desde aquí puedes copiar y probar los enlaces que usarás en <b>Data Source</b> y en <b>Browser Input</b> (overlay).</p>
+          <div class="meta">
+            <div class="chip">🌐 Host: {{ vmix.host }}</div>
+            <div class="chip">📅 Sorteo: {{ vmix.fecha }}</div>
+            <div class="chip">🔗 Base: {{ vmix.base_url }}</div>
+          </div>
+        </div>
+        <div class="hero-actions">
+          <a class="btn" href="{{ url_for('juego.juego_ui') }}">← Volver al juego</a>
+          <a class="btn brand" href="{{ url_for('juego.juego_vmix_links_json') }}" target="_blank" rel="noopener">Ver JSON de enlaces</a>
+        </div>
+      </section>
+
+      <section class="grid">
+        {% for group in vmix.groups %}
+          <article class="card">
+            <h2>{{ group["titulo"] }}</h2>
+            <div class="items">
+              {% for item in group["items"] %}
+                <div class="item">
+                  <div class="row-top">
+                    <div>
+                      <div class="name">{{ item.nombre }}</div>
+                      <div class="kind">{{ item.tipo }}</div>
+                    </div>
+                    <span class="badge {{ 'ok' if item.disponible else 'no' }}">
+                      {{ 'Disponible' if item.disponible else 'Pendiente' }}
+                    </span>
+                  </div>
+
+                  <div class="urlbox">
+                    <a class="url" href="{{ item.url }}" target="_blank" rel="noopener noreferrer">{{ item.url }}</a>
+                    <div class="path">Ruta interna: {{ item.ruta }}</div>
+                  </div>
+
+                  <div class="note">{{ item.nota }}</div>
+
+                  <div class="actions">
+                    <button class="xbtn" type="button" onclick="copyText('{{ item.url|replace("'", "\\'") }}', this)">Copiar URL</button>
+                    <button class="xbtn" type="button" onclick="copyText('{{ item.ruta|replace("'", "\\'") }}', this)">Copiar ruta</button>
+                    <a class="xbtn ok" href="{{ item.url }}" target="_blank" rel="noopener noreferrer">Abrir</a>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          </article>
+        {% endfor %}
+      </section>
+
+      <section class="foot small">
+        <div><b>Recomendación:</b> para <b>datos_bingo</b> y <b>spinners</b> usa las rutas <b>/juego/xml/...</b> porque salen con encabezados sin caché y vMix refresca mejor.</div>
+        <div>Si estás en <b>Render</b>, copia las URLs con tu dominio público (HTTPS). Si estás en local, usa la IP de tu PC para que vMix la pueda leer (ej. <b>http://192.168.x.x:5000</b>).</div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    async function copyText(text, btn){
+      try{
+        await navigator.clipboard.writeText(text);
+        const old = btn.textContent;
+        btn.textContent = 'Copiado ✓';
+        setTimeout(()=> btn.textContent = old, 1000);
+      }catch(e){
+        prompt('Copia este enlace:', text);
+      }
+    }
+  </script>
+</body>
+</html>

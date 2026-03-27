@@ -1,0 +1,19 @@
+{
+  "item": {
+    "activo": true,
+    "fecha": "2026-02-28",
+    "serie_archivo": "Srs_ib1.xlsx",
+    "carton_id": "1",
+    "fig_code": "TL1",
+    "figura_nombre": "LLENA",
+    "balota_objetivo": 48,
+    "nota": "",
+    "valor": 0.0,
+    "guardado_en": "2026-03-01 22:59:06",
+    "guardado_por": "GLSTUDIOS",
+    "disparado": true,
+    "disparado_en": "2026-03-01 23:01:28",
+    "ultimo_resultado": "GANADOR DISPARADO",
+    "ultimo_error": ""
+  }
+}

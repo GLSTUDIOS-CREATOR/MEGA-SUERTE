@@ -1,0 +1,61 @@
+{
+  "enabled": true,
+  "mode": "global_positional",
+  "code": "BNS-20260308-010421-2494",
+  "numbers": [
+    72,
+    63,
+    62,
+    5,
+    45
+  ],
+  "requested": {
+    "5": 4,
+    "4": 0,
+    "3": 0,
+    "2": 0,
+    "1": 0
+  },
+  "winners": {
+    "5": [
+      "25"
+    ],
+    "4": [],
+    "3": [],
+    "2": [],
+    "1": []
+  },
+  "feasible": false,
+  "shortages": {
+    "5": 3
+  },
+  "pattern": "left_to_right",
+  "layout": {
+    "offset_x": 0.0,
+    "offset_y": 0.0,
+    "scale": 1.0,
+    "font_size": 9.0,
+    "gap": 3.5,
+    "slot_w": 8.5
+  },
+  "log_id": 56,
+  "serie_archivo": "Srs_Manila.xlsx",
+  "desde": "25",
+  "hasta": "25",
+  "fecha_sorteo": "2026-03-08",
+  "tickets_detalle": [
+    {
+      "boleto": "25",
+      "bonus_boleto": [
+        72,
+        63,
+        62,
+        5,
+        45
+      ],
+      "coincidencias_posicion": 5,
+      "coincidencias_numeros": 5,
+      "cambian_posiciones": []
+    }
+  ]
+}

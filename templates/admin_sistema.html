@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema | GL Bingo</title>
+  <style>
+    :root{
+      --bg:#f7f9fc;
+      --card:#ffffff;
+      --ink:#15233b;
+      --muted:#6b7a99;
+      --line:#e9eef6;
+      --brand:#4460ff;
+      --brand-soft:#eef2ff;
+      --ok:#1aa36f;
+      --warn:#d97706;
+      --bad:#dc2626;
+      --shadow:0 10px 30px rgba(68,96,255,.08);
+      --radius:18px;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+    .layout{display:grid;grid-template-columns:260px 1fr;min-height:100vh}
+    nav{background:#fff;border-right:1px solid var(--line)}
+    .brand{display:flex;align-items:center;gap:10px;padding:16px 18px;border-bottom:1px solid var(--line)}
+    .brand img{width:34px;height:34px;border-radius:10px;object-fit:cover}
+    .brand .t{font-weight:900;font-size:20px}
+    nav ul{list-style:none;margin:0;padding:8px}
+    nav li a{display:flex;align-items:center;gap:10px;padding:10px 14px;margin:4px 10px;border-radius:12px;color:var(--ink);text-decoration:none;font-weight:600}
+    nav li a:hover{background:#f3f6ff}
+    nav li a.active{background:var(--brand-soft);color:#2441d8}
+    .logout{display:block;margin:12px 10px 18px;padding:12px 14px;border-radius:12px;background:#fff3f3;color:#b22727;text-decoration:none;border:1px solid #ffdede;font-weight:700}
+
+    main{padding:22px}
+    .topbar{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:18px}
+    .title h1{margin:0;font-size:34px;line-height:1.1}
+    .title p{margin:6px 0 0;color:var(--muted);font-weight:600}
+    .top-actions{display:flex;gap:10px;flex-wrap:wrap}
+    .btn,.btn-link{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 16px;border-radius:12px;border:0;cursor:pointer;font-weight:800;text-decoration:none;font-size:14px}
+    .btn-primary{background:var(--brand);color:#fff}
+    .btn-ghost{background:#fff;color:var(--ink);border:1px solid var(--line)}
+    .btn-danger{background:#fff3f3;color:var(--bad);border:1px solid #ffdede}
+    .btn-warn{background:#fff7ed;color:var(--warn);border:1px solid #fed7aa}
+
+    .flash-wrap{display:grid;gap:10px;margin-bottom:16px}
+    .flash{padding:12px 14px;border-radius:12px;font-weight:700;border:1px solid var(--line);background:#fff}
+    .flash.success{border-color:#c7f0df;background:#f0fff8;color:#0f7b53}
+    .flash.error{border-color:#ffd5d5;background:#fff5f5;color:#b91c1c}
+    .flash.warning{border-color:#fde0b7;background:#fffaf0;color:#b45309}
+    .flash.info{border-color:#dbe7ff;background:#f7faff;color:#2441d8}
+
+    .stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:18px}
+    .stat{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow)}
+    .stat .k{font-size:12px;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px}
+    .stat .v{font-size:28px;font-weight:900}
+    .stat .s{margin-top:6px;color:var(--muted);font-size:13px;font-weight:600}
+
+    .grid{display:grid;grid-template-columns:1.1fr .9fr;gap:18px}
+    .panel{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow)}
+    .panel h3{margin:0 0 6px;font-size:20px}
+    .panel .sub{margin:0 0 16px;color:var(--muted);font-size:14px;font-weight:600}
+
+    .stack{display:grid;gap:14px}
+    .card-mini{border:1px solid var(--line);border-radius:16px;padding:14px;background:#fbfcff}
+    .card-mini h4{margin:0 0 6px;font-size:16px}
+    .card-mini p{margin:0 0 12px;color:var(--muted);font-size:14px;line-height:1.4}
+
+    form{display:grid;gap:12px}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    label{font-size:13px;font-weight:800;color:var(--muted)}
+    input,select{width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--ink);font:inherit;outline:none}
+    input:focus,select:focus{border-color:#bfd0ff;box-shadow:0 0 0 4px rgba(68,96,255,.1)}
+    .hint{font-size:12px;color:var(--muted);font-weight:600}
+
+    .list{display:grid;gap:10px;max-height:420px;overflow:auto;padding-right:4px}
+    .file-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:#fff}
+    .file-name{font-weight:800;word-break:break-all}
+    .file-meta{font-size:12px;color:var(--muted);font-weight:600}
+    .empty{padding:16px;border:1px dashed var(--line);border-radius:14px;background:#fafcff;color:var(--muted);font-weight:700;text-align:center}
+
+    .footer-note{margin-top:18px;padding:14px 16px;border-radius:14px;background:#f7faff;border:1px solid #dbe7ff;color:#3146a9;font-weight:700;font-size:13px}
+
+    @media (max-width:1200px){
+      .stats{grid-template-columns:repeat(2,1fr)}
+      .grid{grid-template-columns:1fr}
+    }
+    @media (max-width:840px){
+      .layout{grid-template-columns:1fr}
+      nav{display:none}
+      main{padding:16px}
+      .stats{grid-template-columns:1fr}
+      .row{grid-template-columns:1fr}
+      .title h1{font-size:28px}
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <nav>
+      <div class="brand">
+        <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo">
+        <div class="t">GL Bingo</div>
+      </div>
+      <ul>
+        {% if can('dashboard') %}<li><a href="/dashboard">🏠 Dashboard</a></li>{% endif %}
+        {% if can('admin_sistema') %}<li><a href="/admin/sistema" class="active">🛠️ Sistema</a></li>{% endif %}
+        {% if can('usuarios') %}<li><a href="/usuarios">🧑‍💼 Usuarios</a></li>{% endif %}
+        {% if can('juego') %}<li><a href="/juego">🎲 Juego</a></li>{% endif %}
+        {% if can('contabilidad') %}<li><a href="/contabilidad">📊 Contabilidad</a></li>{% endif %}
+        {% if can('vendedores') %}<li><a href="/vendedores">🧾 Vendedores</a></li>{% endif %}
+        {% if can('asignar_planillas') %}<li><a href="/asignar-planillas">📑 Asignar Planillas</a></li>{% endif %}
+        {% if can('impresion') %}<li><a href="/impresion">🖨️ Impresión de Boletos</a></li>{% endif %}
+        {% if can('cobro') %}<li><a href="/cobro">💵 Cobro de Caja</a></li>{% endif %}
+        {% if can('pago_premios') %}<li><a href="/pago-premios">🏅 Pago de Premios</a></li>{% endif %}
+        {% if can('sorteo') %}<li><a href="/sorteo">🎟️ Sorteo</a></li>{% endif %}
+        {% if can('crear_figuras') %}<li><a href="/crear-figuras">🟩 Crear Figuras</a></li>{% endif %}
+        {% if can('escoger_figuras') %}<li><a href="/escoger-figuras">🟦 Escoger Figuras</a></li>{% endif %}
+        {% if can('boletin') %}<li><a href="/boletin">📋 Boletín</a></li>{% endif %}
+      </ul>
+      <a class="logout" href="{{ url_for('logout') }}">⏻ Cerrar sesión</a>
+    </nav>
+
+    <main>
+      <div class="topbar">
+        <div class="title">
+          <h1>Administración del Sistema</h1>
+          <p>Respaldo, reinicio general y revisión de cierres diarios sin tocar el resto de tu operación.</p>
+        </div>
+        <div class="top-actions">
+          <a class="btn-link btn-ghost" href="/dashboard">← Volver al Dashboard</a>
+        </div>
+      </div>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <div class="flash-wrap">
+            {% for category, message in messages %}
+              <div class="flash {{ category if category else 'info' }}">{{ message }}</div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
+
+      <section class="stats">
+        <div class="stat">
+          <div class="k">Fecha de trabajo</div>
+          <div class="v">{{ fecha_hoy or '-' }}</div>
+          <div class="s">Base activa para cierres y respaldos</div>
+        </div>
+        <div class="stat">
+          <div class="k">Respaldo actual</div>
+          <div class="v">{{ respaldo_nombre or '—' }}</div>
+          <div class="s">Último archivo compacto disponible</div>
+        </div>
+        <div class="stat">
+          <div class="k">Cierres detectados</div>
+          <div class="v">{{ (cierre_archivos or [])|length }}</div>
+          <div class="s">Historial diario consultable</div>
+        </div>
+        <div class="stat">
+          <div class="k">Estado</div>
+          <div class="v" style="color:var(--ok)">Listo</div>
+          <div class="s">Panel preparado para administrar</div>
+        </div>
+      </section>
+
+      <section class="grid">
+        <div class="panel">
+          <h3>Herramientas principales</h3>
+          <p class="sub">Estas acciones están separadas en bloques para que controles el sistema sin afectar el resto.</p>
+
+          <div class="stack">
+            <div class="card-mini">
+              <h4>📦 Crear respaldo liviano</h4>
+              <p>Genera un archivo ZIP compacto con la información esencial para recuperar tu operación y subirla a Render.</p>
+              <form method="post" action="/admin/backup">
+                <button type="submit" class="btn btn-primary">Crear respaldo ahora</button>
+              </form>
+            </div>
+
+            <div class="card-mini">
+              <h4>🗓️ Guardar cierre por fecha</h4>
+              <p>Congela cómo terminó el día: sorteo, juego, ventas, impresión y demás data de esa fecha.</p>
+              <form method="post" action="/admin/cierre">
+                <div class="row">
+                  <div>
+                    <label for="fecha_cierre">Fecha del cierre</label>
+                    <input id="fecha_cierre" type="date" name="fecha" value="{{ fecha_hoy or '' }}" required>
+                  </div>
+                  <div>
+                    <label for="motivo">Motivo</label>
+                    <select id="motivo" name="motivo">
+                      <option value="manual">Manual</option>
+                      <option value="finalizar">Finalizar sorteo</option>
+                      <option value="respaldo">Antes de respaldo</option>
+                    </select>
+                  </div>
+                </div>
+                <button type="submit" class="btn btn-primary">Guardar cierre diario</button>
+                <div class="hint">Consejo: hazlo al terminar cada jornada para poder consultar exactamente cómo cerró el día.</div>
+              </form>
+            </div>
+
+            <div class="card-mini">
+              <h4>♻️ Reiniciar sistema a 0</h4>
+              <p>Deja la data operativa en blanco para comenzar desde cero. Mantiene usuarios para no sacarte del sistema.</p>
+              <form method="post" action="/admin/reset" onsubmit="return confirm('¿Seguro que deseas dejar la data operativa en cero? Se recomienda crear un respaldo primero.');">
+                <div class="row">
+                  <div>
+                    <label for="preservar_usuarios">Usuarios</label>
+                    <select id="preservar_usuarios" name="preservar_usuarios">
+                      <option value="1" selected>Conservar usuarios</option>
+                      <option value="0">Borrar usuarios también</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label for="tipo_reset">Tipo de limpieza</label>
+                    <select id="tipo_reset" name="tipo_reset">
+                      <option value="operativo" selected>Solo data operativa</option>
+                      <option value="total">Limpieza total</option>
+                    </select>
+                  </div>
+                </div>
+                <button type="submit" class="btn btn-danger">Reiniciar sistema</button>
+                <div class="hint">Haz respaldo antes de usar esta opción.</div>
+              </form>
+            </div>
+          </div>
+
+          <div class="footer-note">
+            Si tus rutas aún no están conectadas en <strong>app.py</strong>, este HTML se verá bien pero los botones no ejecutarán nada hasta enlazar <code>/admin/backup</code>, <code>/admin/cierre</code> y <code>/admin/reset</code>.
+          </div>
+        </div>
+
+        <div class="panel">
+          <h3>Historial y descargas</h3>
+          <p class="sub">Consulta respaldos y cierres guardados para revisar cómo terminó cada día.</p>
+
+          <div class="stack">
+            <div class="card-mini">
+              <h4>📥 Último respaldo</h4>
+              {% if respaldo_nombre %}
+                <div class="file-row">
+                  <div>
+                    <div class="file-name">{{ respaldo_nombre }}</div>
+                    <div class="file-meta">Archivo de recuperación compacta</div>
+                  </div>
+                  <a class="btn-link btn-ghost" href="/admin/descargar/{{ respaldo_nombre }}">Descargar</a>
+                </div>
+              {% else %}
+                <div class="empty">Todavía no hay respaldo generado.</div>
+              {% endif %}
+            </div>
+
+            <div class="card-mini">
+              <h4>🗂️ Cierres disponibles</h4>
+              <div class="list">
+                {% if cierre_archivos %}
+                  {% for archivo in cierre_archivos %}
+                    <div class="file-row">
+                      <div>
+                        <div class="file-name">{{ archivo }}</div>
+                        <div class="file-meta">Cierre diario guardado</div>
+                      </div>
+                      <a class="btn-link btn-ghost" href="/admin/descargar/{{ archivo }}">Descargar</a>
+                    </div>
+                  {% endfor %}
+                {% else %}
+                  <div class="empty">No hay cierres guardados todavía.</div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

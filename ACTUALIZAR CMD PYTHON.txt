@@ -1,0 +1,32 @@
+cd /d "D:\Documents\SISTEMA\GOLPE DE SUERTE\GOLPEDESUERTE.EC" && if not exist venv py -3 -m venv venv && call venv\Scripts\activate.bat && python -m pip install --upgrade pip setuptools wheel && python -m pip install flask flask-login gunicorn pandas qrcode pillow reportlab openpyxl python-barcode PyPDF2 && python app.py
+
+
+
+
+cd /d "D:\Documents\SISTEMA\GOLPE DE SUERTE\GOLPEDESUERTE.EC"
+
+
+
+call venv\Scripts\activate.bat
+
+
+
+python -m pip install flask flask-login gunicorn pandas qrcode pillow reportlab openpyxl python-barcode PyPDF2
+
+
+
+python app.py
+
+start "" http://127.0.0.1:5000
+
+
+
+
+_____________________
+
+
+
+
+cd /d "D:\Documents\SISTEMA\GOLPE DE SUERTE\GOLPEDESUERTE.EC"
+set PUBLIC_BASE_URL=http://192.168.0.6:5000
+python app.py

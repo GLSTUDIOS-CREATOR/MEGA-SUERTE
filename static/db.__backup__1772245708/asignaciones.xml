@@ -1,0 +1,80 @@
+<?xml version='1.0' encoding='utf-8'?>
+<asignaciones>
+  <dia fecha="2026-02-05">
+    <vendedor nombre="DIEGO" apellido="MANQUILLO" seudonimo="PAPI PAPI DE PEPE">
+      <planilla numero="1" rango="1-40" serie="Srs_ib2.xlsx" fecha_impresion="2026-02-05" />
+      <planilla numero="19" rango="721-760" serie="Srs_ib2.xlsx" fecha_impresion="2026-02-05" />
+    </vendedor>
+  </dia>
+  <dia fecha="2026-02-06">
+    <vendedor nombre="DIEGO" apellido="MANQUILLO" seudonimo="PAPI PAPI DE PEPE">
+      <planilla numero="1" rango="1-30" serie="Srs_ib3.xlsx" fecha_impresion="2026-02-06" />
+      <planilla numero="2" rango="31-60" serie="Srs_ib3.xlsx" fecha_impresion="2026-02-06" />
+      <planilla numero="14" rango="391-420" serie="Srs_ib3.xlsx" fecha_impresion="2026-02-06" />
+      <planilla numero="15" rango="421-450" serie="Srs_ib3.xlsx" fecha_impresion="2026-02-06" />
+    </vendedor>
+  </dia>
+  <dia fecha="2026-02-07">
+    <vendedor nombre="DIEGO" apellido="MANQUILLO" seudonimo="PAPI PAPI DE PEPE">
+      <planilla numero="12" rango="331-360" serie="Srs_Manila.xlsx" fecha_impresion="2026-02-07" />
+      <planilla numero="13" rango="361-390" serie="Srs_Manila.xlsx" fecha_impresion="2026-02-07" />
+      <planilla numero="14" rango="391-420" serie="Srs_Manila.xlsx" fecha_impresion="2026-02-07" />
+      <planilla numero="15" rango="421-450" serie="Srs_Manila.xlsx" fecha_impresion="2026-02-07" />
+    </vendedor>
+    <vendedor nombre="GIOVANNY" apellido="LARA" seudonimo="MR. GIO">
+      <planilla numero="1" rango="1-30" serie="Srs_Manila.xlsx" fecha_impresion="2026-02-07" />
+      <planilla numero="2" rango="31-60" serie="Srs_Manila.xlsx" fecha_impresion="2026-02-07" />
+      <planilla numero="3" rango="61-90" serie="Srs_Manila.xlsx" fecha_impresion="2026-02-07" />
+      <planilla numero="4" rango="91-120" serie="Srs_Manila.xlsx" fecha_impresion="2026-02-07" />
+    </vendedor>
+    <vendedor nombre="JULIO" apellido="URRESTO" seudonimo="JULIO">
+      <planilla numero="8" rango="211-240" serie="Srs_Manila.xlsx" fecha_impresion="2026-02-07" />
+    </vendedor>
+    <vendedor nombre="SKARLETH" apellido="AVILES" seudonimo="PRESENTADORA">
+      <planilla numero="21" rango="601-630" serie="Srs_Manila.xlsx" fecha_impresion="2026-02-07" />
+      <planilla numero="22" rango="631-660" serie="Srs_Manila.xlsx" fecha_impresion="2026-02-07" />
+      <planilla numero="23" rango="661-690" serie="Srs_Manila.xlsx" fecha_impresion="2026-02-07" />
+      <planilla numero="24" rango="691-720" serie="Srs_Manila.xlsx" fecha_impresion="2026-02-07" />
+      <planilla numero="25" rango="721-750" serie="Srs_Manila.xlsx" fecha_impresion="2026-02-07" />
+    </vendedor>
+  </dia>
+  <dia fecha="2026-02-20">
+    <vendedor nombre="DIEGO" apellido="MANQUILLO" seudonimo="PAPI PAPI DE PEPE">
+      <planilla numero="1" rango="1-30" serie="Srs_ib1.xlsx" fecha_impresion="2026-02-20" />
+    </vendedor>
+    <vendedor nombre="GIOVANNY" apellido="LARA" seudonimo="MR. GIO">
+      <planilla numero="2" rango="31-60" serie="Srs_ib1.xlsx" fecha_impresion="2026-02-20" />
+    </vendedor>
+    <vendedor nombre="JULIO" apellido="URRESTO" seudonimo="JULIO">
+      <planilla numero="3" rango="61-90" serie="Srs_ib1.xlsx" fecha_impresion="2026-02-20" />
+    </vendedor>
+    <vendedor nombre="SKARLETH" apellido="AVILES" seudonimo="PRESENTADORA">
+      <planilla numero="4" rango="91-120" serie="Srs_ib1.xlsx" fecha_impresion="2026-02-20" />
+      <planilla numero="5" rango="121-150" serie="Srs_ib1.xlsx" fecha_impresion="2026-02-20" />
+      <planilla numero="6" rango="151-180" serie="Srs_ib1.xlsx" fecha_impresion="2026-02-20" />
+      <planilla numero="7" rango="181-210" serie="Srs_ib1.xlsx" fecha_impresion="2026-02-20" />
+      <planilla numero="8" rango="211-240" serie="Srs_ib1.xlsx" fecha_impresion="2026-02-20" />
+      <planilla numero="9" rango="241-270" serie="Srs_ib1.xlsx" fecha_impresion="2026-02-20" />
+    </vendedor>
+  </dia>
+  <dia fecha="2026-02-24">
+    <vendedor nombre="DIEGO" apellido="MANQUILLO" seudonimo="PAPI PAPI DE PEPE">
+      <planilla numero="1" rango="1-20" serie="Srs_ib2.xlsx" fecha_impresion="2026-02-24" />
+      <planilla numero="2" rango="21-40" serie="Srs_ib2.xlsx" fecha_impresion="2026-02-24" />
+      <planilla numero="21" rango="401-420" serie="Srs_ib2.xlsx" fecha_impresion="2026-02-24" />
+      <planilla numero="22" rango="421-440" serie="Srs_ib2.xlsx" fecha_impresion="2026-02-24" />
+      <planilla numero="24" rango="461-480" serie="Srs_ib2.xlsx" fecha_impresion="2026-02-24" />
+      <planilla numero="25" rango="481-500" serie="Srs_ib2.xlsx" fecha_impresion="2026-02-24" />
+    </vendedor>
+    <vendedor nombre="GIOVANNY" apellido="LARA" seudonimo="MR. GIO">
+      <planilla numero="3" rango="41-60" serie="Srs_ib2.xlsx" fecha_impresion="2026-02-24" />
+      <planilla numero="4" rango="61-80" serie="Srs_ib2.xlsx" fecha_impresion="2026-02-24" />
+      <planilla numero="7" rango="121-140" serie="Srs_ib2.xlsx" fecha_impresion="2026-02-24" />
+      <planilla numero="8" rango="141-160" serie="Srs_ib2.xlsx" fecha_impresion="2026-02-24" />
+      <planilla numero="9" rango="161-180" serie="Srs_ib2.xlsx" fecha_impresion="2026-02-24" />
+      <planilla numero="10" rango="181-200" serie="Srs_ib2.xlsx" fecha_impresion="2026-02-24" />
+      <planilla numero="19" rango="361-380" serie="Srs_ib2.xlsx" fecha_impresion="2026-02-24" />
+      <planilla numero="20" rango="381-400" serie="Srs_ib2.xlsx" fecha_impresion="2026-02-24" />
+    </vendedor>
+  </dia>
+</asignaciones>

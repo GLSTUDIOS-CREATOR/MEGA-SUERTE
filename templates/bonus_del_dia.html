@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>GL Bingo | BONUS del día</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f6f8fc; --panel:#fff; --ink:#1b2240; --muted:#778; --brand:#1c3faa;
+    --accent:#0fb79a; --ring:#e6e9f7; --danger:#e0434f;
+  }
+  *{box-sizing:border-box} body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+  .wrap{max-width:980px;margin:auto;padding:18px}
+  .card{background:var(--panel);border:1px solid var(--ring);border-radius:14px;box-shadow:0 10px 28px rgba(27,34,64,.06)}
+  .hd{display:flex;gap:10px;align-items:center;padding:14px 16px;border-bottom:1px solid var(--ring)}
+  .hd h1{margin:0;font-size:1.35rem;color:var(--brand)}
+  .bd{padding:16px}
+  .btn{display:inline-flex;align-items:center;gap:8px;border:none;border-radius:12px;padding:10px 14px;font-weight:800;cursor:pointer}
+  .btn-accent{background:var(--accent);color:#05352c}
+  .btn-ghost{background:#eef4ff;color:#1c3faa}
+  .btn-danger{background:var(--danger);color:#fff}
+  .row{display:flex;gap:10px;flex-wrap:wrap}
+  .kv{display:grid;grid-template-columns:150px 1fr;gap:6px}
+  .k{color:#667} .v{font-weight:900}
+  /* modal */
+  .modal{position:fixed;inset:0;background:rgba(0,0,0,.52);display:none;align-items:center;justify-content:center;z-index:50}
+  .modal .box{background:#fff;border-radius:16px;max-width:520px;width:92%;box-shadow:0 30px 60px rgba(0,0,0,.25)}
+  .modal .hd{border-bottom:1px solid var(--ring)}
+  .modal .bd{padding:16px}
+  .nums{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin:6px 0 12px}
+  .ball{width:54px;height:54px;border-radius:50%;display:grid;place-content:center;border:3px solid #e7ecff;font-weight:900;font-size:1.15rem}
+  .pill{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;background:#eef4ff;color:#1c3faa;font-weight:800}
+  .foot{display:flex;gap:8px;justify-content:flex-end;padding:12px 16px;border-top:1px solid var(--ring)}
+  .muted{color:var(--muted);font-size:.92rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <div class="hd">
+      <i class="bi bi-printer-fill"></i>
+      <h1>Impresión de Boletos & BONUS</h1>
+    </div>
+    <div class="bd">
+      <div class="row">
+        <button id="btnVerBonus" class="btn btn-accent"><i class="bi bi-stars"></i> Ver BONUS del día</button>
+        <button id="btnCambiar" class="btn btn-ghost" title="Regenerar y guardar nuevos números"><i class="bi bi-arrow-repeat"></i> Cambiar BONUS</button>
+        <button id="btnBorrar" class="btn btn-danger" title="Eliminar BONUS guardado para hoy"><i class="bi bi-trash3"></i> Borrar BONUS</button>
+      </div>
+      <div style="margin-top:12px" class="kv">
+        <div class="k">Fecha de hoy</div><div class="v" id="kvFecha">—</div>
+        <div class="k">BONUS guardado</div><div class="v" id="kvBonus">—</div>
+        <div class="k">Origen</div><div class="v" id="kvOrigen" class="muted">—</div>
+      </div>
+      <p class="muted" style="margin-top:10px">
+        El BONUS se almacena en tu navegador (localStorage) usando la clave <code>BONUS:YYYY-MM-DD</code>.  
+        Si ya existe para hoy, se respeta; si no, se genera automáticamente.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- Ventanita / Modal -->
+<div class="modal" id="modalBonus">
+  <div class="box">
+    <div class="hd">
+      <i class="bi bi-stars"></i>
+      <h1 style="margin:0;font-size:1.15rem">BONUS del día</h1>
+      <div style="margin-left:auto" class="pill" id="lblFecha">—</div>
+    </div>
+    <div class="bd" id="modalBody">
+      <div class="nums" id="bonusBalls"><!-- JS --></div>
+      <div style="text-align:center" class="muted">Estos son los 5 números BONUS para la fecha indicada.</div>
+    </div>
+    <div class="foot">
+      <button class="btn btn-ghost" id="btnCerrar"><i class="bi bi-x-lg"></i> Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const $ = (q,el=document)=>el.querySelector(q);
+
+  // ===== utilidades =====
+  const hoyISO = ()=> new Date().toISOString().slice(0,10);
+  const key = (d)=> `BONUS:${d}`;
+  const parseJSON = (t,fb=null)=>{ try{return JSON.parse(t)}catch{return fb} };
+  const uniqueRandoms = (count, min, max)=>{
+    const s=new Set(); while(s.size<count){ s.add(Math.floor(Math.random()*(max-min+1))+min); }
+    return [...s].sort((a,b)=>a-b);
+  };
+
+  // ===== estado =====
+  function leerBonus(fecha){
+    return parseJSON(localStorage.getItem(key(fecha)), null);
+  }
+  function guardarBonus(fecha, arr, origen="generado"){
+    const payload = { date:fecha, numbers:arr, origin:origen, saved_at:new Date().toISOString() };
+    localStorage.setItem(key(fecha), JSON.stringify(payload));
+    return payload;
+  }
+  function obtenerOBonusDeHoy(){
+    const fecha = hoyISO();
+    let data = leerBonus(fecha);
+    let origin = "guardado";
+    if(!data || !Array.isArray(data.numbers) || data.numbers.length!==5){
+      origin = "generado";
+      data = guardarBonus(fecha, uniqueRandoms(5,1,40), origin);
+    }
+    return {fecha, data, origin};
+  }
+
+  // ===== UI =====
+  const kvFecha = $("#kvFecha");
+  const kvBonus = $("#kvBonus");
+  const kvOrigen= $("#kvOrigen");
+  const modal    = $("#modalBonus");
+  const lblFecha = $("#lblFecha");
+  const ballsBox = $("#bonusBalls");
+
+  function pintarResumen(){
+    const {fecha, data} = obtenerOBonusDeHoy();
+    kvFecha.textContent = fecha;
+    kvBonus.textContent = (data.numbers||[]).join(" ");
+    kvOrigen.textContent = (data.origin||"—") + (data.saved_at?` (@ ${new Date(data.saved_at).toLocaleTimeString()})`:"");
+  }
+
+  function abrirVentanaBonus(){
+    const {fecha, data} = obtenerOBonusDeHoy();
+    lblFecha.textContent = fecha;
+    ballsBox.innerHTML = (data.numbers||[]).map(n=>`<div class="ball">${n}</div>`).join("");
+    modal.style.display = "flex";
+  }
+  function cerrarVentana(){ modal.style.display = "none"; }
+
+  // botones
+  $("#btnVerBonus").onclick = abrirVentanaBonus;
+  $("#btnCerrar").onclick   = cerrarVentana;
+  window.addEventListener("click", e=>{ if(e.target===modal) cerrarVentana(); });
+
+  $("#btnCambiar").onclick = ()=>{
+    const fecha = hoyISO();
+    const nums = uniqueRandoms(5,1,40);
+    guardarBonus(fecha, nums, "regenerado");
+    pintarResumen();
+    abrirVentanaBonus();
+  };
+
+  $("#btnBorrar").onclick = ()=>{
+    const fecha = hoyISO();
+    localStorage.removeItem(key(fecha));
+    pintarResumen();
+    alert("BONUS de hoy eliminado. Al volver a abrir se generará uno nuevo.");
+  };
+
+  // inicio: garantiza que haya BONUS y abre ventanita
+  pintarResumen();
+  abrirVentanaBonus();
+})();
+</script>
+</body>
+</html>

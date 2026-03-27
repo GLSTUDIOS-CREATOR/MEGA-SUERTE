@@ -1,0 +1,47 @@
+﻿📌 CMD paso a paso para subir tus cambios
+
+Entra a la carpeta del proyecto:
+
+cd "D:\GL STUDIOS\SISTEMA PUEBLOVIEJO\super-sorteo-puebloviejo-ec"
+
+
+Agregar los cambios al “staging area”:
+
+git add .
+
+
+(el . significa que agrega todos los archivos modificados).
+
+Hacer el commit con un mensaje (puedes poner lo que quieras en el mensaje):
+
+git commit -m "Actualización de códigos"
+
+
+Subir al repositorio remoto en GitHub:
+
+git push origin main
+
+
+
+
+pasa para ejecutar cmd
+
+cd /d "C:\Users\pc\Documents\SISTEMA\GOLPE DE SUERTE\GOLPEDESUERTE.EC"
+py -m venv venv
+call venv\Scripts\activate
+python -m pip install --upgrade pip
+if exist requirements.txt (pip install -r requirements.txt) else (pip install flask)
+set DATA_DIR=%CD%\DATA
+if not exist "%DATA_DIR%" mkdir "%DATA_DIR%"
+python app.py
+
+
+
+cd /d "D:\Documents\SISTEMA\GOLPE DE SUERTE\GOLPEDESUERTE.EC" && py -m pip install --upgrade pip && py -m pip install pandas qrcode[pil] pillow flask openpyxl reportlab && py app.py
+
+
+
+
+
+
+powershell -NoProfile -ExecutionPolicy Bypass -Command "$repo='D:\Documents\SISTEMA\GOLPE DE SUERTE\GOLPEDESUERTE.EC'; Set-Location $repo; $remote='https://github.com/GLSTUDIOS-CREATOR/GOLPEDESUERTE.EC.git'; function FindGit{ $g=(Get-Command git -EA SilentlyContinue).Source; if($g){return $g}; foreach($p in @('C:\Program Files\Git\cmd\git.exe','C:\Program Files (x86)\Git\cmd\git.exe')){if(Test-Path $p){return $p}}; $base=Join-Path $env:LOCALAPPDATA 'GitHubDesktop'; if(Test-Path $base){ $apps=Get-ChildItem $base -Directory -Filter 'app-*' -EA SilentlyContinue | Sort-Object Name -Descending; foreach($a in $apps){ foreach($p in @('resources\app\git\cmd\git.exe','resources\app.asar.unpacked\git\cmd\git.exe','resources\app\git\mingw64\bin\git.exe','resources\app.asar.unpacked\git\mingw64\bin\git.exe')){ $full=Join-Path $a.FullName $p; if(Test-Path $full){return $full}}}}; return $null }; $git=FindGit; if(-not $git){Write-Host '[ERROR] No se encontro Git.'; exit 1}; & $git remote get-url origin 2>$null; if($LASTEXITCODE -ne 0){ & $git remote add origin $remote }; & $git remote set-url origin $remote; & $git add -A; & $git diff --cached --quiet; if($LASTEXITCODE -ne 0){ & $git commit -m ('Update '+(Get-Date -Format 'yyyy-MM-dd_HH-mm-ss')) | Out-Null } else { Write-Host '[INFO] No hay cambios para commit' }; & $git pull --rebase origin main; & $git push -u origin main"

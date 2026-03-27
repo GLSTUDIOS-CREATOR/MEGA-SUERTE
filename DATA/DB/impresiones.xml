@@ -1,0 +1,15 @@
+<?xml version='1.0' encoding='utf-8'?>
+<impresiones>
+  <impresion id="1" fecha_hora="2026-03-26 17:04:26" usuario="GLSTUDIOS" tipo="boletos" serie_archivo="Srs_ib2.xlsx" desde="1" hasta="3500">
+    <valor>1.00</valor>
+    <telefono />
+    <fecha_sorteo>2026-03-27</fecha_sorteo>
+    <reintegro_especial />
+    <cant_reintegro_especial>0</cant_reintegro_especial>
+    <incluir_aleatorio>1</incluir_aleatorio>
+    <total_boletos>3500</total_boletos>
+    <total_planillas>175</total_planillas>
+    <excedente>0</excedente>
+    <lote />
+  </impresion>
+</impresiones>
