@@ -8449,7 +8449,7 @@ VMIX_REINTEGRO_REL    = "vmix_reintegro.xml"
 VMIX_REINTEGROS_REL   = "vmix_reintegros.xml"
 
 # Ruta base de medios local (ajustable por variable de entorno)
-VMIX_MEDIA_ROOT = (os.getenv("VMIX_MEDIA_ROOT") or r"D:\PRODUCCIONES\VENTANAS\MEDIA").strip().rstrip("\\/")
+VMIX_MEDIA_ROOT = (os.getenv("VMIX_MEDIA_ROOT") or r"D:\PRODUCCIONES\EL GRAN GORDO").strip().rstrip("\\/")
 
 # Rutas reales de medios para reintegros (heredan de VMIX_MEDIA_ROOT si no defines variables individuales)
 REINTEGRO_MEDIA_DIR  = (os.getenv("REINTEGRO_MEDIA_DIR")  or os.path.join(VMIX_MEDIA_ROOT, "REINTEGRO")).strip()
